@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/yulog/mi-diary/mi"
 
@@ -133,15 +134,17 @@ func main() {
 		}
 		users = append(users, u)
 
+		reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 		n := Note{
 			ID:           v.Note.ID,
 			UserID:       v.Note.User.ID,
-			ReactionName: v.Note.MyReaction, // TODO: @.を消す
+			ReactionName: reactionName,
 		}
 		notes = append(notes, n)
 
 		r := Reaction{
-			Name: v.Note.MyReaction,
+			Name:  reactionName,
+			Image: "xxx",
 		}
 		reactions = append(reactions, r)
 	}
@@ -208,6 +211,27 @@ func main() {
 		Scan(ctx)
 	pp.Println(notes)
 
+	// リアクション
+	db.NewSelect().
+		Model(&reactions).
+		Scan(ctx)
+	pp.Println(reactions)
+
+	// var m []map[string]interface{}
+	// err = db.NewSelect().Model((*Note)(nil)).ColumnExpr("reaction_name, count(*)").Group("reaction_name").Scan(ctx, &m)
+	// pp.Println(m)
+
+	// 先に取得してあったreactionsを更新している？
+	err = db.NewSelect().Model((*Note)(nil)).ColumnExpr("reaction_name as name, count(*) as count").Group("reaction_name").Scan(ctx, &reactions)
+	pp.Println(reactions)
+
+	// 既存の値も更新している？
+	_, err = db.NewUpdate().
+		Model(&reactions).
+		OmitZero().
+		Column("count").
+		Bulk().
+		Exec(ctx)
 	// リアクション
 	db.NewSelect().
 		Model(&reactions).
