@@ -34,9 +34,11 @@ import (
 type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
-	ID     string `bun:",pk"`
-	UserID string `bun:",pk"`
-	User   User   `bun:"rel:belongs-to,join:user_id=id"`
+	ID           string `bun:",pk"`
+	UserID       string `bun:",pk"`
+	ReactionName string
+	User         User     `bun:"rel:belongs-to,join:user_id=id"`
+	Reaction     Reaction `bun:"rel:belongs-to,join:reaction_name=name"`
 }
 
 type User struct {
@@ -44,6 +46,14 @@ type User struct {
 
 	ID    string `bun:",pk"`
 	Name  string
+	Count int64
+}
+
+type Reaction struct {
+	bun.BaseModel `bun:"table:reactions,alias:r"`
+
+	Name  string `bun:",pk"`
+	Image string
 	Count int64
 }
 
@@ -75,8 +85,10 @@ func main() {
 	// fmt.Println(num)
 
 	// Tableを作る
+	// TODO: Migration
 	_, _ = db.NewCreateTable().Model((*Note)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*User)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*Reaction)(nil)).Exec(ctx)
 	// Insert
 	// user := &User{Name: "admin"}
 	// _, err = db.NewInsert().Model(user).Exec(ctx)
@@ -110,8 +122,9 @@ func main() {
 
 	// JSONの中身をモデルへ移す
 	var (
-		users []User
-		notes []Note
+		users     []User
+		notes     []Note
+		reactions []Reaction
 	)
 	for _, v := range r {
 		u := User{
@@ -121,32 +134,68 @@ func main() {
 		users = append(users, u)
 
 		n := Note{
-			ID:     v.Note.ID,
-			UserID: v.Note.User.ID,
+			ID:           v.Note.ID,
+			UserID:       v.Note.User.ID,
+			ReactionName: v.Note.MyReaction, // TODO: @.を消す
 		}
 		notes = append(notes, n)
+
+		r := Reaction{
+			Name: v.Note.MyReaction,
+		}
+		reactions = append(reactions, r)
 	}
 
-	// まとめて追加する
-	_, err = db.NewInsert().Model(&users).Ignore().Exec(ctx)
+	// まとめて追加する(トランザクション)
+	err = db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+		_, err := db.NewInsert().Model(&users).Ignore().Exec(ctx)
+		if err != nil {
+			return err
+		}
+		for _, user := range users {
+			fmt.Println(user.ID) // id is scanned automatically
+		}
+
+		_, err = db.NewInsert().Model(&notes).Ignore().Exec(ctx)
+		if err != nil {
+			return err
+		}
+		for _, note := range notes {
+			fmt.Println(note.ID) // id is scanned automatically
+		}
+
+		_, err = db.NewInsert().Model(&reactions).Ignore().Exec(ctx)
+		if err != nil {
+			return err
+		}
+		// for _, reaction := range reactions {
+		// 	fmt.Println(reaction.ID) // id is scanned automatically
+		// }
+		return err
+	})
 	if err != nil {
 		panic(err)
 	}
-	for _, user := range users {
-		fmt.Println(user.ID) // id is scanned automatically
-	}
-	db.NewInsert().Model(&notes).Ignore().Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	for _, note := range notes {
-		fmt.Println(note.ID) // id is scanned automatically
-	}
+	// _, err = db.NewInsert().Model(&users).Ignore().Exec(ctx)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// for _, user := range users {
+	// 	fmt.Println(user.ID) // id is scanned automatically
+	// }
+	// db.NewInsert().Model(&notes).Ignore().Exec(ctx)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// for _, note := range notes {
+	// 	fmt.Println(note.ID) // id is scanned automatically
+	// }
 
 	// 結合
 	db.NewSelect().
 		Model(&notes). // &必須
 		Relation("User").
+		Relation("Reaction").
 		Scan(ctx)
 	pp.Println(notes)
 
@@ -154,7 +203,14 @@ func main() {
 	db.NewSelect().
 		Model(&notes).
 		Relation("User").
+		Relation("Reaction").
 		Where("user_id = ?", "7rkrarq81i").
 		Scan(ctx)
 	pp.Println(notes)
+
+	// リアクション
+	db.NewSelect().
+		Model(&reactions).
+		Scan(ctx)
+	pp.Println(reactions)
 }
