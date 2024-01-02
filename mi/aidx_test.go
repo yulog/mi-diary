@@ -26,7 +26,7 @@ func Test_parseAidx(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseAidx(tt.args.id)
+			got, err := ParseAidx(tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseAidx() error = %v, wantErr %v", err, tt.wantErr)
 				return
