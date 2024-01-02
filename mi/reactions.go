@@ -3,7 +3,9 @@ package mi
 
 import "time"
 
-type Reactions []struct {
+type Reactions []Reaction
+
+type Reaction struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	User      User      `json:"user"`
