@@ -10,10 +10,12 @@ type Reactions []struct {
 	Type      string    `json:"type"`
 	Note      Note      `json:"note,omitempty"`
 }
+
 type AvatarDecorations struct {
 	ID  string `json:"id"`
 	URL string `json:"url"`
 }
+
 type Instance struct {
 	Name            string `json:"name"`
 	SoftwareName    string `json:"softwareName"`
@@ -23,8 +25,6 @@ type Instance struct {
 	ThemeColor      string `json:"themeColor"`
 }
 
-// type Emojis struct {
-// }
 type User struct {
 	ID                string              `json:"id"`
 	Name              any                 `json:"name"`
@@ -41,29 +41,6 @@ type User struct {
 	BadgeRoles        []any               `json:"badgeRoles"`
 }
 
-// type User struct {
-// 	AvatarDecorations []any    `json:"avatarDecorations"`
-// }
-// type User struct {
-// 	Name              string              `json:"name"`
-// 	AvatarBlurhash    string              `json:"avatarBlurhash"`
-// 	BadgeRoles        []BadgeRoles        `json:"badgeRoles"`
-// }
-// type User struct {
-// 	Name              string   `json:"name"`
-// 	Host              string   `json:"host"`
-// }
-// type BadgeRoles struct {
-// 	Name         string `json:"name"`
-// 	IconURL      string `json:"iconUrl"`
-// 	DisplayOrder int    `json:"displayOrder"`
-// }
-
-// type Reactions struct {
-// 	HayaHantei int `json:":haya_hantei@.:"`
-// }
-// type ReactionEmojis struct {
-// }
 type Note struct {
 	ID                 string    `json:"id"`
 	CreatedAt          time.Time `json:"createdAt"`
@@ -80,22 +57,22 @@ type Note struct {
 	ReactionEmojis     any       `json:"reactionEmojis"`
 	Emojis             any       `json:"emojis"`
 	FileIds            []any     `json:"fileIds"`
-	// Files              []any     `json:"files"`
-	Files        []File   `json:"files"`
-	ReplyID      any      `json:"replyId"`
-	Mentions     []string `json:"mentions,omitempty"`
-	URI          string   `json:"uri"`
-	URL          string   `json:"url"`
-	RenoteID     any      `json:"renoteId"`
-	ClippedCount int      `json:"clippedCount"`
-	Reply        Reply    `json:"reply,omitempty"`
-	MyReaction   string   `json:"myReaction"`
+	Files              []File    `json:"files"`
+	ReplyID            any       `json:"replyId"`
+	Mentions           []string  `json:"mentions,omitempty"`
+	URI                string    `json:"uri"`
+	URL                string    `json:"url"`
+	RenoteID           any       `json:"renoteId"`
+	ClippedCount       int       `json:"clippedCount"`
+	Reply              Reply     `json:"reply,omitempty"`
+	MyReaction         string    `json:"myReaction"`
 }
 
 type Properties struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
+
 type File struct {
 	ID           string     `json:"id"`
 	CreatedAt    time.Time  `json:"createdAt"`
@@ -115,42 +92,6 @@ type File struct {
 	User         any        `json:"user"`
 }
 
-// type Note0 struct {
-// 	ReactionAcceptance any       `json:"reactionAcceptance"`
-
-// 	ReplyID            string    `json:"replyId"`
-// }
-
-// type Emojis struct {
-// 	Ta     string `json:"_ta"`
-// 	I      string `json:"_i"`
-// 	Ni     string `json:"_ni"`
-// 	Xya    string `json:"_xya"`
-// 	N      string `json:"_n"`
-// 	Pu     string `json:"_pu"`
-// 	Github string `json:"github"`
-// }
-
-// type Reactions struct {
-// 	NAMING_FAILED                     int `json:"🤯"`
-// 	Sugoihanashi                      int `json:":sugoihanashi@.:"`
-// 	SurprisedAi                       int `json:":surprised_ai@.:"`
-// 	YosanoParty                       int `json:":yosano_party@.:"`
-// 	IgyoNoKesin                       int `json:":igyo_no_kesin@.:"`
-// 	Bikkuri9IneverseCom               int `json:":bikkuri@9ineverse.com:"`
-// 	KokyakuGaHontouNiHituyoudattaMono int `json:":kokyaku_ga_hontou_ni_hituyoudatta_mono@.:"`
-// }
-// type ReactionEmojis struct {
-// 	Bikkuri9IneverseCom string `json:"bikkuri@9ineverse.com"`
-// }
-// type Emojis struct {
-// }
-
-// type Reactions struct {
-// 	SetsufuroCheering int `json:":setsufuro_cheering@.:"`
-// }
-// type ReactionEmojis struct {
-// }
 type Reply struct {
 	ID                 string    `json:"id"`
 	CreatedAt          time.Time `json:"createdAt"`
@@ -171,14 +112,3 @@ type Reply struct {
 	RenoteID           any       `json:"renoteId"`
 	Mentions           []string  `json:"mentions"`
 }
-
-// type Reactions struct {
-// 	NAMING_FAILED      int `json:"👍"`
-// 	Polarbear          int `json:":polarbear@.:"`
-// 	WakaruMkYopoWork   int `json:":wakaru@mk.yopo.work:"`
-// 	OtokuSocialSda1Net int `json:":otoku@social.sda1.net:"`
-// }
-// type ReactionEmojis struct {
-// 	WakaruMkYopoWork   string `json:"wakaru@mk.yopo.work"`
-// 	OtokuSocialSda1Net string `json:"otoku@social.sda1.net"`
-// }
