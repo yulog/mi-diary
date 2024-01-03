@@ -18,28 +18,15 @@ import (
 	"github.com/k0kubun/pp/v3"
 )
 
-// type User struct {
-// 	bun.BaseModel `bun:"table:users,alias:u"`
-
-// 	ID   int64 `bun:",pk,autoincrement"`
-// 	Name string
-// }
-
-// type Book struct {
-// 	bun.BaseModel `bun:"table:books,alias:b"`
-
-// 	ID   int64 `bun:",pk"`
-// 	Name string
-// }
-
 type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
 	ID           string `bun:",pk"`
 	UserID       string `bun:",pk"`
 	ReactionName string
-	User         User     `bun:"rel:belongs-to,join:user_id=id"`
-	Reaction     Reaction `bun:"rel:belongs-to,join:reaction_name=name"`
+	User         User      `bun:"rel:belongs-to,join:user_id=id"`
+	Reaction     Reaction  `bun:"rel:belongs-to,join:reaction_name=name"`
+	Tags         []HashTag `bun:"m2m:note_to_tags,join:Note=HashTag"`
 }
 
 type User struct {
@@ -58,6 +45,21 @@ type Reaction struct {
 	Count int64
 }
 
+type HashTag struct {
+	bun.BaseModel `bun:"table:HashTags,alias:h"`
+
+	ID    int64  `bun:",pk,autoincrement"`
+	Text  string `bun:",unique"`
+	Notes []Note `bun:"m2m:note_to_tags,join:HashTag=Note"`
+}
+
+type NoteToTag struct {
+	NoteID    string   `bun:",pk"`
+	Note      *Note    `bun:"rel:belongs-to,join:note_id=id"`
+	HashTagID int64    `bun:",pk"`
+	HashTag   *HashTag `bun:"rel:belongs-to,join:hash_tag_id=id"`
+}
+
 func main() {
 	// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
 	sqldb, err := sql.Open(sqliteshim.ShimName, "file:diary.db")
@@ -70,6 +72,8 @@ func main() {
 		bundebug.FromEnv("BUNDEBUG"),
 	))
 	ctx := context.Background()
+	// modelを最初に使う前にやる
+	db.RegisterModel((*NoteToTag)(nil))
 
 	// 生のSQL
 	// res, err := db.ExecContext(ctx, "SELECT 1")
@@ -90,6 +94,8 @@ func main() {
 	_, _ = db.NewCreateTable().Model((*Note)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*User)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*Reaction)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*HashTag)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*NoteToTag)(nil)).Exec(ctx)
 	// Insert
 	// user := &User{Name: "admin"}
 	// _, err = db.NewInsert().Model(user).Exec(ctx)
@@ -103,54 +109,53 @@ func main() {
 	// err = db.NewSelect().Model(&users).OrderExpr("id ASC").Limit(10).Scan(ctx)
 	// fmt.Println(users)
 
-	// Tableを作る
-	// _, err = db.NewCreateTable().Model((*Book)(nil)).Exec(ctx)
-	// Insert
-	// 重複してたら登録しない(エラーにしない)
-	// book := &Book{ID: 1, Name: "admin"}
-	// _, err = db.NewInsert().Model(book).Ignore().Exec(ctx)
-	// Select
-	// var books []Book
-	// err = db.NewSelect().Model(&books).OrderExpr("id ASC").Limit(10).Scan(ctx)
-	// fmt.Println(books)
-
 	// JSON読み込み
 	f, _ := os.ReadFile("users_reactions.json")
 	var r mi.Reactions
 	json.Unmarshal(f, &r)
-	// fmt.Printf("%+v\n", r)
-	pp.Println(r)
+	// pp.Println(r)
 
 	// JSONの中身をモデルへ移す
 	var (
-		users     []User
-		notes     []Note
-		reactions []Reaction
+		users      []User
+		notes      []Note
+		reactions  []Reaction
+		noteToTags []NoteToTag
 	)
-	for _, v := range r {
-		u := User{
-			ID:   v.Note.User.ID,
-			Name: v.Note.User.Username,
-		}
-		users = append(users, u)
-
-		reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
-		n := Note{
-			ID:           v.Note.ID,
-			UserID:       v.Note.User.ID,
-			ReactionName: reactionName,
-		}
-		notes = append(notes, n)
-
-		r := Reaction{
-			Name:  reactionName,
-			Image: "xxx",
-		}
-		reactions = append(reactions, r)
-	}
 
 	// まとめて追加する(トランザクション)
 	err = db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+		// JSONの中身をモデルへ移す
+		for _, v := range r {
+			u := User{
+				ID:   v.Note.User.ID,
+				Name: v.Note.User.Username,
+			}
+			users = append(users, u)
+
+			for _, tv := range v.Note.Tags {
+				ht := HashTag{Text: tv}
+				_, err = db.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
+				pp.Println(ht.ID)
+				noteToTags = append(noteToTags, NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+			}
+
+			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
+			n := Note{
+				ID:           v.Note.ID,
+				UserID:       v.Note.User.ID,
+				ReactionName: reactionName,
+			}
+			notes = append(notes, n)
+
+			r := Reaction{
+				Name:  reactionName,
+				Image: "xxx",
+			}
+			reactions = append(reactions, r)
+		}
+
+		// 重複してたら登録しない(エラーにしない)
 		_, err := db.NewInsert().Model(&users).Ignore().Exec(ctx)
 		if err != nil {
 			return err
@@ -174,25 +179,16 @@ func main() {
 		// for _, reaction := range reactions {
 		// 	fmt.Println(reaction.ID) // id is scanned automatically
 		// }
+
+		_, err = db.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+		if err != nil {
+			return err
+		}
 		return err
 	})
 	if err != nil {
 		panic(err)
 	}
-	// _, err = db.NewInsert().Model(&users).Ignore().Exec(ctx)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// for _, user := range users {
-	// 	fmt.Println(user.ID) // id is scanned automatically
-	// }
-	// db.NewInsert().Model(&notes).Ignore().Exec(ctx)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// for _, note := range notes {
-	// 	fmt.Println(note.ID) // id is scanned automatically
-	// }
 
 	// 結合
 	db.NewSelect().
@@ -237,4 +233,13 @@ func main() {
 		Model(&reactions).
 		Scan(ctx)
 	pp.Println(reactions)
+
+	// 特定Tagのノートを取得
+	db.NewSelect().
+		Model(&noteToTags).
+		Relation("HashTag").
+		Relation("Note").
+		Where("hash_tag_id = ?", 1).
+		Scan(ctx)
+	pp.Println(noteToTags)
 }

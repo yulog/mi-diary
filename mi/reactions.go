@@ -60,6 +60,7 @@ type Note struct {
 	Emojis             any       `json:"emojis"`
 	FileIds            []any     `json:"fileIds"`
 	Files              []File    `json:"files"`
+	Tags               []string  `json:"tags"`
 	ReplyID            any       `json:"replyId"`
 	Mentions           []string  `json:"mentions,omitempty"`
 	URI                string    `json:"uri"`
