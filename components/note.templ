@@ -1,0 +1,13 @@
+package components
+
+import (
+	"github.com/yulog/mi-diary/model"
+)
+
+templ Note(items []model.Note) {
+	<ul>
+		for _, item := range items {
+			<li>{ item.ID }</li>
+		}
+	</ul>
+}

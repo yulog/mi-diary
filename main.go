@@ -8,72 +8,34 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/mi"
+	"github.com/yulog/mi-diary/model"
 
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/dialect/sqlitedialect"
-	"github.com/uptrace/bun/driver/sqliteshim"
-	"github.com/uptrace/bun/extra/bundebug"
 
 	"github.com/k0kubun/pp/v3"
 )
 
-type Note struct {
-	bun.BaseModel `bun:"table:notes,alias:n"`
-
-	ID           string `bun:",pk"`
-	UserID       string `bun:",pk"`
-	ReactionName string
-	User         User      `bun:"rel:belongs-to,join:user_id=id"`
-	Reaction     Reaction  `bun:"rel:belongs-to,join:reaction_name=name"`
-	Tags         []HashTag `bun:"m2m:note_to_tags,join:Note=HashTag"`
-}
-
-type User struct {
-	bun.BaseModel `bun:"table:users,alias:u"`
-
-	ID    string `bun:",pk"`
-	Name  string
-	Count int64
-}
-
-type Reaction struct {
-	bun.BaseModel `bun:"table:reactions,alias:r"`
-
-	Name  string `bun:",pk"`
-	Image string
-	Count int64
-}
-
-type HashTag struct {
-	bun.BaseModel `bun:"table:HashTags,alias:h"`
-
-	ID    int64  `bun:",pk,autoincrement"`
-	Text  string `bun:",unique"`
-	Notes []Note `bun:"m2m:note_to_tags,join:HashTag=Note"`
-}
-
-type NoteToTag struct {
-	NoteID    string   `bun:",pk"`
-	Note      *Note    `bun:"rel:belongs-to,join:note_id=id"`
-	HashTagID int64    `bun:",pk"`
-	HashTag   *HashTag `bun:"rel:belongs-to,join:hash_tag_id=id"`
-}
-
 func main() {
 	// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
-	sqldb, err := sql.Open(sqliteshim.ShimName, "file:diary.db")
-	if err != nil {
-		panic(err)
-	}
-	db := bun.NewDB(sqldb, sqlitedialect.New())
-	db.AddQueryHook(bundebug.NewQueryHook(
-		bundebug.WithVerbose(true),
-		bundebug.FromEnv("BUNDEBUG"),
-	))
-	ctx := context.Background()
+	// sqldb, err := sql.Open(sqliteshim.ShimName, "file:diary.db")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// db := bun.NewDB(sqldb, sqlitedialect.New())
+	// db.AddQueryHook(bundebug.NewQueryHook(
+	// 	bundebug.WithVerbose(true),
+	// 	bundebug.FromEnv("BUNDEBUG"),
+	// ))
 	// modelを最初に使う前にやる
-	db.RegisterModel((*NoteToTag)(nil))
+	// db.RegisterModel((*NoteToTag)(nil))
+
+	// TODO: 仮
+	app := app.New()
+	db := app.DB()
+
+	ctx := context.Background()
 
 	// 生のSQL
 	// res, err := db.ExecContext(ctx, "SELECT 1")
@@ -91,11 +53,11 @@ func main() {
 
 	// Tableを作る
 	// TODO: Migration
-	_, _ = db.NewCreateTable().Model((*Note)(nil)).Exec(ctx)
-	_, _ = db.NewCreateTable().Model((*User)(nil)).Exec(ctx)
-	_, _ = db.NewCreateTable().Model((*Reaction)(nil)).Exec(ctx)
-	_, _ = db.NewCreateTable().Model((*HashTag)(nil)).Exec(ctx)
-	_, _ = db.NewCreateTable().Model((*NoteToTag)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.Note)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.User)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.Reaction)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.HashTag)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.NoteToTag)(nil)).Exec(ctx)
 	// Insert
 	// user := &User{Name: "admin"}
 	// _, err = db.NewInsert().Model(user).Exec(ctx)
@@ -117,38 +79,38 @@ func main() {
 
 	// JSONの中身をモデルへ移す
 	var (
-		users      []User
-		notes      []Note
-		reactions  []Reaction
-		noteToTags []NoteToTag
+		users      []model.User
+		notes      []model.Note
+		reactions  []model.Reaction
+		noteToTags []model.NoteToTag
 	)
 
 	// まとめて追加する(トランザクション)
-	err = db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
 		for _, v := range r {
-			u := User{
+			u := model.User{
 				ID:   v.Note.User.ID,
 				Name: v.Note.User.Username,
 			}
 			users = append(users, u)
 
 			for _, tv := range v.Note.Tags {
-				ht := HashTag{Text: tv}
-				_, err = db.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
+				ht := model.HashTag{Text: tv}
+				_, _ = db.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
 				pp.Println(ht.ID)
-				noteToTags = append(noteToTags, NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
 			}
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
-			n := Note{
+			n := model.Note{
 				ID:           v.Note.ID,
 				UserID:       v.Note.User.ID,
 				ReactionName: reactionName,
 			}
 			notes = append(notes, n)
 
-			r := Reaction{
+			r := model.Reaction{
 				Name:  reactionName,
 				Image: "xxx",
 			}
@@ -218,7 +180,7 @@ func main() {
 	// pp.Println(m)
 
 	// 先に取得してあったreactionsを更新している？
-	err = db.NewSelect().Model((*Note)(nil)).ColumnExpr("reaction_name as name, count(*) as count").Group("reaction_name").Scan(ctx, &reactions)
+	err = db.NewSelect().Model((*model.Note)(nil)).ColumnExpr("reaction_name as name, count(*) as count").Group("reaction_name").Scan(ctx, &reactions)
 	pp.Println(reactions)
 
 	// 既存の値も更新している？
