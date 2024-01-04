@@ -15,7 +15,8 @@ func main() {
 	app := app.New()
 	srv := server.New(app)
 	// e.Validator = &Validator{validator: validator.New()}
-	e.GET("/", srv.GetIndex)
-	e.GET("/reactions/:name", srv.GetReactions)
+	e.GET("/", srv.IndexHandler)
+	e.GET("/reactions/:name", srv.ReactionsHandler)
+	e.GET("/hashtags/:name", srv.HashTagsHandler)
 	e.Logger.Fatal(e.Start(":1323"))
 }

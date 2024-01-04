@@ -1,9 +1,12 @@
 package components
 
-templ Index(title string, r templ.Component) {
+templ Index(title string, reaction templ.Component, tags templ.Component) {
 	@Base(title) {
 		<div>
-			@r
+			@reaction
+		</div>
+		<div>
+			@tags
 		</div>
 	}
 }

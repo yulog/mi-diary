@@ -8,7 +8,11 @@ import (
 templ Reaction(items []model.Reaction) {
 	<ul hx-boost="true">
 		for _, item := range items {
-			<li><a href={ templ.URL(fmt.Sprintf("./reactions/%s", item.Name)) } hx-push-url="true">{ item.Name } : { fmt.Sprintf("%d", item.Count) }</a></li>
+			<li>
+				<a href={ templ.URL(fmt.Sprintf("./reactions/%s", item.Name)) } hx-push-url="true">
+					{ item.Name } ( { fmt.Sprintf("%d", item.Count) } )
+				</a>
+			</li>
 		}
 	</ul>
 }

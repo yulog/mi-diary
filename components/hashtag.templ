@@ -1,0 +1,19 @@
+package components
+
+import (
+	"fmt"
+	"github.com/yulog/mi-diary/model"
+)
+
+templ HashTag(items []model.HashTag) {
+	<ul hx-boost="true">
+		for _, item := range items {
+			// TODO: カウントもほしい？{ fmt.Sprintf("%d", item.Count) }
+			<li>
+				<a href={ templ.URL(fmt.Sprintf("./hashtags/%s", item.Text)) } hx-push-url="true">
+					{ item.Text }
+				</a>
+			</li>
+		}
+	</ul>
+}

@@ -1,13 +1,20 @@
 package components
 
 import (
+	"fmt"
 	"github.com/yulog/mi-diary/model"
 )
 
-templ Note(items []model.Note) {
-	<ul>
-		for _, item := range items {
-			<li>{ item.ID }</li>
-		}
-	</ul>
+templ Note(title string, items []model.Note) {
+	@Base(title) {
+		<ul>
+			for _, item := range items {
+				<li>
+					<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
+						{ item.ID }
+					</a>
+				</li>
+			}
+		</ul>
+	}
 }
