@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"github.com/a-h/templ"
@@ -7,7 +7,6 @@ import (
 	"github.com/yulog/mi-diary/model"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 type Server struct {
@@ -22,7 +21,7 @@ func renderer(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (srv *Server) getIndex(c echo.Context) error {
+func (srv *Server) GetIndex(c echo.Context) error {
 	var reactions []model.Reaction
 	srv.app.DB().
 		NewSelect().
@@ -32,7 +31,7 @@ func (srv *Server) getIndex(c echo.Context) error {
 	return renderer(c, cm.Index("index", cm.Reaction(reactions)))
 }
 
-func (srv *Server) getReactions(c echo.Context) error {
+func (srv *Server) GetReactions(c echo.Context) error {
 	name := c.Param("name")
 	var notes []model.Note
 	srv.app.DB().
@@ -40,19 +39,5 @@ func (srv *Server) getReactions(c echo.Context) error {
 		Model(&notes).
 		Where("reaction_name = ?", name).
 		Scan(c.Request().Context())
-	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
 	return renderer(c, cm.Note(notes))
-}
-
-func main() {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	// e.Use(middleware.Gzip())
-	e.Use(middleware.Recover())
-	app := app.New()
-	srv := New(app)
-	// e.Validator = &Validator{validator: validator.New()}
-	e.GET("/", srv.getIndex)
-	e.GET("/reactions/:name", srv.getReactions)
-	e.Logger.Fatal(e.Start(":1323"))
 }
