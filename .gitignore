@@ -50,3 +50,4 @@ goxz
 
 # mi-diary
 diary*.db
+config*.toml

@@ -13,13 +13,24 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-func Insert(ctx context.Context) {
+func InsertFromFile(ctx context.Context) {
 	app := New()
 	db := app.DB()
 	// JSON読み込み
 	f, _ := os.ReadFile("users_reactions.json")
 	var r mi.Reactions
 	json.Unmarshal(f, &r)
+	// pp.Println(r)
+
+	tx(ctx, db, r)
+}
+
+func Insert(ctx context.Context, b []byte) {
+	app := New()
+	db := app.DB()
+	// JSON読み込み
+	var r mi.Reactions
+	json.Unmarshal(b, &r)
 	// pp.Println(r)
 
 	tx(ctx, db, r)
@@ -91,31 +102,45 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		// 	fmt.Println(reaction.ID) // id is scanned automatically
 		// }
 
-		_, err = db.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+		// 0件の場合がある
+		if len(noteToTags) > 0 {
+			_, err = db.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = count(ctx, db)
 		if err != nil {
 			return err
 		}
-
-		count(ctx, db)
 		return err
 	})
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 }
 
-func count(ctx context.Context, db *bun.DB) {
+func count(ctx context.Context, db *bun.DB) error {
 	var reactions []model.Reaction
-	db.NewSelect().
+	err := db.NewSelect().
 		Model((*model.Note)(nil)).
 		ColumnExpr("reaction_name as name, count(*) as count").
 		Group("reaction_name").
 		Scan(ctx, &reactions)
+	if err != nil {
+		return err
+	}
 
-	db.NewUpdate().
+	_, err = db.NewUpdate().
 		Model(&reactions).
 		OmitZero().
 		Column("count").
 		Bulk().
 		Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return err
 }

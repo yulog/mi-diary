@@ -8,6 +8,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
+// https://techblog.enechain.com/entry/bun-atlas-migration-setup-guide
 func modelsToByte(db *bun.DB, models []interface{}) []byte {
 	var data []byte
 	for _, model := range models {
@@ -22,6 +23,7 @@ func modelsToByte(db *bun.DB, models []interface{}) []byte {
 	return data
 }
 
+// https://techblog.enechain.com/entry/bun-atlas-migration-setup-guide
 func indexesToByte(db *bun.DB, idxCreators []model.IndexQueryCreator) []byte {
 	var data []byte
 	for _, idxCreator := range idxCreators {

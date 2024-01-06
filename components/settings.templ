@@ -10,6 +10,10 @@ templ Settings(title string) {
 
 templ getReaction() {
 	<form hx-post="/settings/reactions" hx-swap="none">
+		<label>
+			ID
+			<input name="note-id" type="text"/>
+		</label>
 		<button>
 			Get
 		</button>

@@ -1,12 +1,15 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
+	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
 )
 
@@ -16,6 +19,7 @@ func (srv *Server) IndexHandler(c echo.Context) error {
 	srv.app.DB().
 		NewSelect().
 		Model(&reactions).
+		Order("count DESC").
 		Scan(c.Request().Context())
 	var tags []model.HashTag
 	srv.app.DB().
@@ -66,7 +70,24 @@ func (srv *Server) SettingsHandler(c echo.Context) error {
 
 // SettingsReactionsHandler は/settings/reactionsのハンドラ
 func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
-	app.Insert(c.Request().Context())
-	return c.HTML(http.StatusOK, "OK")
+	id := c.FormValue("note-id")
+	body := map[string]any{
+		"i":      srv.app.Config.I,
+		"limit":  20,
+		"userId": srv.app.Config.UserId,
+	}
+	if id != "" {
+		body["untilId"] = id
+	}
+	b, _ := json.Marshal(body)
+	// fmt.Println(string(b))
+	u := fmt.Sprintf("https://%s/api/users/reactions", srv.app.Config.Host)
+	resp, err := mi.Post(u, b)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// fmt.Println(string(resp))
+	app.Insert(c.Request().Context(), resp)
+	return c.HTML(http.StatusOK, id)
 	// return renderer(c, cm.Settings("settings"))
 }
