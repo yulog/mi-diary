@@ -22,6 +22,10 @@ func Insert(ctx context.Context) {
 	json.Unmarshal(f, &r)
 	// pp.Println(r)
 
+	tx(ctx, db, r)
+}
+
+func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 	// JSONの中身をモデルへ移す
 	var (
 		users      []model.User
@@ -91,9 +95,27 @@ func Insert(ctx context.Context) {
 		if err != nil {
 			return err
 		}
+
+		count(ctx, db)
 		return err
 	})
 	if err != nil {
 		panic(err)
 	}
+}
+
+func count(ctx context.Context, db *bun.DB) {
+	var reactions []model.Reaction
+	db.NewSelect().
+		Model((*model.Note)(nil)).
+		ColumnExpr("reaction_name as name, count(*) as count").
+		Group("reaction_name").
+		Scan(ctx, &reactions)
+
+	db.NewUpdate().
+		Model(&reactions).
+		OmitZero().
+		Column("count").
+		Bulk().
+		Exec(ctx)
 }

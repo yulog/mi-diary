@@ -7,6 +7,12 @@ import (
 	"github.com/yulog/mi-diary/server"
 )
 
+const name = "mi-diary"
+
+const version = "0.0.1"
+
+var revision = "HEAD"
+
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
