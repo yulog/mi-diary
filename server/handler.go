@@ -1,8 +1,11 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo"
 	"github.com/uptrace/bun"
+	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/model"
 )
@@ -53,4 +56,17 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Where("hash_tag.text = ?", name).
 		Scan(c.Request().Context(), &notes)
 	return renderer(c, cm.Note(name, notes))
+}
+
+// SettingsHandler は/settingsのハンドラ
+func (srv *Server) SettingsHandler(c echo.Context) error {
+	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
+	return renderer(c, cm.Settings("settings"))
+}
+
+// SettingsReactionsHandler は/settings/reactionsのハンドラ
+func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
+	app.Insert(c.Request().Context())
+	return c.HTML(http.StatusOK, "OK")
+	// return renderer(c, cm.Settings("settings"))
 }

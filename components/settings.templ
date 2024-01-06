@@ -1,0 +1,17 @@
+package components
+
+templ Settings(title string) {
+	@Base(title) {
+		<div>
+			@getReaction()
+		</div>
+	}
+}
+
+templ getReaction() {
+	<form hx-post="/settings/reactions" hx-swap="none">
+		<button>
+			Get
+		</button>
+	</form>
+}
