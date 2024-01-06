@@ -49,4 +49,4 @@ $RECYCLE.BIN/
 goxz
 
 # mi-diary
-diary.db
+diary*.db
