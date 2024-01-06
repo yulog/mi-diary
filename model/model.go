@@ -30,7 +30,7 @@ type Reaction struct {
 }
 
 type HashTag struct {
-	bun.BaseModel `bun:"table:HashTags,alias:h"`
+	bun.BaseModel `bun:"table:hash_tags,alias:h"`
 
 	ID    int64  `bun:",pk,autoincrement"`
 	Text  string `bun:",unique"`
