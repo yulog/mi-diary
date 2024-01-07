@@ -82,17 +82,17 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		if err != nil {
 			return err
 		}
-		for _, user := range users {
-			fmt.Println(user.ID) // id is scanned automatically
-		}
+		// for _, user := range users {
+		// 	fmt.Println(user.ID) // id is scanned automatically
+		// }
 
 		_, err = db.NewInsert().Model(&notes).Ignore().Exec(ctx)
 		if err != nil {
 			return err
 		}
-		for _, note := range notes {
-			fmt.Println(note.ID) // id is scanned automatically
-		}
+		// for _, note := range notes {
+		// 	fmt.Println(note.ID) // id is scanned automatically
+		// }
 
 		_, err = db.NewInsert().Model(&reactions).Ignore().Exec(ctx)
 		if err != nil {
@@ -111,6 +111,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		}
 
 		err = count(ctx, db)
+		// TODO: あってもなくても変わらない vs 統一感
 		if err != nil {
 			return err
 		}

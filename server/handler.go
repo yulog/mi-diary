@@ -65,7 +65,6 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 
 // SettingsHandler は/settingsのハンドラ
 func (srv *Server) SettingsHandler(c echo.Context) error {
-	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
 	return renderer(c, cm.Settings("settings"))
 }
 
@@ -90,5 +89,4 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 	// fmt.Println(string(resp))
 	app.Insert(c.Request().Context(), resp)
 	return c.HTML(http.StatusOK, id)
-	// return renderer(c, cm.Settings("settings"))
 }

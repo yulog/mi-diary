@@ -12,6 +12,7 @@ import (
 //go:embed migrations/*.sql
 var migrationFS embed.FS
 
+// RunMigrations はマイグレーションを実行する
 func RunMigrations() {
 	app := app.New()
 	migrations, err := iofs.New(migrationFS, "migrations")

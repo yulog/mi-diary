@@ -50,5 +50,6 @@ func GenerateSchema() {
 	var data []byte
 	data = append(data, modelsToByte(app.DB(), models)...)
 	data = append(data, indexesToByte(app.DB(), model.IdxCreators)...)
+	// TODO: 権限これで良いの？
 	os.WriteFile("migrate/schema.sql", data, 0666)
 }

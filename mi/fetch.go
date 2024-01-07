@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Post は指定のurlにJSONをPOSTする
 func Post(url string, b []byte) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
