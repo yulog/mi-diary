@@ -67,6 +67,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				ID:           v.Note.ID,
 				UserID:       v.Note.User.ID,
 				ReactionName: reactionName,
+				Text:         v.Note.Text,
 			}
 			notes = append(notes, n)
 

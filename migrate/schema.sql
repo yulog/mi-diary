@@ -1,4 +1,4 @@
-CREATE TABLE "notes" ("id" VARCHAR NOT NULL, "user_id" VARCHAR NOT NULL, "reaction_name" VARCHAR, PRIMARY KEY ("id", "user_id"), FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY ("reaction_name") REFERENCES "reactions" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
+CREATE TABLE "notes" ("id" VARCHAR NOT NULL, "user_id" VARCHAR NOT NULL, "reaction_name" VARCHAR, "text" VARCHAR, PRIMARY KEY ("id", "user_id"), FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY ("reaction_name") REFERENCES "reactions" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
 CREATE TABLE "users" ("id" VARCHAR NOT NULL, "name" VARCHAR, "count" INTEGER, PRIMARY KEY ("id"));
 CREATE TABLE "reactions" ("name" VARCHAR NOT NULL, "image" VARCHAR, "count" INTEGER, PRIMARY KEY ("name"));
 CREATE TABLE "hash_tags" ("id" INTEGER NOT NULL, "text" VARCHAR, "count" INTEGER, PRIMARY KEY ("id"), UNIQUE ("text"));

@@ -8,6 +8,7 @@ type Note struct {
 	ID           string `bun:",pk"`
 	UserID       string `bun:",pk"`
 	ReactionName string
+	Text         string
 	User         User      `bun:"rel:belongs-to,join:user_id=id"`
 	Reaction     Reaction  `bun:"rel:belongs-to,join:reaction_name=name"`
 	Tags         []HashTag `bun:"m2m:note_to_tags,join:Note=HashTag"`
