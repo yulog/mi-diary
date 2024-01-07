@@ -25,6 +25,7 @@ func (srv *Server) IndexHandler(c echo.Context) error {
 	srv.app.DB().
 		NewSelect().
 		Model(&tags).
+		Order("count DESC").
 		Scan(c.Request().Context())
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
 	return renderer(c, cm.Index("index", cm.Reaction(reactions), cm.HashTag(tags)))

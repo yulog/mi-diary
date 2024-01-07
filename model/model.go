@@ -34,6 +34,7 @@ type HashTag struct {
 
 	ID    int64  `bun:",pk,autoincrement"`
 	Text  string `bun:",unique"`
+	Count int64
 	Notes []Note `bun:"m2m:note_to_tags,join:HashTag=Note"`
 }
 

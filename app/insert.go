@@ -123,6 +123,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 }
 
 func count(ctx context.Context, db *bun.DB) error {
+	// リアクションのカウント
 	var reactions []model.Reaction
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
@@ -135,6 +136,30 @@ func count(ctx context.Context, db *bun.DB) error {
 
 	_, err = db.NewUpdate().
 		Model(&reactions).
+		OmitZero().
+		Column("count").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// タグのカウント
+	var hashtags []model.HashTag
+	err = db.NewSelect().
+		Model((*model.NoteToTag)(nil)).
+		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Column("text")
+		}).
+		ColumnExpr("hash_tag_id as id, count(*) as count").
+		Group("hash_tag_id").
+		Scan(ctx, &hashtags)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.NewUpdate().
+		Model(&hashtags).
 		OmitZero().
 		Column("count").
 		Bulk().

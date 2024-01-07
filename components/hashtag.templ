@@ -11,7 +11,7 @@ templ HashTag(items []model.HashTag) {
 			// TODO: カウントもほしい？{ fmt.Sprintf("%d", item.Count) }
 			<li>
 				<a href={ templ.URL(fmt.Sprintf("./hashtags/%s", item.Text)) } hx-push-url="true">
-					{ item.Text }
+					{ item.Text } ( { fmt.Sprintf("%d", item.Count) } )
 				</a>
 			</li>
 		}
