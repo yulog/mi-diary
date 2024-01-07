@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/server"
 )
 
@@ -14,6 +15,7 @@ const version = "0.0.1"
 var revision = "HEAD"
 
 func main() {
+	migrate.RunMigrations()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Gzip())
