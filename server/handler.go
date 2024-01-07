@@ -52,7 +52,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Model((*model.NoteToTag)(nil)).
 		// 必要な列だけ選択して、不要な列をなくす
 		Relation("Note", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Column("id", "user_id", "reaction_name")
+			return q.Column("id", "user_id", "reaction_name", "text")
 		}).
 		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Column("")

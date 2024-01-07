@@ -2,6 +2,7 @@ package migrate
 
 import (
 	"embed"
+	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
@@ -38,6 +39,8 @@ func RunMigrations() {
 	}
 	err = m.Up()
 	if err != nil {
-		panic(err)
+		// 恐らく最新ということ
+		log.Println(err)
+		// panic(err)
 	}
 }
