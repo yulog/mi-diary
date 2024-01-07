@@ -31,8 +31,8 @@ func Test_parseAidx(t *testing.T) {
 				t.Errorf("parseAidx() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseAidx() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got.UTC(), tt.want) {
+				t.Errorf("parseAidx() = %v, want %v", got.UTC(), tt.want)
 			}
 		})
 	}

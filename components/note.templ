@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/mi"
 )
 
 templ Note(title string, items []model.Note) {
@@ -11,7 +12,7 @@ templ Note(title string, items []model.Note) {
 			for _, item := range items {
 				<li>
 					<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
-						{ item.ID }
+						{ item.ID } ({ mi.FormatTime(mi.ParseAidx(item.ID)) })
 					</a>
 				</li>
 			}
