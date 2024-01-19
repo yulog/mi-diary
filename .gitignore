@@ -51,3 +51,4 @@ goxz
 # mi-diary
 diary*.db
 config*.toml
+sample*.json
