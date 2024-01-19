@@ -26,6 +26,7 @@ func main() {
 	e.GET("/", srv.IndexHandler)
 	e.GET("/reactions/:name", srv.ReactionsHandler)
 	e.GET("/hashtags/:name", srv.HashTagsHandler)
+	e.GET("/users/:name", srv.UsersHandler)
 	e.GET("/settings", srv.SettingsHandler)
 	e.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	e.Logger.Fatal(e.Start(":1323"))

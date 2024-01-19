@@ -1,0 +1,18 @@
+package components
+
+import (
+	"fmt"
+	"github.com/yulog/mi-diary/model"
+)
+
+templ User(items []model.User) {
+	<ul hx-boost="true">
+		for _, item := range items {
+			<li>
+				<a href={ templ.URL(fmt.Sprintf("./users/%s", item.Name)) } hx-push-url="true">
+					{ item.DisplayName } ( { fmt.Sprintf("%d", item.Count) } )
+				</a>
+			</li>
+		}
+	</ul>
+}

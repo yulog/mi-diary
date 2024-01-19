@@ -17,9 +17,10 @@ type Note struct {
 type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
-	ID    string `bun:",pk"`
-	Name  string
-	Count int64
+	ID          string `bun:",pk"`
+	Name        string
+	DisplayName string
+	Count       int64
 }
 
 type Reaction struct {

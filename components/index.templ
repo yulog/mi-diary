@@ -1,13 +1,19 @@
 package components
 
-templ Index(title string, reaction templ.Component, tags templ.Component) {
+templ Index(title string, reaction templ.Component, tags templ.Component, users templ.Component) {
 	@Base(title) {
 		<a href="/settings">settings</a>
 		<div>
+			<h3>Reactions</h3>
 			@reaction
 		</div>
 		<div>
+			<h3>HashTags</h3>
 			@tags
+		</div>
+		<div>
+			<h3>Users</h3>
+			@users
 		</div>
 	}
 }

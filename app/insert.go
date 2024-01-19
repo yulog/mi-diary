@@ -49,9 +49,16 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
 		for _, v := range r {
+			var dn string
+			if v.Note.User.Name == nil {
+				dn = v.Note.User.Username
+			} else {
+				dn = v.Note.User.Name.(string)
+			}
 			u := model.User{
-				ID:   v.Note.User.ID,
-				Name: v.Note.User.Username,
+				ID:          v.Note.User.ID,
+				Name:        v.Note.User.Username,
+				DisplayName: dn,
 			}
 			users = append(users, u)
 
@@ -73,7 +80,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 
 			r := model.Reaction{
 				Name:  reactionName,
-				Image: "xxx",
+				Image: "",
 			}
 			reactions = append(reactions, r)
 		}
@@ -162,6 +169,30 @@ func count(ctx context.Context, db *bun.DB) error {
 
 	_, err = db.NewUpdate().
 		Model(&hashtags).
+		OmitZero().
+		Column("count").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// ユーザーのカウント
+	var users []model.User
+	err = db.NewSelect().
+		Model((*model.Note)(nil)).
+		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Column("id", "name")
+		}).
+		ColumnExpr("count(*) as count").
+		Group("user_id").
+		Scan(ctx, &users)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.NewUpdate().
+		Model(&users).
 		OmitZero().
 		Column("count").
 		Bulk().

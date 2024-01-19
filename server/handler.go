@@ -27,8 +27,14 @@ func (srv *Server) IndexHandler(c echo.Context) error {
 		Model(&tags).
 		Order("count DESC").
 		Scan(c.Request().Context())
+	var users []model.User
+	srv.app.DB().
+		NewSelect().
+		Model(&users).
+		Order("count DESC").
+		Scan(c.Request().Context())
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	return renderer(c, cm.Index("index", cm.Reaction(reactions), cm.HashTag(tags)))
+	return renderer(c, cm.Index("index", cm.Reaction(reactions), cm.HashTag(tags), cm.User(users)))
 }
 
 // ReactionsHandler は/reactions/:nameのハンドラ
@@ -60,6 +66,19 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Column("").
 		Where("hash_tag.text = ?", name).
 		Scan(c.Request().Context(), &notes)
+	return renderer(c, cm.Note(name, notes))
+}
+
+// UsersHandler は/users/:nameのハンドラ
+func (srv *Server) UsersHandler(c echo.Context) error {
+	name := c.Param("name")
+	var notes []model.Note
+	srv.app.DB().
+		NewSelect().
+		Model(&notes).
+		Relation("User").
+		Where("user.name = ?", name).
+		Scan(c.Request().Context())
 	return renderer(c, cm.Note(name, notes))
 }
 
