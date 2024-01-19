@@ -6,7 +6,7 @@ import (
 )
 
 templ User(items []model.User) {
-	<ul hx-boost="true">
+	<ul>
 		for _, item := range items {
 			<li>
 				<a href={ templ.URL(fmt.Sprintf("./users/%s", item.Name)) } hx-push-url="true">

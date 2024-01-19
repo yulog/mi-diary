@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 	"github.com/uptrace/bun"
@@ -13,7 +14,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-// IndexHandler は/のハンドラ
+// IndexHandler は / のハンドラ
 func (srv *Server) IndexHandler(c echo.Context) error {
 	var reactions []model.Reaction
 	srv.app.DB().
@@ -37,7 +38,7 @@ func (srv *Server) IndexHandler(c echo.Context) error {
 	return renderer(c, cm.Index("index", cm.Reaction(reactions), cm.HashTag(tags), cm.User(users)))
 }
 
-// ReactionsHandler は/reactions/:nameのハンドラ
+// ReactionsHandler は /reactions/:name のハンドラ
 func (srv *Server) ReactionsHandler(c echo.Context) error {
 	name := c.Param("name")
 	var notes []model.Note
@@ -49,7 +50,7 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 	return renderer(c, cm.Note(name, notes))
 }
 
-// HashTagsHandler は/hashtags/:nameのハンドラ
+// HashTagsHandler は /hashtags/:name のハンドラ
 func (srv *Server) HashTagsHandler(c echo.Context) error {
 	name := c.Param("name")
 	var notes []model.Note
@@ -69,7 +70,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 	return renderer(c, cm.Note(name, notes))
 }
 
-// UsersHandler は/users/:nameのハンドラ
+// UsersHandler は /users/:name のハンドラ
 func (srv *Server) UsersHandler(c echo.Context) error {
 	name := c.Param("name")
 	var notes []model.Note
@@ -82,12 +83,45 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 	return renderer(c, cm.Note(name, notes))
 }
 
-// SettingsHandler は/settingsのハンドラ
+// NotesHandler は /notes のハンドラ
+func (srv *Server) NotesRootHandler(c echo.Context) error {
+	return c.Redirect(http.StatusFound, "/notes/1")
+}
+
+// NotesHandler は /notes/:page のハンドラ
+func (srv *Server) NotesHandler(c echo.Context) error {
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		return err
+	}
+	if page < 1 {
+		page = 1
+	}
+	limit := 10
+	offset := limit * (page - 1)
+	var notes []model.Note
+	srv.app.DB().
+		NewSelect().
+		Model(&notes).
+		// Relation("User").
+		Limit(limit).
+		Offset(offset).
+		Scan(c.Request().Context())
+	title := fmt.Sprint(page)
+	prev := page - 1
+	next := page + 1
+	if len(notes) < limit {
+		next = 0
+	}
+	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next))
+}
+
+// SettingsHandler は /settings のハンドラ
 func (srv *Server) SettingsHandler(c echo.Context) error {
 	return renderer(c, cm.Settings("settings"))
 }
 
-// SettingsReactionsHandler は/settings/reactionsのハンドラ
+// SettingsReactionsHandler は /settings/reactions のハンドラ
 func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 	id := c.FormValue("note-id")
 	body := map[string]any{

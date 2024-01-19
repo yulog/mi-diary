@@ -6,7 +6,7 @@ import (
 )
 
 templ Reaction(items []model.Reaction) {
-	<ul hx-boost="true">
+	<ul>
 		for _, item := range items {
 			<li>
 				<a href={ templ.URL(fmt.Sprintf("./reactions/%s", item.Name)) } hx-push-url="true">

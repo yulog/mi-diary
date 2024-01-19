@@ -1,5 +1,9 @@
 package components
 
+import (
+	"fmt"
+)
+
 templ Base(title string) {
 	<!DOCTYPE html>
 	<html>
@@ -9,8 +13,39 @@ templ Base(title string) {
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<title>{ title }</title>
 		</head>
-		<body>
+		<body hx-boost="true">
+			<a href={ templ.URL("/") } hx-push-url="true">
+				Top
+			</a>
 			{ children... }
 		</body>
 	</html>
+}
+
+templ Pagination(title string, current, prev, next int) {
+	@Base(title) {
+		@pager(current, prev, next)
+		<div>
+			{ children... }
+		</div>
+		@pager(current, prev, next)
+	}
+}
+
+templ pager(current, prev, next int) {
+	<div>
+		if prev != 0 {
+			<a href={ templ.URL(fmt.Sprintf("./%d", prev)) } hx-push-url="true">
+				{ fmt.Sprintf("< %d ", prev) }
+			</a>
+		}
+		<span>
+			{ fmt.Sprintf("[ %d ]", current) }
+		</span>
+		if next != 0 {
+			<a href={ templ.URL(fmt.Sprintf("./%d", next)) } hx-push-url="true">
+				{ fmt.Sprintf(" %d >", next) }
+			</a>
+		}
+	</div>
 }

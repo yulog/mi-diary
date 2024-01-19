@@ -6,19 +6,29 @@ import (
 	"github.com/yulog/mi-diary/mi"
 )
 
+templ noteList(items []model.Note) {
+	<ul>
+		for _, item := range items {
+			<li>
+				<div>
+					{ item.Text }
+				</div>
+				<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
+					{ item.ID } ({ mi.FormatTime(mi.ParseAidx(item.ID)) })
+				</a>
+			</li>
+		}
+	</ul>
+}
+
 templ Note(title string, items []model.Note) {
 	@Base(title) {
-		<ul>
-			for _, item := range items {
-				<li>
-					<div>
-						{ item.Text }
-					</div>
-					<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
-						{ item.ID } ({ mi.FormatTime(mi.ParseAidx(item.ID)) })
-					</a>
-				</li>
-			}
-		</ul>
+		@noteList(items)
+	}
+}
+
+templ NoteWithPages(title string, items []model.Note, current, prev, next int) {
+	@Pagination(title, current, prev, next) {
+		@noteList(items)
 	}
 }
