@@ -46,6 +46,8 @@ func GenerateSchema() {
 		(*model.Reaction)(nil),
 		(*model.HashTag)(nil),
 		(*model.NoteToTag)(nil),
+		(*model.Month)(nil),
+		(*model.Day)(nil),
 	}
 	var data []byte
 	data = append(data, modelsToByte(app.DB(), models)...)

@@ -1,0 +1,49 @@
+package components
+
+import (
+	"fmt"
+	"github.com/yulog/mi-diary/model"
+)
+
+var header = ""
+var isOpen = false
+
+func setHeader(h string) (string, error) {
+	header = h
+	return "", nil
+}
+
+func setIsOpen(f bool) (string, error) {
+	isOpen = f
+	return "", nil
+}
+
+templ Archive(title string, items []model.Archive) {
+	@Base(title) {
+		for _, item := range items {
+			if header != item.YM && isOpen {
+				{ setIsOpen(false) }
+				@templ.Raw("</ul>")
+			}
+			if header != item.YM {
+				{ setHeader(item.YM) }
+				<a href={ templ.URL(fmt.Sprintf("./archives/%s", item.YM)) } hx-push-url="true">
+					<h3>{ item.YM } ( { fmt.Sprintf("%d", item.YmCount) } )</h3>
+				</a>
+			}
+			if !isOpen {
+				{ setIsOpen(true) }
+				@templ.Raw("<ul>")
+			}
+			<li>
+				<a href={ templ.URL(fmt.Sprintf("./archives/%s", item.YMD)) } hx-push-url="true">
+					{ item.YMD } ( { fmt.Sprintf("%d", item.YmdCount) } )
+				</a>
+			</li>
+		}
+		if isOpen {
+			@templ.Raw("</ul>")
+		}
+		{ setHeader("") }
+	}
+}

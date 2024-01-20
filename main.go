@@ -28,6 +28,8 @@ func main() {
 	e.GET("/hashtags/:name", srv.HashTagsHandler)
 	e.GET("/users/:name", srv.UsersHandler)
 	e.GET("/notes", srv.NotesHandler)
+	e.GET("/archives", srv.ArchivesHandler)
+	e.GET("/archives/:date", srv.ArchiveNotesHandler)
 	e.GET("/settings", srv.SettingsHandler)
 	e.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	e.Logger.Fatal(e.Start(":1323"))

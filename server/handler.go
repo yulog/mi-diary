@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
@@ -45,6 +46,7 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 		NewSelect().
 		Model(&notes).
 		Where("reaction_name = ?", name).
+		Order("created_at DESC").
 		Scan(c.Request().Context())
 	return renderer(c, cm.Note(name, notes))
 }
@@ -65,6 +67,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		}).
 		Column("").
 		Where("hash_tag.text = ?", name).
+		Order("created_at DESC").
 		Scan(c.Request().Context(), &notes)
 	return renderer(c, cm.Note(name, notes))
 }
@@ -78,11 +81,12 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		Model(&notes).
 		Relation("User").
 		Where("user.name = ?", name).
+		Order("created_at DESC").
 		Scan(c.Request().Context())
 	return renderer(c, cm.Note(name, notes))
 }
 
-// NotesHandler は /notes/:page のハンドラ
+// NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
 	var page = 1
 	err := echo.QueryParamsBinder(c).
@@ -102,10 +106,79 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 		NewSelect().
 		Model(&notes).
 		// Relation("User").
+		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Scan(c.Request().Context())
 	title := fmt.Sprint(page)
+	prev := page - 1
+	next := page + 1
+	if len(notes) < limit {
+		next = 0
+	}
+	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next))
+}
+
+// ArchivesHandler は /archives のハンドラ
+func (srv *Server) ArchivesHandler(c echo.Context) error {
+	// name := c.Param("name")
+	var archives []model.Archive
+	srv.app.DB().
+		NewSelect().
+		Model((*model.Day)(nil)).
+		Relation("Month", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Column("")
+		}).
+		ColumnExpr("d.ym as ym, month.count as ym_count, d.ymd as ymd, d.count as ymd_count").
+		Order("ym DESC", "ymd DESC").
+		Scan(c.Request().Context(), &archives)
+	return renderer(c, cm.Archive("Archives", archives))
+}
+
+var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
+var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+
+// ArchiveNotesHandler は /archives/:date のハンドラ
+func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
+	d := c.Param("date")
+	col := ""
+	if reym.MatchString(d) {
+		col = "strftime('%Y-%m', created_at)"
+	} else if reymd.MatchString(d) {
+		col = "strftime('%Y-%m-%d', created_at)"
+	}
+	fmt.Println(d)
+	fmt.Println(col)
+	var page = 1
+	err := echo.QueryParamsBinder(c).
+		Int("page", &page).
+		BindError()
+	// page, err = strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return err
+	}
+	if page < 1 {
+		page = 1
+	}
+	limit := 10
+	offset := limit * (page - 1)
+	var notes []model.Note
+
+	// srv.app.DB().
+	// 	NewRaw(
+	// 		"SELECT id, user_id, reaction_name, text, created_at FROM ? WHERE "+col+" = ? LIMIT ? OFFSET ?",
+	// 		bun.Ident("notes"), d, limit, offset).
+	// 	Scan(c.Request().Context(), &notes)
+
+	srv.app.DB().
+		NewSelect().
+		Model(&notes).
+		Where(col+" = ?", d). // 条件指定に関数適用した列を使う
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Scan(c.Request().Context())
+	title := fmt.Sprintf("%s - %d", d, page)
 	prev := page - 1
 	next := page + 1
 	if len(notes) < limit {
