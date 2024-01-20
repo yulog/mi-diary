@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/server"
@@ -27,8 +27,7 @@ func main() {
 	e.GET("/reactions/:name", srv.ReactionsHandler)
 	e.GET("/hashtags/:name", srv.HashTagsHandler)
 	e.GET("/users/:name", srv.UsersHandler)
-	e.GET("/notes", srv.NotesRootHandler)
-	e.GET("/notes/:page", srv.NotesHandler)
+	e.GET("/notes", srv.NotesHandler)
 	e.GET("/settings", srv.SettingsHandler)
 	e.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	e.Logger.Fatal(e.Start(":1323"))

@@ -163,7 +163,7 @@ func pager(current, prev, next int) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 templ.SafeURL = templ.URL(fmt.Sprintf("./%d", prev))
+			var templ_7745c5c3_Var9 templ.SafeURL = templ.URL(fmt.Sprintf("?page=%d", prev))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var9)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -208,7 +208,7 @@ func pager(current, prev, next int) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 templ.SafeURL = templ.URL(fmt.Sprintf("./%d", next))
+			var templ_7745c5c3_Var12 templ.SafeURL = templ.URL(fmt.Sprintf("?page=%d", next))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

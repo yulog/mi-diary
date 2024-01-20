@@ -35,7 +35,7 @@ templ Pagination(title string, current, prev, next int) {
 templ pager(current, prev, next int) {
 	<div>
 		if prev != 0 {
-			<a href={ templ.URL(fmt.Sprintf("./%d", prev)) } hx-push-url="true">
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } hx-push-url="true">
 				{ fmt.Sprintf("< %d ", prev) }
 			</a>
 		}
@@ -43,7 +43,7 @@ templ pager(current, prev, next int) {
 			{ fmt.Sprintf("[ %d ]", current) }
 		</span>
 		if next != 0 {
-			<a href={ templ.URL(fmt.Sprintf("./%d", next)) } hx-push-url="true">
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } hx-push-url="true">
 				{ fmt.Sprintf(" %d >", next) }
 			</a>
 		}

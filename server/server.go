@@ -4,7 +4,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/yulog/mi-diary/app"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {

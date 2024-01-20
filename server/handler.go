@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
@@ -83,14 +82,13 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 	return renderer(c, cm.Note(name, notes))
 }
 
-// NotesHandler は /notes のハンドラ
-func (srv *Server) NotesRootHandler(c echo.Context) error {
-	return c.Redirect(http.StatusFound, "/notes/1")
-}
-
 // NotesHandler は /notes/:page のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
-	page, err := strconv.Atoi(c.Param("page"))
+	var page = 1
+	err := echo.QueryParamsBinder(c).
+		Int("page", &page).
+		BindError()
+	// page, err = strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
 		return err
 	}
