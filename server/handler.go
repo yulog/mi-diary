@@ -227,3 +227,25 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 	app.Insert(c.Request().Context(), resp)
 	return c.HTML(http.StatusOK, id)
 }
+
+// SettingsEmojisHandler は /settings/emojis のハンドラ
+func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
+	name := c.FormValue("emoji-name")
+	body := map[string]any{
+		// "i":      srv.app.Config.I,
+		"name": name,
+	}
+	// if id != "" {
+	// 	body["untilId"] = id
+	// }
+	b, _ := json.Marshal(body)
+	// fmt.Println(string(b))
+	u := fmt.Sprintf("https://%s/api/emoji", srv.app.Config.Host)
+	resp, err := mi.Post(u, b)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// fmt.Println(string(resp))
+	app.InsertEmoji(c.Request().Context(), resp)
+	return c.HTML(http.StatusOK, name)
+}

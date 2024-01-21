@@ -32,5 +32,6 @@ func main() {
 	e.GET("/archives/:date", srv.ArchiveNotesHandler)
 	e.GET("/settings", srv.SettingsHandler)
 	e.POST("/settings/reactions", srv.SettingsReactionsHandler)
-	e.Logger.Fatal(e.Start(":1323"))
+	e.POST("/settings/emojis", srv.SettingsEmojisHandler)
+	e.Logger.Fatal(e.Start(":1323")) // TODO: configで変えられるようにする
 }

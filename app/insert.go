@@ -243,3 +243,31 @@ func count(ctx context.Context, db *bun.DB) error {
 	}
 	return err
 }
+
+func InsertEmoji(ctx context.Context, b []byte) {
+	app := New()
+	db := app.DB()
+	// JSON読み込み
+	var e mi.Emoji
+	json.Unmarshal(b, &e)
+	// pp.Println(r)
+
+	// TODO: emoji画像をローカルに保存する
+
+	r := model.Reaction{
+		Name:  e.Name,
+		Image: e.URL,
+	}
+	var s []model.Reaction
+	s = append(s, r)
+	_, err := db.NewUpdate().
+		Model(&s).
+		OmitZero().
+		Column("image").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+}

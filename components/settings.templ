@@ -3,17 +3,40 @@ package components
 templ Settings(title string) {
 	@Base(title) {
 		@getReaction()
+		@getEmoji()
 	}
 }
 
 templ getReaction() {
 	<div class="box">
+		<h3 class="title is-3">Note</h3>
 		<form hx-post="/settings/reactions" hx-swap="none">
 			<label class="label">
 				Note ID
 				<div class="field has-addons">
 					<div class="control">
 						<input class="input" name="note-id" type="text"/>
+					</div>
+					<div class="control">
+						<button class="button is-link">
+							Get
+						</button>
+					</div>
+				</div>
+			</label>
+		</form>
+	</div>
+}
+
+templ getEmoji() {
+	<div class="box">
+		<h3 class="title is-3">Emoji</h3>
+		<form hx-post="/settings/emojis" hx-swap="none">
+			<label class="label">
+				Name
+				<div class="field has-addons">
+					<div class="control">
+						<input class="input" name="emoji-name" type="text"/>
 					</div>
 					<div class="control">
 						<button class="button is-link">

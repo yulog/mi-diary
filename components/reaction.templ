@@ -5,12 +5,21 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
+css emoji() {
+	height: 24px;
+}
+
 templ Reaction(items []model.Reaction) {
 	<ul>
 		for _, item := range items {
 			<li>
-				<a href={ templ.URL(fmt.Sprintf("./reactions/%s", item.Name)) }>
-					{ item.Name } ( { fmt.Sprintf("%d", item.Count) } )
+				<a href={ templ.URL(fmt.Sprintf("./reactions/%s", item.Name)) } class="level-left">
+					if item.Image != "" {
+						<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", emoji() }/>
+					} else {
+						<span class="level-item">{ item.Name }</span>
+					}
+					<span class="level-item">( { fmt.Sprintf("%d", item.Count) } )</span>
 				</a>
 			</li>
 		}
