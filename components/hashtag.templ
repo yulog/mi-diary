@@ -9,7 +9,7 @@ templ HashTag(items []model.HashTag) {
 	<ul>
 		for _, item := range items {
 			<li>
-				<a href={ templ.URL(fmt.Sprintf("./hashtags/%s", item.Text)) } hx-push-url="true">
+				<a href={ templ.URL(fmt.Sprintf("./hashtags/%s", item.Text)) }>
 					{ item.Text } ( { fmt.Sprintf("%d", item.Count) } )
 				</a>
 			</li>

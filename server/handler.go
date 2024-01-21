@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 
@@ -101,6 +102,16 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	}
 	limit := 10
 	offset := limit * (page - 1)
+
+	count, err := srv.app.DB().
+		NewSelect().
+		Model((*model.Note)(nil)).
+		Count(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	last := int(math.Ceil(float64(count) / float64(limit)))
+
 	var notes []model.Note
 	srv.app.DB().
 		NewSelect().
@@ -113,15 +124,17 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	title := fmt.Sprint(page)
 	prev := page - 1
 	next := page + 1
-	if len(notes) < limit {
+	if len(notes) < limit || next > last {
 		next = 0
 	}
-	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next))
+	if next == last {
+		last = 0
+	}
+	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next, last))
 }
 
 // ArchivesHandler は /archives のハンドラ
 func (srv *Server) ArchivesHandler(c echo.Context) error {
-	// name := c.Param("name")
 	var archives []model.Archive
 	srv.app.DB().
 		NewSelect().
@@ -184,7 +197,7 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	if len(notes) < limit {
 		next = 0
 	}
-	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next))
+	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next, 0))
 }
 
 // SettingsHandler は /settings のハンドラ

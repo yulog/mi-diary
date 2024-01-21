@@ -9,7 +9,7 @@ templ User(items []model.User) {
 	<ul>
 		for _, item := range items {
 			<li>
-				<a href={ templ.URL(fmt.Sprintf("./users/%s", item.Name)) } hx-push-url="true">
+				<a href={ templ.URL(fmt.Sprintf("./users/%s", item.Name)) }>
 					{ item.DisplayName } ( { fmt.Sprintf("%d", item.Count) } )
 				</a>
 			</li>

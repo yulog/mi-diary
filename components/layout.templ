@@ -10,42 +10,80 @@ templ Base(title string) {
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width"/>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+			<link rel="stylesheet" type="text/css" href="https://unpkg.com/bulma-prefers-dark"/>
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<title>{ title }</title>
 		</head>
-		<body hx-boost="true">
-			<a href={ templ.URL("/") } hx-push-url="true">
-				Top
-			</a>
-			{ children... }
+		<body class="has-navbar-fixed-top" hx-boost="true">
+			<nav class="navbar is-fixed-top is-primary" role="navigation" aria-label="main navigation">
+				<div class="navbar-brand"><a href="/" class="navbar-item">Mi Diary</a></div>
+				<div class="navbar-end">
+					<a href="/" class="navbar-item">Home</a>
+					<a href={ templ.URL("/settings") } class="navbar-item">Settings</a>
+				</div>
+			</nav>
+			<main class="section">
+				{ children... }
+			</main>
 		</body>
 	</html>
 }
 
-templ Pagination(title string, current, prev, next int) {
+templ Pagination(title string, current, prev, next, last int) {
 	@Base(title) {
-		@pager(current, prev, next)
-		<div>
+		@pager(current, prev, next, last)
+		<div class="block">
 			{ children... }
 		</div>
-		@pager(current, prev, next)
+		@pager(current, prev, next, last)
 	}
 }
 
-templ pager(current, prev, next int) {
-	<div>
+templ pager(current, prev, next, last int) {
+	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
 		if prev != 0 {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } hx-push-url="true">
-				{ fmt.Sprintf("< %d ", prev) }
-			</a>
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } class="pagination-previous">Prev</a>
 		}
-		<span>
-			{ fmt.Sprintf("[ %d ]", current) }
-		</span>
 		if next != 0 {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } hx-push-url="true">
-				{ fmt.Sprintf(" %d >", next) }
-			</a>
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } class="pagination-next">Next</a>
 		}
-	</div>
+		<ul class="pagination-list">
+			if current > 2 {
+				<li>
+					<a href={ templ.URL("?page=1") } class="pagination-link">
+						{ fmt.Sprint("1") }
+					</a>
+				</li>
+				<li><span class="pagination-ellipsis">&hellip;</span></li>
+			}
+			if prev != 0 {
+				<li>
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } class="pagination-link">
+						{ fmt.Sprintf("%d", prev) }
+					</a>
+				</li>
+			}
+			<li>
+				<span class="pagination-link is-current">
+					{ fmt.Sprintf("%d", current) }
+				</span>
+			</li>
+			if next != 0 {
+				<li>
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } class="pagination-link">
+						{ fmt.Sprintf("%d", next) }
+					</a>
+				</li>
+			}
+			if last != 0 && last != current {
+				<li><span class="pagination-ellipsis">&hellip;</span></li>
+				<li>
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", last)) } class="pagination-link">
+						{ fmt.Sprintf("%d", last) }
+					</a>
+				</li>
+			}
+		</ul>
+	</nav>
 }

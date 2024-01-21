@@ -2,20 +2,26 @@ package components
 
 templ Settings(title string) {
 	@Base(title) {
-		<div>
-			@getReaction()
-		</div>
+		@getReaction()
 	}
 }
 
 templ getReaction() {
-	<form hx-post="/settings/reactions" hx-swap="none">
-		<label>
-			ID
-			<input name="note-id" type="text"/>
-		</label>
-		<button>
-			Get
-		</button>
-	</form>
+	<div class="box">
+		<form hx-post="/settings/reactions" hx-swap="none">
+			<label class="label">
+				Note ID
+				<div class="field has-addons">
+					<div class="control">
+						<input class="input" name="note-id" type="text"/>
+					</div>
+					<div class="control">
+						<button class="button is-link">
+							Get
+						</button>
+					</div>
+				</div>
+			</label>
+		</form>
+	</div>
 }

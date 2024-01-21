@@ -3,19 +3,23 @@ package components
 import (
 	"fmt"
 	"github.com/yulog/mi-diary/model"
-	"github.com/yulog/mi-diary/mi"
+	"time"
 )
 
 templ noteList(items []model.Note) {
-	<ul>
+	<ul class="columns is-multiline">
 		for _, item := range items {
-			<li>
-				<div>
-					{ item.Text }
+			<li class="column is-full">
+				<div class="card">
+					<div class="card-content">
+						<div>
+							{ item.Text }
+						</div>
+						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
+							{ item.ID } ({ item.CreatedAt.Format(time.DateTime) })
+						</a>
+					</div>
 				</div>
-				<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
-					{ item.ID } ({ mi.FormatTime(mi.ParseAidx(item.ID)) })
-				</a>
 			</li>
 		}
 	</ul>
@@ -27,8 +31,8 @@ templ Note(title string, items []model.Note) {
 	}
 }
 
-templ NoteWithPages(title string, items []model.Note, current, prev, next int) {
-	@Pagination(title, current, prev, next) {
+templ NoteWithPages(title string, items []model.Note, current, prev, next, last int) {
+	@Pagination(title, current, prev, next, last) {
 		@noteList(items)
 	}
 }
