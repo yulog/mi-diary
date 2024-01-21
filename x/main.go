@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-	// TODO: 仮
 	app := app.New()
 	db := app.DB()
 
@@ -39,7 +38,6 @@ func main() {
 	// fmt.Println(num)
 
 	// Tableを作る
-	// TODO: Migration
 	_, _ = db.NewCreateTable().Model((*model.Note)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*model.User)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*model.Reaction)(nil)).Exec(ctx)
