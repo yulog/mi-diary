@@ -75,7 +75,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				UserID:       v.Note.User.ID,
 				ReactionName: reactionName,
 				Text:         v.Note.Text,
-				CreatedAt:    v.Note.CreatedAt,
+				CreatedAt:    mi.GetTime(mi.ParseAidx(v.Note.ID)), // v.Note.CreatedAtはUTCっぽいのでaidxから変換する
 			}
 			notes = append(notes, n)
 
@@ -206,14 +206,10 @@ func count(ctx context.Context, db *bun.DB) error {
 	var months []model.Month
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		// Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-		// 	return q.Column("id", "name")
-		// }).
 		ColumnExpr("strftime('%Y-%m', created_at) as ym, count(*) as count").
 		Group("ym").
 		Having("ym is not null").
 		Scan(ctx, &months)
-	// pp.Println(months)
 	if err != nil {
 		return err
 	}
@@ -221,8 +217,6 @@ func count(ctx context.Context, db *bun.DB) error {
 	_, err = db.NewInsert().
 		Model(&months).
 		On("CONFLICT DO UPDATE").
-		// Column("count").
-		// Bulk().
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -232,14 +226,10 @@ func count(ctx context.Context, db *bun.DB) error {
 	var days []model.Day
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		// Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-		// 	return q.Column("id", "name")
-		// }).
 		ColumnExpr("strftime('%Y-%m-%d', created_at) as ymd, strftime('%Y-%m', created_at) as ym, count(*) as count").
 		Group("ymd").
 		Having("ymd is not null").
 		Scan(ctx, &days)
-	// pp.Println(months)
 	if err != nil {
 		return err
 	}
@@ -247,9 +237,6 @@ func count(ctx context.Context, db *bun.DB) error {
 	_, err = db.NewInsert().
 		Model(&days).
 		On("CONFLICT DO UPDATE").
-		// OmitZero().
-		// Column("count").
-		// Bulk().
 		Exec(ctx)
 	if err != nil {
 		return err

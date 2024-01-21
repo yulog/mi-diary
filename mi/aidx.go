@@ -25,3 +25,7 @@ func ParseAidx(id string) (time.Time, error) {
 func FormatTime(t time.Time, err error) string {
 	return t.Format(time.DateTime)
 }
+
+func GetTime(t time.Time, err error) time.Time {
+	return t
+}
