@@ -156,9 +156,9 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	d := c.Param("date")
 	col := ""
 	if reym.MatchString(d) {
-		col = "strftime('%Y-%m', created_at)"
+		col = "strftime('%Y-%m', created_at, 'localtime')"
 	} else if reymd.MatchString(d) {
-		col = "strftime('%Y-%m-%d', created_at)"
+		col = "strftime('%Y-%m-%d', created_at, 'localtime')"
 	}
 	fmt.Println(d)
 	fmt.Println(col)

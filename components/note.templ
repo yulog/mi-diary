@@ -2,8 +2,9 @@ package components
 
 import (
 	"fmt"
-	"github.com/yulog/mi-diary/model"
 	"time"
+
+	"github.com/yulog/mi-diary/model"
 )
 
 templ noteList(items []model.Note) {
@@ -16,7 +17,7 @@ templ noteList(items []model.Note) {
 							{ item.Text }
 						</div>
 						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
-							{ item.ID } ({ item.CreatedAt.Format(time.DateTime) })
+							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) }) // SQLite は日時をUTCで保持する
 						</a>
 					</div>
 				</div>

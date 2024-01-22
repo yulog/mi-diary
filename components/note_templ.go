@@ -12,8 +12,9 @@ import "bytes"
 
 import (
 	"fmt"
-	"github.com/yulog/mi-diary/model"
 	"time"
+
+	"github.com/yulog/mi-diary/model"
 )
 
 func noteList(items []model.Note) templ.Component {
@@ -41,7 +42,7 @@ func noteList(items []model.Note) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 15, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 16, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -63,7 +64,7 @@ func noteList(items []model.Note) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(item.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 18, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 19, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -79,15 +80,15 @@ func noteList(items []model.Note) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.CreatedAt.Format(time.DateTime))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.CreatedAt.In(time.Local).Format(time.DateTime))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 18, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\note.templ`, Line: 19, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var7 := `)`
+			templ_7745c5c3_Var7 := `) // SQLite は日時をUTCで保持する`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

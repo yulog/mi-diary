@@ -75,7 +75,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				UserID:       v.Note.User.ID,
 				ReactionName: reactionName,
 				Text:         v.Note.Text,
-				CreatedAt:    mi.GetTime(mi.ParseAidx(v.Note.ID)), // v.Note.CreatedAtはUTCっぽいのでaidxから変換する
+				CreatedAt:    v.Note.CreatedAt, // SQLite は日時をUTCで保持する
 			}
 			notes = append(notes, n)
 
@@ -206,7 +206,7 @@ func count(ctx context.Context, db *bun.DB) error {
 	var months []model.Month
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("strftime('%Y-%m', created_at) as ym, count(*) as count").
+		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym, count(*) as count").
 		Group("ym").
 		Having("ym is not null").
 		Scan(ctx, &months)
@@ -226,7 +226,7 @@ func count(ctx context.Context, db *bun.DB) error {
 	var days []model.Day
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("strftime('%Y-%m-%d', created_at) as ymd, strftime('%Y-%m', created_at) as ym, count(*) as count").
+		ColumnExpr("strftime('%Y-%m-%d', created_at, 'localtime') as ymd, strftime('%Y-%m', created_at, 'localtime') as ym, count(*) as count").
 		Group("ymd").
 		Having("ymd is not null").
 		Scan(ctx, &days)

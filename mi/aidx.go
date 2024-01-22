@@ -23,7 +23,7 @@ func ParseAidx(id string) (time.Time, error) {
 }
 
 func FormatTime(t time.Time, err error) string {
-	return t.Format(time.DateTime)
+	return t.In(time.Local).Format(time.DateTime) // SQLite は日時をUTCで保持する
 }
 
 func GetTime(t time.Time, err error) time.Time {
