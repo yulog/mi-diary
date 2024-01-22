@@ -7,6 +7,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
+// SQLite は日時をUTCで保持する
 templ noteList(items []model.Note) {
 	<ul class="columns is-multiline">
 		for _, item := range items {
@@ -17,7 +18,7 @@ templ noteList(items []model.Note) {
 							{ item.Text }
 						</div>
 						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
-							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) }) // SQLite は日時をUTCで保持する
+							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
 						</a>
 					</div>
 				</div>
