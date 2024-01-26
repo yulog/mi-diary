@@ -67,12 +67,3 @@ type Day struct {
 	Count int64
 	Month Month `bun:"rel:belongs-to,join:ym=ym"`
 }
-
-type Archive struct {
-	bun.BaseModel `bun:"table:archives,alias:a"`
-
-	YM       string
-	YmCount  int64
-	YMD      string
-	YmdCount int64
-}
