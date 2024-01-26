@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"regexp"
 
@@ -13,6 +12,7 @@ import (
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/server/pg"
 )
 
 // IndexHandler は / のハンドラ
@@ -49,7 +49,11 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 		Where("reaction_name = ?", name).
 		Order("created_at DESC").
 		Scan(c.Request().Context())
-	return renderer(c, cm.Note(name, notes))
+	n := cm.Note{
+		Title: name,
+		Items: notes,
+	}
+	return renderer(c, n.WithPage())
 }
 
 // HashTagsHandler は /hashtags/:name のハンドラ
@@ -70,7 +74,11 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Where("hash_tag.text = ?", name).
 		Order("created_at DESC").
 		Scan(c.Request().Context(), &notes)
-	return renderer(c, cm.Note(name, notes))
+	n := cm.Note{
+		Title: name,
+		Items: notes,
+	}
+	return renderer(c, n.WithPage())
 }
 
 // UsersHandler は /users/:name のハンドラ
@@ -84,25 +92,15 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		Where("user.name = ?", name).
 		Order("created_at DESC").
 		Scan(c.Request().Context())
-	return renderer(c, cm.Note(name, notes))
+	n := cm.Note{
+		Title: name,
+		Items: notes,
+	}
+	return renderer(c, n.WithPage())
 }
 
 // NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
-	var page = 1
-	err := echo.QueryParamsBinder(c).
-		Int("page", &page).
-		BindError()
-	// page, err = strconv.Atoi(c.QueryParam("page"))
-	if err != nil {
-		return err
-	}
-	if page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := limit * (page - 1)
-
 	count, err := srv.app.DB().
 		NewSelect().
 		Model((*model.Note)(nil)).
@@ -110,7 +108,11 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	last := int(math.Ceil(float64(count) / float64(limit)))
+	p := pg.New(&c, count)
+	page, err := p.Page()
+	if err != nil {
+		return err
+	}
 
 	var notes []model.Note
 	srv.app.DB().
@@ -118,19 +120,27 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 		Model(&notes).
 		// Relation("User").
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(p.Limit()).
+		Offset(p.Offset()).
 		Scan(c.Request().Context())
 	title := fmt.Sprint(page)
-	prev := page - 1
-	next := page + 1
-	if len(notes) < limit || next > last {
-		next = 0
+
+	hasNext := len(notes) >= p.Limit() && p.Next() <= p.Last()
+	hasLast := p.Next() < p.Last()
+
+	n := cm.Note{
+		Title: title,
+		Items: notes,
 	}
-	if next == last {
-		last = 0
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: hasLast,
 	}
-	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next, last))
+	return renderer(c, n.WithPages(cp))
 }
 
 // ArchivesHandler は /archives のハンドラ
@@ -160,44 +170,40 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	} else if reymd.MatchString(d) {
 		col = "strftime('%Y-%m-%d', created_at, 'localtime')"
 	}
-	fmt.Println(d)
-	fmt.Println(col)
-	var page = 1
-	err := echo.QueryParamsBinder(c).
-		Int("page", &page).
-		BindError()
-	// page, err = strconv.Atoi(c.QueryParam("page"))
+
+	p := pg.New(&c, 0)
+	page, err := p.Page()
 	if err != nil {
 		return err
 	}
-	if page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := limit * (page - 1)
+
 	var notes []model.Note
-
-	// srv.app.DB().
-	// 	NewRaw(
-	// 		"SELECT id, user_id, reaction_name, text, created_at FROM ? WHERE "+col+" = ? LIMIT ? OFFSET ?",
-	// 		bun.Ident("notes"), d, limit, offset).
-	// 	Scan(c.Request().Context(), &notes)
-
 	srv.app.DB().
 		NewSelect().
 		Model(&notes).
 		Where(col+" = ?", d). // 条件指定に関数適用した列を使う
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(p.Limit()).
+		Offset(p.Offset()).
 		Scan(c.Request().Context())
 	title := fmt.Sprintf("%s - %d", d, page)
-	prev := page - 1
-	next := page + 1
-	if len(notes) < limit {
-		next = 0
+
+	hasNext := len(notes) >= p.Limit()
+
+	// TODO: 引数が多い。DTOってこういうところで使うもの？
+	n := cm.Note{
+		Title: title,
+		Items: notes,
 	}
-	return renderer(c, cm.NoteWithPages(title, notes, page, prev, next, 0))
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: false,
+	}
+	return renderer(c, n.WithPages(cp))
 }
 
 // SettingsHandler は /settings のハンドラ
@@ -232,7 +238,6 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 	name := c.FormValue("emoji-name")
 	body := map[string]any{
-		// "i":      srv.app.Config.I,
 		"name": name,
 	}
 	// if id != "" {

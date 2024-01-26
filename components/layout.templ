@@ -30,26 +30,39 @@ templ Base(title string) {
 	</html>
 }
 
-templ Pagination(title string, current, prev, next, last int) {
+type Pages struct {
+	Current int
+	Prev    int
+	Next    int
+	Last    int
+	HasNext bool
+	HasLast bool
+}
+
+templ Pagination(title string, p Pages) {
 	@Base(title) {
-		@pager(current, prev, next, last)
+		@pager(p)
 		<div class="block">
 			{ children... }
 		</div>
-		@pager(current, prev, next, last)
+		@pager(p)
 	}
 }
 
-templ pager(current, prev, next, last int) {
+templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
-		if prev != 0 {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } class="pagination-previous">Prev</a>
+		if p.Prev != 0 {
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Prev)) } class="pagination-previous">Prev</a>
+		} else {
+			<span class="pagination-previous is-disabled">Prev</span>
 		}
-		if next != 0 {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } class="pagination-next">Next</a>
+		if p.HasNext {
+			<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Next)) } class="pagination-next">Next</a>
+		} else {
+			<span class="pagination-next is-disabled">Next</span>
 		}
 		<ul class="pagination-list">
-			if current > 2 {
+			if p.Current > 2 {
 				<li>
 					<a href={ templ.URL("?page=1") } class="pagination-link">
 						{ fmt.Sprint("1") }
@@ -57,30 +70,30 @@ templ pager(current, prev, next, last int) {
 				</li>
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
 			}
-			if prev != 0 {
+			if p.Prev != 0 {
 				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", prev)) } class="pagination-link">
-						{ fmt.Sprintf("%d", prev) }
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Prev)) } class="pagination-link">
+						{ fmt.Sprintf("%d", p.Prev) }
 					</a>
 				</li>
 			}
 			<li>
 				<span class="pagination-link is-current">
-					{ fmt.Sprintf("%d", current) }
+					{ fmt.Sprintf("%d", p.Current) }
 				</span>
 			</li>
-			if next != 0 {
+			if p.HasNext {
 				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", next)) } class="pagination-link">
-						{ fmt.Sprintf("%d", next) }
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Next)) } class="pagination-link">
+						{ fmt.Sprintf("%d", p.Next) }
 					</a>
 				</li>
 			}
-			if last != 0 && last != current {
+			if p.HasLast {
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
 				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", last)) } class="pagination-link">
-						{ fmt.Sprintf("%d", last) }
+					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Last)) } class="pagination-link">
+						{ fmt.Sprintf("%d", p.Last) }
 					</a>
 				</li>
 			}

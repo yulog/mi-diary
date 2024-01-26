@@ -110,7 +110,12 @@ func noteList(items []model.Note) templ.Component {
 	})
 }
 
-func Note(title string, items []model.Note) templ.Component {
+type Note struct {
+	Title string
+	Items []model.Note
+}
+
+func (n Note) WithPage() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -129,7 +134,7 @@ func Note(title string, items []model.Note) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = noteList(items).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = noteList(n.Items).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -138,7 +143,7 @@ func Note(title string, items []model.Note) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = Base(title).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base(n.Title).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -149,7 +154,7 @@ func Note(title string, items []model.Note) templ.Component {
 	})
 }
 
-func NoteWithPages(title string, items []model.Note, current, prev, next, last int) templ.Component {
+func (n Note) WithPages(p Pages) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -168,7 +173,7 @@ func NoteWithPages(title string, items []model.Note, current, prev, next, last i
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = noteList(items).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = noteList(n.Items).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -177,7 +182,7 @@ func NoteWithPages(title string, items []model.Note, current, prev, next, last i
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = Pagination(title, current, prev, next, last).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Pagination(n.Title, p).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

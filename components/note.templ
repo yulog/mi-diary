@@ -27,14 +27,19 @@ templ noteList(items []model.Note) {
 	</ul>
 }
 
-templ Note(title string, items []model.Note) {
-	@Base(title) {
-		@noteList(items)
+type Note struct {
+	Title string
+	Items []model.Note
+}
+
+templ (n Note) WithPage() {
+	@Base(n.Title) {
+		@noteList(n.Items)
 	}
 }
 
-templ NoteWithPages(title string, items []model.Note, current, prev, next, last int) {
-	@Pagination(title, current, prev, next, last) {
-		@noteList(items)
+templ (n Note) WithPages(p Pages) {
+	@Pagination(n.Title, p) {
+		@noteList(n.Items)
 	}
 }
