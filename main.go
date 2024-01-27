@@ -33,5 +33,5 @@ func main() {
 	e.GET("/settings", srv.SettingsHandler)
 	e.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	e.POST("/settings/emojis", srv.SettingsEmojisHandler)
-	e.Logger.Fatal(e.Start(":" + app.Config.Port)) // TODO: configで変えられるようにする
+	e.Logger.Fatal(e.Start(":" + app.Config.Port))
 }

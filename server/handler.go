@@ -190,7 +190,6 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 
 	hasNext := len(notes) >= p.Limit()
 
-	// TODO: 引数が多い。DTOってこういうところで使うもの？
 	n := cm.Note{
 		Title: title,
 		Items: notes,
