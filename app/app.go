@@ -75,23 +75,23 @@ func LoadConfig() Config {
 }
 
 func (app *App) DB(profile string) *bun.DB {
-	_, ok := app.db.Load(profile)
-	if !ok {
-		// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
-		sqldb, err := sql.Open(sqliteshim.ShimName, fmt.Sprintf("file:diary_%s.db", profile))
-		if err != nil {
-			panic(err)
-		}
-		db := bun.NewDB(sqldb, sqlitedialect.New())
-		db.AddQueryHook(bundebug.NewQueryHook(
-			bundebug.WithVerbose(true),
-			bundebug.FromEnv("BUNDEBUG"),
-		))
-		// modelを最初に使う前にやる
-		db.RegisterModel((*model.NoteToTag)(nil))
-
-		app.db.Store(profile, db)
-	}
-	v, _ := app.db.Load(profile)
+	v, _ := app.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)
+}
+
+func connect(profile string) *bun.DB {
+	// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
+	sqldb, err := sql.Open(sqliteshim.ShimName, fmt.Sprintf("file:diary_%s.db", profile))
+	if err != nil {
+		panic(err)
+	}
+	db := bun.NewDB(sqldb, sqlitedialect.New())
+	db.AddQueryHook(bundebug.NewQueryHook(
+		bundebug.WithVerbose(true),
+		bundebug.FromEnv("BUNDEBUG"),
+	))
+	// modelを最初に使う前にやる
+	db.RegisterModel((*model.NoteToTag)(nil))
+
+	return db
 }
