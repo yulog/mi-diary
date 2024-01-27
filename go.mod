@@ -59,6 +59,7 @@ require (
 )
 
 require (
+	github.com/goccy/go-json v0.10.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/k0kubun/pp/v3 v3.2.0

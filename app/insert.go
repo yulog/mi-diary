@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/goccy/go-json"
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"

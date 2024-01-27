@@ -215,16 +215,16 @@ func (srv *Server) SettingsHandler(c echo.Context) error {
 func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 	id := c.FormValue("note-id")
 	body := map[string]any{
-		"i":      srv.app.Config.I,
+		"i":      srv.app.Config.Profiles["default"].I,
 		"limit":  20,
-		"userId": srv.app.Config.UserId,
+		"userId": srv.app.Config.Profiles["default"].UserId,
 	}
 	if id != "" {
 		body["untilId"] = id
 	}
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/users/reactions", srv.app.Config.Host)
+	u := fmt.Sprintf("https://%s/api/users/reactions", srv.app.Config.Profiles["default"].Host)
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
@@ -245,7 +245,7 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 	// }
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/emoji", srv.app.Config.Host)
+	u := fmt.Sprintf("https://%s/api/emoji", srv.app.Config.Profiles["default"].Host)
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
