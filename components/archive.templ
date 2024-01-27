@@ -19,7 +19,7 @@ func setIsOpen(f bool) (string, error) {
 }
 
 templ Archive(title, profile string, items []model.Archive) {
-	@Base(title, profile) {
+	@BaseWithNav(title, profile) {
 		<div class="content">
 			for _, item := range items {
 				if header != item.YM && isOpen {

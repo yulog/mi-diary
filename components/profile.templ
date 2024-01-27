@@ -1,0 +1,18 @@
+package components
+
+import "fmt"
+
+templ SelectProfile(title string, profiles []string) {
+	@BaseWithoutNav(title) {
+		<div class="content">
+			<div class="box">
+				<h3>Profiles</h3>
+				<ul>
+					for _, profile := range profiles {
+						<li><a href={ templ.URL(fmt.Sprintf("/%s", profile)) }>{ profile }</a></li>
+					}
+				</ul>
+			</div>
+		</div>
+	}
+}

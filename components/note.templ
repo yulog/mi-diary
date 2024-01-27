@@ -17,7 +17,7 @@ templ noteList(items []model.Note) {
 						<div>
 							{ item.Text }
 						</div>
-						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) }>
+						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) } target="_blank">
 							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
 						</a>
 					</div>
@@ -34,7 +34,7 @@ type Note struct {
 }
 
 templ (n Note) WithPage() {
-	@Base(n.Title, n.Profile) {
+	@BaseWithNav(n.Title, n.Profile) {
 		@noteList(n.Items)
 	}
 }

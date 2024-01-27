@@ -23,6 +23,7 @@ func main() {
 	app := app.New()
 	srv := server.New(app)
 	// e.Validator = &Validator{validator: validator.New()}
+	e.GET("/", srv.ProfileHandler)
 	e.GET("/:profile", srv.HomeHandler)
 	e.GET("/:profile/reactions/:name", srv.ReactionsHandler)
 	e.GET("/:profile/hashtags/:name", srv.HashTagsHandler)

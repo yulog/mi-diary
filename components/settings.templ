@@ -3,7 +3,7 @@ package components
 import "fmt"
 
 templ Settings(title, profile string) {
-	@Base(title, profile) {
+	@BaseWithNav(title, profile) {
 		@getReaction(profile)
 		@getEmoji(profile)
 	}

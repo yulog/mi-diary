@@ -15,7 +15,16 @@ import (
 	"github.com/yulog/mi-diary/server/pg"
 )
 
-// HomeHandler は / のハンドラ
+// ProfileHandler は / のハンドラ
+func (srv *Server) ProfileHandler(c echo.Context) error {
+	var ps []string
+	for k := range srv.app.Config.Profiles {
+		ps = append(ps, k)
+	}
+	return renderer(c, cm.SelectProfile("Select profile...", ps))
+}
+
+// HomeHandler は /:profile のハンドラ
 func (srv *Server) HomeHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	var reactions []model.Reaction
