@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-templ Base(title string) {
+templ Base(title, profile string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -17,10 +17,10 @@ templ Base(title string) {
 		</head>
 		<body class="has-navbar-fixed-top" hx-boost="true">
 			<nav class="navbar is-fixed-top is-primary" role="navigation" aria-label="main navigation">
-				<div class="navbar-brand"><a href="/" class="navbar-item">Mi Diary</a></div>
+				<div class="navbar-brand"><a href={ templ.URL(fmt.Sprintf("/%s", profile)) } class="navbar-item">Mi Diary</a></div>
 				<div class="navbar-end">
-					<a href="/" class="navbar-item">Home</a>
-					<a href={ templ.URL("/settings") } class="navbar-item">Settings</a>
+					<a href={ templ.URL(fmt.Sprintf("/%s", profile)) } class="navbar-item">Home</a>
+					<a href={ templ.URL(fmt.Sprintf("/%s/settings", profile)) } class="navbar-item">Settings</a>
 				</div>
 			</nav>
 			<main class="section">
@@ -39,8 +39,8 @@ type Pages struct {
 	HasLast bool
 }
 
-templ Pagination(title string, p Pages) {
-	@Base(title) {
+templ Pagination(title, profile string, p Pages) {
+	@Base(title, profile) {
 		@pager(p)
 		<div class="block">
 			{ children... }

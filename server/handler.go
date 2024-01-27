@@ -15,8 +15,9 @@ import (
 	"github.com/yulog/mi-diary/server/pg"
 )
 
-// IndexHandler は / のハンドラ
-func (srv *Server) IndexHandler(c echo.Context) error {
+// HomeHandler は / のハンドラ
+func (srv *Server) HomeHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	var reactions []model.Reaction
 	srv.app.DB().
 		NewSelect().
@@ -36,11 +37,12 @@ func (srv *Server) IndexHandler(c echo.Context) error {
 		Order("count DESC").
 		Scan(c.Request().Context())
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	return renderer(c, cm.Index("index", cm.Reaction(reactions), cm.HashTag(tags), cm.User(users)))
+	return renderer(c, cm.Index("Home", profile, cm.Reaction(profile, reactions), cm.HashTag(profile, tags), cm.User(profile, users)))
 }
 
 // ReactionsHandler は /reactions/:name のハンドラ
 func (srv *Server) ReactionsHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
 	srv.app.DB().
@@ -50,14 +52,16 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 		Order("created_at DESC").
 		Scan(c.Request().Context())
 	n := cm.Note{
-		Title: name,
-		Items: notes,
+		Title:   name,
+		Profile: profile,
+		Items:   notes,
 	}
 	return renderer(c, n.WithPage())
 }
 
 // HashTagsHandler は /hashtags/:name のハンドラ
 func (srv *Server) HashTagsHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
 	srv.app.DB().
@@ -75,14 +79,16 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Order("created_at DESC").
 		Scan(c.Request().Context(), &notes)
 	n := cm.Note{
-		Title: name,
-		Items: notes,
+		Title:   name,
+		Profile: profile,
+		Items:   notes,
 	}
 	return renderer(c, n.WithPage())
 }
 
 // UsersHandler は /users/:name のハンドラ
 func (srv *Server) UsersHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
 	srv.app.DB().
@@ -93,14 +99,16 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		Order("created_at DESC").
 		Scan(c.Request().Context())
 	n := cm.Note{
-		Title: name,
-		Items: notes,
+		Title:   name,
+		Profile: profile,
+		Items:   notes,
 	}
 	return renderer(c, n.WithPage())
 }
 
 // NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	count, err := srv.app.DB().
 		NewSelect().
 		Model((*model.Note)(nil)).
@@ -129,8 +137,9 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	hasLast := p.Next() < p.Last()
 
 	n := cm.Note{
-		Title: title,
-		Items: notes,
+		Title:   title,
+		Profile: profile,
+		Items:   notes,
 	}
 	cp := cm.Pages{
 		Current: page,
@@ -145,6 +154,7 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 
 // ArchivesHandler は /archives のハンドラ
 func (srv *Server) ArchivesHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	var archives []model.Archive
 	srv.app.DB().
 		NewSelect().
@@ -155,7 +165,7 @@ func (srv *Server) ArchivesHandler(c echo.Context) error {
 		ColumnExpr("d.ym as ym, month.count as ym_count, d.ymd as ymd, d.count as ymd_count").
 		Order("ym DESC", "ymd DESC").
 		Scan(c.Request().Context(), &archives)
-	return renderer(c, cm.Archive("Archives", archives))
+	return renderer(c, cm.Archive("Archives", profile, archives))
 }
 
 var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
@@ -163,6 +173,7 @@ var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
 // ArchiveNotesHandler は /archives/:date のハンドラ
 func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	d := c.Param("date")
 	col := ""
 	if reym.MatchString(d) {
@@ -191,8 +202,9 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	hasNext := len(notes) >= p.Limit()
 
 	n := cm.Note{
-		Title: title,
-		Items: notes,
+		Title:   title,
+		Profile: profile,
+		Items:   notes,
 	}
 	cp := cm.Pages{
 		Current: page,
@@ -207,23 +219,25 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 
 // SettingsHandler は /settings のハンドラ
 func (srv *Server) SettingsHandler(c echo.Context) error {
-	return renderer(c, cm.Settings("settings"))
+	profile := c.Param("profile")
+	return renderer(c, cm.Settings("settings", profile))
 }
 
 // SettingsReactionsHandler は /settings/reactions のハンドラ
 func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	id := c.FormValue("note-id")
 	body := map[string]any{
-		"i":      srv.app.Config.Profiles["default"].I,
+		"i":      srv.app.Config.Profiles[profile].I,
 		"limit":  20,
-		"userId": srv.app.Config.Profiles["default"].UserId,
+		"userId": srv.app.Config.Profiles[profile].UserId,
 	}
 	if id != "" {
 		body["untilId"] = id
 	}
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/users/reactions", srv.app.Config.Profiles["default"].Host)
+	u := fmt.Sprintf("https://%s/api/users/reactions", srv.app.Config.Profiles[profile].Host)
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
@@ -235,6 +249,7 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 
 // SettingsEmojisHandler は /settings/emojis のハンドラ
 func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
+	profile := c.Param("profile")
 	name := c.FormValue("emoji-name")
 	body := map[string]any{
 		"name": name,
@@ -244,7 +259,7 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 	// }
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/emoji", srv.app.Config.Profiles["default"].Host)
+	u := fmt.Sprintf("https://%s/api/emoji", srv.app.Config.Profiles[profile].Host)
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)

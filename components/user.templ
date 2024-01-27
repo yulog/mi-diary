@@ -5,11 +5,11 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-templ User(items []model.User) {
+templ User(profile string, items []model.User) {
 	<ul>
 		for _, item := range items {
 			<li>
-				<a href={ templ.URL(fmt.Sprintf("./users/%s", item.Name)) }>
+				<a href={ templ.URL(fmt.Sprintf("/%s/users/%s", profile, item.Name)) }>
 					{ item.DisplayName } ( { fmt.Sprintf("%d", item.Count) } )
 				</a>
 			</li>

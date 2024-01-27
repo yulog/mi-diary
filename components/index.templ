@@ -1,11 +1,13 @@
 package components
 
-templ Index(title string, reaction templ.Component, tags templ.Component, users templ.Component) {
-	@Base(title) {
+import "fmt"
+
+templ Index(title, profile string, reaction templ.Component, tags templ.Component, users templ.Component) {
+	@Base(title, profile) {
 		<div class="content">
 			<div class="box">
 				<h3>Notes</h3>
-				<a href="/notes">All Notes</a>
+				<a href={ templ.URL(fmt.Sprintf("/%s/notes", profile)) }>All Notes</a>
 			</div>
 			<div class="box">
 				<h3>Reactions</h3>
@@ -21,7 +23,7 @@ templ Index(title string, reaction templ.Component, tags templ.Component, users 
 			</div>
 			<div class="box">
 				<h3>Archives</h3>
-				<a href="/archives">All Archives</a>
+				<a href={ templ.URL(fmt.Sprintf("/%s/archives", profile)) }>All Archives</a>
 			</div>
 		</div>
 	}

@@ -28,18 +28,19 @@ templ noteList(items []model.Note) {
 }
 
 type Note struct {
-	Title string
-	Items []model.Note
+	Title   string
+	Profile string
+	Items   []model.Note
 }
 
 templ (n Note) WithPage() {
-	@Base(n.Title) {
+	@Base(n.Title, n.Profile) {
 		@noteList(n.Items)
 	}
 }
 
 templ (n Note) WithPages(p Pages) {
-	@Pagination(n.Title, p) {
+	@Pagination(n.Title, n.Profile, p) {
 		@noteList(n.Items)
 	}
 }

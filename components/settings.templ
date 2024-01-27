@@ -1,16 +1,18 @@
 package components
 
-templ Settings(title string) {
-	@Base(title) {
-		@getReaction()
-		@getEmoji()
+import "fmt"
+
+templ Settings(title, profile string) {
+	@Base(title, profile) {
+		@getReaction(profile)
+		@getEmoji(profile)
 	}
 }
 
-templ getReaction() {
+templ getReaction(profile string) {
 	<div class="box">
 		<h3 class="title is-3">Note</h3>
-		<form hx-post="/settings/reactions" hx-swap="none">
+		<form hx-post={ fmt.Sprintf("/%s/settings/reactions", profile) } hx-swap="none">
 			<label class="label">
 				Note ID
 				<div class="field has-addons">
@@ -28,10 +30,10 @@ templ getReaction() {
 	</div>
 }
 
-templ getEmoji() {
+templ getEmoji(profile string) {
 	<div class="box">
 		<h3 class="title is-3">Emoji</h3>
-		<form hx-post="/settings/emojis" hx-swap="none">
+		<form hx-post={ fmt.Sprintf("/%s/settings/emojis", profile) } hx-swap="none">
 			<label class="label">
 				Name
 				<div class="field has-addons">
