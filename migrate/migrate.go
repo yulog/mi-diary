@@ -21,26 +21,29 @@ func RunMigrations() {
 		panic(err)
 	}
 
-	driver, err := sqlite3.WithInstance(app.DB().DB, &sqlite3.Config{})
-	if err != nil {
-		panic(err)
-	}
-	// m, _ := migrate.NewWithDatabaseInstance(
-	//     "file:///migrations",
-	//     "sqlite", driver)
-	m, err := migrate.NewWithInstance(
-		"iofs",
-		migrations,
-		"sqlite",
-		driver,
-	)
-	if err != nil {
-		panic(err)
-	}
-	err = m.Up()
-	if err != nil {
-		// 恐らく最新ということ
-		log.Println(err)
-		// panic(err)
+	// 各プロファイルのDBをマイグレーションする
+	for k := range app.Config.Profiles {
+		driver, err := sqlite3.WithInstance(app.DB(k).DB, &sqlite3.Config{})
+		if err != nil {
+			panic(err)
+		}
+		// m, _ := migrate.NewWithDatabaseInstance(
+		//     "file:///migrations",
+		//     "sqlite", driver)
+		m, err := migrate.NewWithInstance(
+			"iofs",
+			migrations,
+			"sqlite",
+			driver,
+		)
+		if err != nil {
+			panic(err)
+		}
+		err = m.Up()
+		if err != nil {
+			// 恐らく最新ということ
+			log.Println(err)
+			// panic(err)
+		}
 	}
 }

@@ -50,8 +50,11 @@ func GenerateSchema() {
 		(*model.Day)(nil),
 	}
 	var data []byte
-	data = append(data, modelsToByte(app.DB(), models)...)
-	data = append(data, indexesToByte(app.DB(), model.IdxCreators)...)
+	for k := range app.Config.Profiles {
+		data = append(data, modelsToByte(app.DB(k), models)...)
+		data = append(data, indexesToByte(app.DB(k), model.IdxCreators)...)
+		break // schemaの生成は1つだけやれば良さそう
+	}
 	// TODO: 権限これで良いの？
 	os.WriteFile("migrate/schema.sql", data, 0666)
 }

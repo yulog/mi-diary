@@ -28,19 +28,19 @@ func (srv *Server) ProfileHandler(c echo.Context) error {
 func (srv *Server) HomeHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	var reactions []model.Reaction
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&reactions).
 		Order("count DESC").
 		Scan(c.Request().Context())
 	var tags []model.HashTag
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&tags).
 		Order("count DESC").
 		Scan(c.Request().Context())
 	var users []model.User
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&users).
 		Order("count DESC").
@@ -54,7 +54,7 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Where("reaction_name = ?", name).
@@ -73,7 +73,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model((*model.NoteToTag)(nil)).
 		// 必要な列だけ選択して、不要な列をなくす
@@ -100,7 +100,7 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
 	var notes []model.Note
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -118,7 +118,7 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 // NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
 	profile := c.Param("profile")
-	count, err := srv.app.DB().
+	count, err := srv.app.DB(profile).
 		NewSelect().
 		Model((*model.Note)(nil)).
 		Count(c.Request().Context())
@@ -132,7 +132,7 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	}
 
 	var notes []model.Note
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&notes).
 		// Relation("User").
@@ -165,7 +165,7 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 func (srv *Server) ArchivesHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	var archives []model.Archive
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model((*model.Day)(nil)).
 		Relation("Month", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -198,7 +198,7 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	}
 
 	var notes []model.Note
-	srv.app.DB().
+	srv.app.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Where(col+" = ?", d). // 条件指定に関数適用した列を使う
@@ -252,7 +252,7 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	app.Insert(c.Request().Context(), resp)
+	app.Insert(c.Request().Context(), profile, resp)
 	return c.HTML(http.StatusOK, id)
 }
 
@@ -274,6 +274,6 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	app.InsertEmoji(c.Request().Context(), resp)
+	app.InsertEmoji(c.Request().Context(), profile, resp)
 	return c.HTML(http.StatusOK, name)
 }

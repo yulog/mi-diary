@@ -18,8 +18,7 @@ import (
 type App struct {
 	Config Config
 
-	dbOnce sync.Once
-	db     *bun.DB
+	db sync.Map // TODO:  sync.Onceの代わりになるのか？
 }
 
 type Config struct {
@@ -75,10 +74,11 @@ func LoadConfig() Config {
 	return config
 }
 
-func (app *App) DB() *bun.DB {
-	app.dbOnce.Do(func() {
+func (app *App) DB(profile string) *bun.DB {
+	_, ok := app.db.Load(profile)
+	if !ok {
 		// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
-		sqldb, err := sql.Open(sqliteshim.ShimName, "file:diary.db")
+		sqldb, err := sql.Open(sqliteshim.ShimName, fmt.Sprintf("file:diary_%s.db", profile))
 		if err != nil {
 			panic(err)
 		}
@@ -90,7 +90,8 @@ func (app *App) DB() *bun.DB {
 		// modelを最初に使う前にやる
 		db.RegisterModel((*model.NoteToTag)(nil))
 
-		app.db = db
-	})
-	return app.db
+		app.db.Store(profile, db)
+	}
+	v, _ := app.db.Load(profile)
+	return v.(*bun.DB)
 }

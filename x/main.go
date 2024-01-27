@@ -19,7 +19,7 @@ import (
 
 func main() {
 	app := app.New()
-	db := app.DB()
+	db := app.DB("")
 
 	ctx := context.Background()
 
