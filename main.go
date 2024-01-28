@@ -15,13 +15,13 @@ const version = "0.0.1"
 var revision = "HEAD"
 
 func main() {
-	migrate.RunMigrations()
+	app := app.New()
+	srv := server.New(app)
+	migrate.Do(app)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
-	app := app.New()
-	srv := server.New(app)
 	// e.Validator = &Validator{validator: validator.New()}
 	e.GET("/", srv.ProfileHandler)
 	e.GET("/:profile", srv.HomeHandler)

@@ -9,6 +9,7 @@ import (
 	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
 	"github.com/magefile/mage/sh"
 
+	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/migrate"
 )
 
@@ -128,5 +129,6 @@ func GenMigrate() {
 
 func Migrate() {
 	fmt.Println("Migration...")
-	migrate.RunMigrations()
+	app := app.New()
+	migrate.Do(app)
 }
