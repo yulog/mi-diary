@@ -35,11 +35,11 @@ type Profile struct {
 
 func New() *App {
 	return &App{
-		Config: LoadConfig(),
+		Config: loadConfig(),
 	}
 }
 
-func LoadConfig() Config {
+func loadConfig() Config {
 	cfg := &Config{
 		Port: "1323",
 		Profiles: map[string]Profile{
