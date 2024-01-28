@@ -13,22 +13,17 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-func InsertFromFile(ctx context.Context, profile string) {
-	app := New()
-	db := app.DB(profile)
+func (app *App) InsertFromFile(ctx context.Context, profile string) {
 	// JSON読み込み
 	f, _ := os.ReadFile("users_reactions.json")
-	var r mi.Reactions
-	json.Unmarshal(f, &r)
-	// pp.Println(r)
 
-	tx(ctx, db, r)
+	app.Insert(ctx, profile, f)
 }
 
-func Insert(ctx context.Context, profile string, b []byte) {
-	app := New()
+func (app *App) Insert(ctx context.Context, profile string, b []byte) {
+	// app := New()
 	db := app.DB(profile)
-	// JSON読み込み
+	// JSON Unmarshal
 	var r mi.Reactions
 	json.Unmarshal(b, &r)
 	// pp.Println(r)
@@ -244,10 +239,10 @@ func count(ctx context.Context, db *bun.DB) error {
 	return err
 }
 
-func InsertEmoji(ctx context.Context, profile string, b []byte) {
-	app := New()
+func (app *App) InsertEmoji(ctx context.Context, profile string, b []byte) {
+	// app := New()
 	db := app.DB(profile)
-	// JSON読み込み
+	// JSON Unmarshal
 	var e mi.Emoji
 	json.Unmarshal(b, &e)
 	// pp.Println(r)

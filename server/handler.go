@@ -8,7 +8,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
-	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
@@ -252,7 +251,7 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	app.Insert(c.Request().Context(), profile, resp)
+	srv.app.Insert(c.Request().Context(), profile, resp)
 	return c.HTML(http.StatusOK, id)
 }
 
@@ -274,6 +273,6 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	app.InsertEmoji(c.Request().Context(), profile, resp)
+	srv.app.InsertEmoji(c.Request().Context(), profile, resp)
 	return c.HTML(http.StatusOK, name)
 }
