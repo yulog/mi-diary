@@ -3,12 +3,10 @@ package pg
 import (
 	"math"
 	"sync"
-
-	"github.com/labstack/echo/v4"
 )
 
 type Pager struct {
-	c    *echo.Context
+	// c    *echo.Context
 	page int
 	// Prev int
 	// Next int
@@ -21,26 +19,26 @@ type Pager struct {
 	offset int
 }
 
-func New(c *echo.Context, total int) *Pager {
+func New(total int) *Pager {
 	return &Pager{
-		c: c,
+		// c: c,
 
 		total: total,
 		limit: 10,
 	}
 }
 
-func (p *Pager) Page() (int, error) {
-	p.page = 1
-	if err := echo.QueryParamsBinder(*p.c).
-		Int("page", &p.page).
-		BindError(); err != nil {
-		return p.page, err
-	}
+func (p *Pager) Page(page int) int {
+	p.page = page
+	// if err := echo.QueryParamsBinder(*p.c).
+	// 	Int("page", &p.page).
+	// 	BindError(); err != nil {
+	// 	return p.page, err
+	// }
 	if p.page < 1 {
 		p.page = 1
 	}
-	return p.page, nil
+	return p.page
 }
 
 func (p *Pager) Limit() int {

@@ -2,17 +2,17 @@ package server
 
 import (
 	"github.com/a-h/templ"
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/logic"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
-	app *app.App
+	logic *logic.Logic
 }
 
-func New(a *app.App) *Server {
-	return &Server{app: a}
+func New(l *logic.Logic) *Server {
+	return &Server{logic: l}
 }
 
 func renderer(c echo.Context, cmp templ.Component) error {
