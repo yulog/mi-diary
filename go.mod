@@ -3,7 +3,7 @@ module github.com/yulog/mi-diary
 go 1.21.5
 
 require (
-	github.com/a-h/templ v0.2.513
+	github.com/a-h/templ v0.2.543
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/uptrace/bun v1.1.17
 )
