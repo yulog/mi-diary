@@ -33,6 +33,11 @@ func (l Logic) ProfileLogic(ctx context.Context) templ.Component {
 }
 
 func (l Logic) HomeLogic(ctx context.Context, profile string) templ.Component {
+
+	// TODO: エラーを返すようにする
+	if _, ok := l.app.Config.Profiles[profile]; !ok {
+		return nil
+	}
 	var reactions []model.Reaction
 	l.app.DB(profile).
 		NewSelect().
@@ -216,7 +221,12 @@ func (l Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page in
 	return n.WithPages(cp)
 }
 
-func (l Logic) GetReactions(ctx context.Context, profile, id string) {
+func (l Logic) SettingsLogic(ctx context.Context, profile string) templ.Component {
+
+	return cm.Settings("settings", profile)
+}
+
+func (l Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) {
 	body := map[string]any{
 		"i":      l.app.Config.Profiles[profile].I,
 		"limit":  20,
@@ -236,7 +246,7 @@ func (l Logic) GetReactions(ctx context.Context, profile, id string) {
 	l.app.Insert(ctx, profile, resp)
 }
 
-func (l Logic) GetEmojiOne(ctx context.Context, profile, name string) {
+func (l Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	body := map[string]any{
 		"name": name,
 	}
