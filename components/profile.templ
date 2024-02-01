@@ -9,7 +9,7 @@ templ SelectProfile(title string, profiles []string) {
 				<h3>Profiles</h3>
 				<ul>
 					for _, profile := range profiles {
-						<li><a href={ templ.URL(fmt.Sprintf("/%s", profile)) }>{ profile }</a></li>
+						<li><a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) }>{ profile }</a></li>
 					}
 				</ul>
 			</div>

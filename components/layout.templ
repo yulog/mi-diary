@@ -23,10 +23,10 @@ templ BaseWithNav(title, profile string) {
 	@Head(title) {
 		<body class="has-navbar-fixed-top" hx-boost="true">
 			<nav class="navbar is-fixed-top is-primary" role="navigation" aria-label="main navigation">
-				<div class="navbar-brand"><a href={ templ.URL(fmt.Sprintf("/%s", profile)) } class="navbar-item">Mi Diary</a></div>
+				<div class="navbar-brand"><a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="navbar-item">Mi Diary</a></div>
 				<div class="navbar-end">
-					<a href={ templ.URL(fmt.Sprintf("/%s", profile)) } class="navbar-item">Home</a>
-					<a href={ templ.URL(fmt.Sprintf("/%s/settings", profile)) } class="navbar-item">Settings</a>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="navbar-item">Home</a>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/settings", profile)) } class="navbar-item">Settings</a>
 					<a href={ templ.URL("/") } class="navbar-item">Profiles</a>
 				</div>
 			</nav>
@@ -39,7 +39,7 @@ templ BaseWithNav(title, profile string) {
 
 templ BaseWithoutNav(title string) {
 	@Head(title) {
-		<body hx-boost="true">
+		<body class="has-navbar-fixed-top" hx-boost="true">
 			<main class="section">
 				{ children... }
 			</main>
