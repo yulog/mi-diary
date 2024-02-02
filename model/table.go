@@ -6,6 +6,10 @@ import (
 	"github.com/uptrace/bun"
 )
 
+// type Repositorier interface {
+// 	Insert(ctx context.Context, profile string, b []byte)
+// }
+
 type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 

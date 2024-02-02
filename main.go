@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/server"
@@ -17,7 +18,8 @@ var revision = "HEAD"
 
 func main() {
 	app := app.New()
-	logic := logic.New(app)
+	repo := infra.New(app)
+	logic := logic.New(repo)
 	srv := server.New(logic)
 	migrate.Do(app)
 	e := echo.New()

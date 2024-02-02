@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/mi"
 )
 
@@ -14,11 +14,11 @@ type EmojiLogic interface {
 }
 
 type emojiLogic struct {
-	app *app.App
+	repo *infra.Infra
 }
 
-func NewEmoji(a *app.App) EmojiLogic {
-	return &emojiLogic{app: a}
+func NewEmoji(r *infra.Infra) EmojiLogic {
+	return &emojiLogic{repo: r}
 }
 
 func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
@@ -30,11 +30,11 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 	// }
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/emoji", l.app.Config.Profiles[profile].Host)
+	u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	l.app.InsertEmoji(ctx, profile, resp)
+	l.repo.InsertEmoji(ctx, profile, resp)
 }
