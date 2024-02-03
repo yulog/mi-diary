@@ -132,7 +132,8 @@ func count(ctx context.Context, db *bun.DB) error {
 	var reactions []model.Reaction
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("reaction_name as name, count(*) as count").
+		ColumnExpr("reaction_name as name").
+		ColumnExpr("count(*) as count").
 		Group("reaction_name").
 		Scan(ctx, &reactions)
 	if err != nil {
@@ -156,7 +157,8 @@ func count(ctx context.Context, db *bun.DB) error {
 		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Column("text")
 		}).
-		ColumnExpr("hash_tag_id as id, count(*) as count").
+		ColumnExpr("hash_tag_id as id").
+		ColumnExpr("count(*) as count").
 		Group("hash_tag_id").
 		Scan(ctx, &hashtags)
 	if err != nil {
@@ -201,7 +203,8 @@ func count(ctx context.Context, db *bun.DB) error {
 	var months []model.Month
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym, count(*) as count").
+		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym").
+		ColumnExpr("count(*) as count").
 		Group("ym").
 		Having("ym is not null").
 		Scan(ctx, &months)
@@ -221,7 +224,9 @@ func count(ctx context.Context, db *bun.DB) error {
 	var days []model.Day
 	err = db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("strftime('%Y-%m-%d', created_at, 'localtime') as ymd, strftime('%Y-%m', created_at, 'localtime') as ym, count(*) as count").
+		ColumnExpr("strftime('%Y-%m-%d', created_at, 'localtime') as ymd").
+		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym").
+		ColumnExpr("count(*) as count").
 		Group("ymd").
 		Having("ymd is not null").
 		Scan(ctx, &days)
