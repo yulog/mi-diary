@@ -10,6 +10,7 @@ import (
 	"github.com/magefile/mage/sh"
 
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/migrate"
 )
 
@@ -130,5 +131,6 @@ func GenMigrate() {
 func Migrate() {
 	fmt.Println("Migration...")
 	app := app.New()
-	migrate.Do(app)
+	infra := infra.New(app)
+	migrate.Do(infra)
 }

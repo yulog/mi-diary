@@ -7,22 +7,22 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 )
 
 //go:embed migrations/*.sql
 var migrationFS embed.FS
 
 // Do はマイグレーションを実行する
-func Do(app *app.App) {
+func Do(infra *infra.Infra) {
 	migrations, err := iofs.New(migrationFS, "migrations")
 	if err != nil {
 		panic(err)
 	}
 
 	// 各プロファイルのDBをマイグレーションする
-	for k := range app.Config.Profiles {
-		driver, err := sqlite3.WithInstance(app.DB(k).DB, &sqlite3.Config{})
+	for k := range infra.Config().Profiles {
+		driver, err := sqlite3.WithInstance(infra.DB(k).DB, &sqlite3.Config{})
 		if err != nil {
 			panic(err)
 		}

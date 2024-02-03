@@ -10,9 +10,6 @@ import (
 
 type App struct {
 	Config Config
-
-	// move to infra
-	// db sync.Map // TODO:  sync.Onceの代わりになるのか？
 }
 
 type Config struct {
@@ -67,27 +64,3 @@ func loadConfig() Config {
 	}
 	return config
 }
-
-// move to infra
-// func (app *App) DB(profile string) *bun.DB {
-// 	v, _ := app.db.LoadOrStore(profile, connect(profile))
-// 	return v.(*bun.DB)
-// }
-
-// move to infra
-// func connect(profile string) *bun.DB {
-// 	// sqldb, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
-// 	sqldb, err := sql.Open(sqliteshim.ShimName, fmt.Sprintf("file:diary_%s.db", profile))
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	db := bun.NewDB(sqldb, sqlitedialect.New())
-// 	db.AddQueryHook(bundebug.NewQueryHook(
-// 		bundebug.WithVerbose(true),
-// 		bundebug.FromEnv("BUNDEBUG"),
-// 	))
-// 	// modelを最初に使う前にやる
-// 	db.RegisterModel((*model.NoteToTag)(nil))
-
-// 	return db
-// }

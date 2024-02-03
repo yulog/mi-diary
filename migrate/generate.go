@@ -5,6 +5,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/model"
 )
 
@@ -40,6 +41,7 @@ func indexesToByte(db *bun.DB, idxCreators []model.IndexQueryCreator) []byte {
 
 func GenerateSchema() {
 	app := app.New()
+	infra := infra.New(app)
 	models := []interface{}{
 		(*model.Note)(nil),
 		(*model.User)(nil),
@@ -51,8 +53,8 @@ func GenerateSchema() {
 	}
 	var data []byte
 	for k := range app.Config.Profiles {
-		data = append(data, modelsToByte(app.DB(k), models)...)
-		data = append(data, indexesToByte(app.DB(k), model.IdxCreators)...)
+		data = append(data, modelsToByte(infra.DB(k), models)...)
+		data = append(data, indexesToByte(infra.DB(k), model.IdxCreators)...)
 		break // schemaの生成は1つだけやれば良さそう
 	}
 	// TODO: 権限これで良いの？

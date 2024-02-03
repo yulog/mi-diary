@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
 
@@ -19,7 +20,8 @@ import (
 
 func main() {
 	app := app.New()
-	db := app.DB("")
+	infra := infra.New(app)
+	db := infra.DB("")
 
 	ctx := context.Background()
 

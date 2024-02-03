@@ -18,10 +18,12 @@ var revision = "HEAD"
 
 func main() {
 	app := app.New()
-	repo := infra.New(app)
-	logic := logic.New(repo)
+	infra := infra.New(app)
+	logic := logic.New(infra)
 	srv := server.New(logic)
-	migrate.Do(app)
+
+	migrate.Do(infra)
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Gzip())
