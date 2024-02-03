@@ -36,39 +36,15 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) templ.Component {
 	if _, ok := l.repo.Config().Profiles[profile]; !ok {
 		return nil
 	}
-	// var reactions []model.Reaction
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&reactions).
-	// 	Order("count DESC").
-	// 	Scan(ctx)
+
 	reactions := l.repo.Reactions(ctx, profile)
-	// var tags []model.HashTag
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&tags).
-	// 	Order("count DESC").
-	// 	Scan(ctx)
 	tags := l.repo.HashTags(ctx, profile)
-	// var users []model.User
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&users).
-	// 	Order("count DESC").
-	// 	Scan(ctx)
 	users := l.repo.Users(ctx, profile)
 
 	return cm.Index("Home", profile, cm.Reaction(profile, reactions), cm.HashTag(profile, tags), cm.User(profile, users))
 }
 
 func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.Component {
-	// var notes []model.Note
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&notes).
-	// 	Where("reaction_name = ?", name).
-	// 	Order("created_at DESC").
-	// 	Scan(ctx)
 	notes := l.repo.ReactionNotes(ctx, profile, name)
 	n := cm.Note{
 		Title:   name,
@@ -80,21 +56,6 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.
 }
 
 func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string) templ.Component {
-	// var notes []model.Note
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model((*model.NoteToTag)(nil)).
-	// 	// 必要な列だけ選択して、不要な列をなくす
-	// 	Relation("Note", func(q *bun.SelectQuery) *bun.SelectQuery {
-	// 		return q.Column("id", "user_id", "reaction_name", "text")
-	// 	}).
-	// 	Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
-	// 		return q.Column("")
-	// 	}).
-	// 	Column("").
-	// 	Where("hash_tag.text = ?", name).
-	// 	Order("created_at DESC").
-	// 	Scan(ctx, &notes)
 	notes := l.repo.HashTagNotes(ctx, profile, name)
 	n := cm.Note{
 		Title:   name,
@@ -106,14 +67,6 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string) templ.C
 }
 
 func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Component {
-	// var notes []model.Note
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&notes).
-	// 	Relation("User").
-	// 	Where("user.name = ?", name).
-	// 	Order("created_at DESC").
-	// 	Scan(ctx)
 	notes := l.repo.UserNotes(ctx, profile, name)
 	n := cm.Note{
 		Title:   name,
@@ -125,10 +78,6 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Comp
 }
 
 func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
-	// count, err := l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model((*model.Note)(nil)).
-	// 	Count(ctx)
 	count, err := l.repo.NoteCount(ctx, profile)
 	if err != nil {
 		return nil, err
@@ -136,15 +85,6 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	p := pg.New(count)
 	page = p.Page(page)
 
-	// var notes []model.Note
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&notes).
-	// 	// Relation("User").
-	// 	Order("created_at DESC").
-	// 	Limit(p.Limit()).
-	// 	Offset(p.Offset()).
-	// 	Scan(ctx)
 	notes := l.repo.Notes(ctx, profile, p)
 	title := fmt.Sprint(page)
 
@@ -169,16 +109,6 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 }
 
 func (l *Logic) ArchivesLogic(ctx context.Context, profile string) templ.Component {
-	// var archives []model.Archive
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model((*model.Day)(nil)).
-	// 	Relation("Month", func(q *bun.SelectQuery) *bun.SelectQuery {
-	// 		return q.Column("")
-	// 	}).
-	// 	ColumnExpr("d.ym as ym, month.count as ym_count, d.ymd as ymd, d.count as ymd_count").
-	// 	Order("ym DESC", "ymd DESC").
-	// 	Scan(ctx, &archives)
 	archives := l.repo.Archives(ctx, profile)
 
 	return cm.Archive("Archives", profile, archives)
@@ -198,15 +128,6 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 	p := pg.New(0)
 	page = p.Page(page)
 
-	// var notes []model.Note
-	// l.app.DB(profile).
-	// 	NewSelect().
-	// 	Model(&notes).
-	// 	Where(col+" = ?", d). // 条件指定に関数適用した列を使う
-	// 	Order("created_at DESC").
-	// 	Limit(p.Limit()).
-	// 	Offset(p.Offset()).
-	// 	Scan(ctx)
 	notes := l.repo.ArchiveNotes(ctx, profile, col, d, p)
 	title := fmt.Sprintf("%s - %d", d, page)
 

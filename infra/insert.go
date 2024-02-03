@@ -22,7 +22,7 @@ func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
 
 func (infra *Infra) Insert(ctx context.Context, profile string, b []byte) {
 	// app := New()
-	db := infra.app.DB(profile)
+	db := infra.DB(profile)
 	// JSON Unmarshal
 	var r mi.Reactions
 	json.Unmarshal(b, &r)
@@ -241,7 +241,7 @@ func count(ctx context.Context, db *bun.DB) error {
 
 func (infra *Infra) InsertEmoji(ctx context.Context, profile string, b []byte) {
 	// app := New()
-	db := infra.app.DB(profile)
+	db := infra.DB(profile)
 	// JSON Unmarshal
 	var e mi.Emoji
 	json.Unmarshal(b, &e)
