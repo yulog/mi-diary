@@ -8,12 +8,22 @@ import (
 )
 
 // SQLite は日時をUTCで保持する
-templ noteList(items []model.Note) {
+templ noteList(items []model.DisplayNote) {
 	<ul class="columns is-multiline">
 		for _, item := range items {
 			<li class="column is-full">
 				<div class="card">
 					<div class="card-content">
+						<div class="media">
+							<div class="media-content">
+								<p>
+									{ item.DisplayName }
+								</p>
+								<p>
+									{ fmt.Sprintf("@%s", item.UserName) }
+								</p>
+							</div>
+						</div>
 						<div>
 							{ item.Text }
 						</div>
@@ -30,7 +40,7 @@ templ noteList(items []model.Note) {
 type Note struct {
 	Title   string
 	Profile string
-	Items   []model.Note
+	Items   []model.DisplayNote
 }
 
 templ (n Note) WithPage() {
