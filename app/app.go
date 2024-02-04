@@ -64,3 +64,18 @@ func loadConfig() Config {
 	}
 	return config
 }
+
+func ForceWriteConfig(cfg *Config) error {
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AddConfigPath(".")
+
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	viper.ReadConfig(bytes.NewBuffer(b))
+	viper.WriteConfig()
+	return nil
+}

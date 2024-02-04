@@ -6,9 +6,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ProfileHandler は / のハンドラ
-func (srv *Server) ProfileHandler(c echo.Context) error {
-	return renderer(c, srv.logic.ProfileLogic(c.Request().Context()))
+// RootHandler は / のハンドラ
+func (srv *Server) RootHandler(c echo.Context) error {
+	return renderer(c, srv.logic.SelectProfileLogic(c.Request().Context()))
 }
 
 // HomeHandler は /:profile のハンドラ
@@ -109,4 +109,31 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 
 	srv.logic.SettingsEmojisLogic(c.Request().Context(), profile, name)
 	return c.HTML(http.StatusOK, name)
+}
+
+// ProfilesHandler は /profiles のハンドラ
+func (srv *Server) NewProfilesHandler(c echo.Context) error {
+
+	return renderer(c, srv.logic.NewProfileLogic(c.Request().Context()))
+}
+
+// SettingsEmojisHandler は /settings/emojis のハンドラ
+func (srv *Server) AddProfileHandler(c echo.Context) error {
+	server := c.FormValue("server-url")
+
+	authURL := srv.logic.AddProfileLogic(c.Request().Context(), server)
+
+	c.Response().Header().Set("hx-redirect", authURL)
+
+	return c.NoContent(http.StatusOK)
+}
+
+// CallbackHandler は /callback/:host のハンドラ
+func (srv *Server) CallbackHandler(c echo.Context) error {
+	host := c.Param("host")
+	s := c.QueryParam("session")
+
+	srv.logic.CallbackLogic(c.Request().Context(), host, s)
+
+	return c.Redirect(http.StatusFound, "/")
 }

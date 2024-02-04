@@ -29,7 +29,10 @@ func main() {
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
 	// e.Validator = &Validator{validator: validator.New()}
-	e.GET("/", srv.ProfileHandler)
+	e.GET("/", srv.RootHandler)
+	e.GET("/callback/:host", srv.CallbackHandler)
+	e.GET("/profiles", srv.NewProfilesHandler)
+	e.POST("/profiles", srv.AddProfileHandler)
 	e.GET("/profiles/:profile", srv.HomeHandler)
 	e.GET("/profiles/:profile/reactions/:name", srv.ReactionsHandler)
 	e.GET("/profiles/:profile/hashtags/:name", srv.HashTagsHandler)

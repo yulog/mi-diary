@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -19,6 +20,17 @@ import (
 )
 
 func main() {
+	u, _ := url.Parse("https://misskey.io")
+	conf := &mi.AuthConfig{
+		Name:       "mi-diary-test",
+		Callback:   fmt.Sprintf("http://localhost:1323/callback/%s", u.Host),
+		Permission: []string{"read:reactions"},
+		Host:       "https://misskey.io",
+	}
+	fmt.Println(conf.AuthCodeURL())
+}
+
+func createTable() {
 	app := app.New()
 	infra := infra.New(app)
 	db := infra.DB("")

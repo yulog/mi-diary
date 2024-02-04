@@ -2,14 +2,18 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"net/url"
 	"regexp"
 
 	"github.com/a-h/templ"
+	"github.com/goccy/go-json"
+	"github.com/google/uuid"
+	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/mi"
+	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/util/pg"
 )
 
@@ -21,7 +25,7 @@ func New(r *infra.Infra) *Logic {
 	return &Logic{repo: r}
 }
 
-func (l *Logic) ProfileLogic(ctx context.Context) templ.Component {
+func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
 	var ps []string
 	for k := range l.repo.Config().Profiles {
 		ps = append(ps, k)
@@ -191,4 +195,50 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	}
 	// fmt.Println(string(resp))
 	l.repo.InsertEmoji(ctx, profile, resp)
+}
+
+func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
+
+	return cm.AddProfile("New Profile")
+}
+
+func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
+	u, _ := url.Parse(server)
+	conf := &mi.AuthConfig{
+		Name:       "mi-diary-app",
+		Callback:   fmt.Sprintf("http://localhost:%s/callback/%s", l.repo.Config().Port, u.Host),
+		Permission: []string{"read:reactions"},
+		Host:       server,
+	}
+	fmt.Println(conf.AuthCodeURL())
+
+	return conf.AuthCodeURL()
+}
+
+func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error {
+	id, err := uuid.Parse(sessionId)
+	if err != nil {
+		return err
+	}
+
+	conf := &mi.AuthConfig{
+		SessionID: id,
+		Host:      fmt.Sprintf("https://%s", host),
+	}
+	resp, _ := conf.Exchange()
+	fmt.Println(resp.Token)
+	if resp.OK {
+		cfg := l.repo.Config()
+		cfg.Profiles[fmt.Sprintf("%s@%s", resp.User.Username, host)] = app.Profile{
+			I:        resp.Token,
+			UserId:   resp.User.ID,
+			UserName: resp.User.Username,
+			Host:     host,
+		}
+		app.ForceWriteConfig(cfg)
+
+		migrate.Do(l.repo)
+	}
+
+	return nil
 }
