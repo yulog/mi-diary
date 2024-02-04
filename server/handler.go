@@ -111,13 +111,13 @@ func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
 	return c.HTML(http.StatusOK, name)
 }
 
-// ProfilesHandler は /profiles のハンドラ
+// NewProfilesHandler は /profiles のハンドラ
 func (srv *Server) NewProfilesHandler(c echo.Context) error {
 
 	return renderer(c, srv.logic.NewProfileLogic(c.Request().Context()))
 }
 
-// SettingsEmojisHandler は /settings/emojis のハンドラ
+// AddProfileHandler は /profiles のハンドラ
 func (srv *Server) AddProfileHandler(c echo.Context) error {
 	server := c.FormValue("server-url")
 
