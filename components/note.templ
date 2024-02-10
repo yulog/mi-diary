@@ -8,8 +8,7 @@ import (
 )
 
 // SQLite は日時をUTCで保持する
-// TODO: hostを渡すようにする
-templ noteList(items []model.DisplayNote) {
+templ noteList(host string, items []model.DisplayNote) {
 	<ul class="columns is-multiline">
 		for _, item := range items {
 			<li class="column is-full">
@@ -28,7 +27,7 @@ templ noteList(items []model.DisplayNote) {
 						<div>
 							{ item.Text }
 						</div>
-						<a href={ templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID)) } target="_blank">
+						<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, item.ID)) } target="_blank">
 							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
 						</a>
 					</div>
@@ -41,17 +40,18 @@ templ noteList(items []model.DisplayNote) {
 type Note struct {
 	Title   string
 	Profile string
+	Host    string
 	Items   []model.DisplayNote
 }
 
 templ (n Note) WithPage() {
 	@BaseWithNav(n.Title, n.Profile) {
-		@noteList(n.Items)
+		@noteList(n.Host, n.Items)
 	}
 }
 
 templ (n Note) WithPages(p Pages) {
 	@Pagination(n.Title, n.Profile, p) {
-		@noteList(n.Items)
+		@noteList(n.Host, n.Items)
 	}
 }

@@ -19,7 +19,7 @@ import (
 
 // SQLite は日時をUTCで保持する
 // TODO: hostを渡すようにする
-func noteList(items []model.DisplayNote) templ.Component {
+func noteList(host string, items []model.DisplayNote) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -80,7 +80,7 @@ func noteList(items []model.DisplayNote) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 templ.SafeURL = templ.URL(fmt.Sprintf("https://misskey.io/notes/%s", item.ID))
+			var templ_7745c5c3_Var5 templ.SafeURL = templ.URL(fmt.Sprintf("https://%s/notes/%s", host, item.ID))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -130,6 +130,7 @@ func noteList(items []model.DisplayNote) templ.Component {
 type Note struct {
 	Title   string
 	Profile string
+	Host    string
 	Items   []model.DisplayNote
 }
 
@@ -152,7 +153,7 @@ func (n Note) WithPage() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = noteList(n.Items).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = noteList(n.Host, n.Items).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -191,7 +192,7 @@ func (n Note) WithPages(p Pages) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = noteList(n.Items).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = noteList(n.Host, n.Items).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

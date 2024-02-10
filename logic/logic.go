@@ -53,6 +53,7 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.
 	n := cm.Note{
 		Title:   name,
 		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
 	}
 
@@ -64,6 +65,7 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string) templ.C
 	n := cm.Note{
 		Title:   name,
 		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
 	}
 
@@ -75,6 +77,7 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Comp
 	n := cm.Note{
 		Title:   name,
 		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
 	}
 
@@ -98,6 +101,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	n := cm.Note{
 		Title:   title,
 		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
 	}
 	cp := cm.Pages{
@@ -140,6 +144,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 	n := cm.Note{
 		Title:   title,
 		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
 	}
 	cp := cm.Pages{
