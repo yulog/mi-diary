@@ -5,8 +5,6 @@ import (
 )
 
 type Archive struct {
-	// bun.BaseModel `bun:"table:archives,alias:a"`
-
 	YM       string
 	YmCount  int64
 	YMD      string
