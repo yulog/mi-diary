@@ -29,19 +29,25 @@ func main() {
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
 	// e.Validator = &Validator{validator: validator.New()}
+
 	e.GET("/", srv.RootHandler)
 	e.GET("/callback/:host", srv.CallbackHandler)
-	e.GET("/profiles", srv.NewProfilesHandler)
-	e.POST("/profiles", srv.AddProfileHandler)
-	e.GET("/profiles/:profile", srv.HomeHandler)
-	e.GET("/profiles/:profile/reactions/:name", srv.ReactionsHandler)
-	e.GET("/profiles/:profile/hashtags/:name", srv.HashTagsHandler)
-	e.GET("/profiles/:profile/users/:name", srv.UsersHandler)
-	e.GET("/profiles/:profile/notes", srv.NotesHandler)
-	e.GET("/profiles/:profile/archives", srv.ArchivesHandler)
-	e.GET("/profiles/:profile/archives/:date", srv.ArchiveNotesHandler)
-	e.GET("/profiles/:profile/settings", srv.SettingsHandler)
-	e.POST("/profiles/:profile/settings/reactions", srv.SettingsReactionsHandler)
-	e.POST("/profiles/:profile/settings/emojis", srv.SettingsEmojisHandler)
+
+	profiles := e.Group("/profiles")
+	profiles.GET("", srv.NewProfilesHandler)
+	profiles.POST("", srv.AddProfileHandler)
+
+	profile := profiles.Group("/:profile")
+	profile.GET("", srv.HomeHandler)
+	profile.GET("/reactions/:name", srv.ReactionsHandler)
+	profile.GET("/hashtags/:name", srv.HashTagsHandler)
+	profile.GET("/users/:name", srv.UsersHandler)
+	profile.GET("/notes", srv.NotesHandler)
+	profile.GET("/archives", srv.ArchivesHandler)
+	profile.GET("/archives/:date", srv.ArchiveNotesHandler)
+	profile.GET("/settings", srv.SettingsHandler)
+	profile.POST("/settings/reactions", srv.SettingsReactionsHandler)
+	profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
+
 	e.Logger.Fatal(e.Start(":" + app.Config.Port))
 }
