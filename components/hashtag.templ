@@ -6,9 +6,9 @@ import (
 )
 
 templ HashTag(profile string, items []model.HashTag) {
-	<ul>
+	<ul class="tags">
 		for _, item := range items {
-			<li>
+			<li class="tag">
 				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/hashtags/%s", profile, item.Text)) }>
 					{ item.Text } ( { fmt.Sprintf("%d", item.Count) } )
 				</a>

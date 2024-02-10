@@ -8,6 +8,7 @@ import (
 )
 
 // SQLite は日時をUTCで保持する
+// TODO: hostを渡すようにする
 templ noteList(items []model.DisplayNote) {
 	<ul class="columns is-multiline">
 		for _, item := range items {

@@ -111,7 +111,15 @@ func AddProfile(title string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"content\"><div class=\"box\"><h3>Add New Profile</h3><form hx-post=\"/profiles\" hx-swap=\"none\"><label class=\"label\">Server URL\r<div class=\"field has-addons\"><div class=\"control\"><input class=\"input\" name=\"server-url\" type=\"text\"></div><div class=\"control\"><button class=\"button is-link\">Auth\r</button></div></div></label></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"content\"><div class=\"box\"><h3>Add New Profile</h3>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Form("/profiles", "Server URL", "server-url", "Auth").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -23,21 +23,22 @@ templ AddProfile(title string) {
 		<div class="content">
 			<div class="box">
 				<h3>Add New Profile</h3>
-				<form hx-post="/profiles" hx-swap="none">
-					<label class="label">
-						Server URL
-						<div class="field has-addons">
-							<div class="control">
-								<input class="input" name="server-url" type="text"/>
-							</div>
-							<div class="control">
-								<button class="button is-link">
-									Auth
-								</button>
-							</div>
-						</div>
-					</label>
-				</form>
+				@Form("/profiles", "Server URL", "server-url", "Auth")
+				// <form hx-post="/profiles" hx-swap="none">
+				// 	<label class="label">
+				// 		Server URL
+				// 		<div class="field has-addons">
+				// 			<div class="control">
+				// 				<input class="input" name="server-url" type="text"/>
+				// 			</div>
+				// 			<div class="control">
+				// 				<button class="button is-link">
+				// 					Auth
+				// 				</button>
+				// 			</div>
+				// 		</div>
+				// 	</label>
+				// </form>
 			</div>
 		</div>
 	}

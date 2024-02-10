@@ -72,15 +72,15 @@ func getReaction(profile string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"box\"><h3 class=\"title is-3\">Note</h3><form hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"box\"><h3 class=\"title is-3\">Note</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/profiles/%s/settings/reactions", profile)))
+		templ_7745c5c3_Err = Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Note ID", "note-id", "Get").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"none\"><label class=\"label\">Note ID\r<div class=\"field has-addons\"><div class=\"control\"><input class=\"input\" name=\"note-id\" type=\"text\"></div><div class=\"control\"><button class=\"button is-link\">Get\r</button></div></div></label></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -104,15 +104,15 @@ func getEmoji(profile string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"box\"><h3 class=\"title is-3\">Emoji</h3><form hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"box\"><h3 class=\"title is-3\">Emoji</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/profiles/%s/settings/emojis", profile)))
+		templ_7745c5c3_Err = Form(fmt.Sprintf("/profiles/%s/settings/emojis", profile), "Name", "emoji-name", "Get").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"none\"><label class=\"label\">Name\r<div class=\"field has-addons\"><div class=\"control\"><input class=\"input\" name=\"emoji-name\" type=\"text\"></div><div class=\"control\"><button class=\"button is-link\">Get\r</button></div></div></label></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

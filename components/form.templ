@@ -1,0 +1,19 @@
+package components
+
+templ Form(postURL, label, inputName, button string) {
+	<form hx-post={ postURL } hx-swap="none">
+		<label class="label">
+			{ label }
+			<div class="field has-addons">
+				<div class="control">
+					<input class="input" name={ inputName } type="text"/>
+				</div>
+				<div class="control">
+					<button class="button is-link">
+						{ button }
+					</button>
+				</div>
+			</div>
+		</label>
+	</form>
+}
