@@ -226,7 +226,7 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 		Host:      fmt.Sprintf("https://%s", host),
 	}
 	resp, _ := conf.Exchange()
-	fmt.Println(resp.Token)
+
 	if resp.OK {
 		cfg := l.repo.Config()
 		cfg.Profiles[fmt.Sprintf("%s@%s", resp.User.Username, host)] = app.Profile{
