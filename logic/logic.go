@@ -41,47 +41,40 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) templ.Component {
 		return nil
 	}
 
-	reactions := l.repo.Reactions(ctx, profile)
-	tags := l.repo.HashTags(ctx, profile)
-	users := l.repo.Users(ctx, profile)
-
-	return cm.Index("Home", profile, cm.Reaction(profile, reactions), cm.HashTag(profile, tags), cm.User(profile, users))
+	return cm.IndexParams{
+		Title:     "Home",
+		Profile:   profile,
+		Reactions: l.repo.Reactions(ctx, profile),
+		HashTags:  l.repo.HashTags(ctx, profile),
+		Users:     l.repo.Users(ctx, profile),
+	}.Index()
 }
 
 func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.Component {
-	notes := l.repo.ReactionNotes(ctx, profile, name)
-	n := cm.Note{
+	return cm.Note{
 		Title:   name,
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   notes,
-	}
-
-	return n.WithPage()
+		Items:   l.repo.ReactionNotes(ctx, profile, name),
+	}.WithPage()
 }
 
 func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string) templ.Component {
-	notes := l.repo.HashTagNotes(ctx, profile, name)
-	n := cm.Note{
+	return cm.Note{
 		Title:   name,
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   notes,
-	}
-
-	return n.WithPage()
+		Items:   l.repo.HashTagNotes(ctx, profile, name),
+	}.WithPage()
 }
 
 func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Component {
-	notes := l.repo.UserNotes(ctx, profile, name)
-	n := cm.Note{
+	return cm.Note{
 		Title:   name,
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   notes,
-	}
-
-	return n.WithPage()
+		Items:   l.repo.UserNotes(ctx, profile, name),
+	}.WithPage()
 }
 
 func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
@@ -93,13 +86,13 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	page = p.Page(page)
 
 	notes := l.repo.Notes(ctx, profile, p)
-	title := fmt.Sprint(page)
+	// title := fmt.Sprint(page)
 
 	hasNext := len(notes) >= p.Limit() && p.Next() <= p.Last()
 	hasLast := p.Next() < p.Last()
 
 	n := cm.Note{
-		Title:   title,
+		Title:   fmt.Sprint(page),
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
 		Items:   notes,
@@ -117,9 +110,11 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 }
 
 func (l *Logic) ArchivesLogic(ctx context.Context, profile string) templ.Component {
-	archives := l.repo.Archives(ctx, profile)
-
-	return cm.Archive("Archives", profile, archives)
+	return cm.ArchiveParams{
+		Title:   "Archives",
+		Profile: profile,
+		Items:   l.repo.Archives(ctx, profile),
+	}.Archive()
 }
 
 var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)

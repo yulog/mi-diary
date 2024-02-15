@@ -10,9 +10,20 @@ import "context"
 import "io"
 import "bytes"
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/yulog/mi-diary/model"
+)
 
-func Index(title, profile string, reaction templ.Component, tags templ.Component, users templ.Component) templ.Component {
+type IndexParams struct {
+	Title     string
+	Profile   string
+	Reactions []model.Reaction
+	HashTags  []model.HashTag
+	Users     []model.User
+}
+
+func (p IndexParams) Index() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -35,7 +46,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/notes", profile))
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -44,7 +55,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = reaction.Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = reaction(p.Profile, p.Reactions).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -52,7 +63,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = tags.Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = hashTag(p.Profile, p.HashTags).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -60,7 +71,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = users.Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = user(p.Profile, p.Users).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,7 +79,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/archives", profile))
+			var templ_7745c5c3_Var4 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -82,7 +93,7 @@ func Index(title, profile string, reaction templ.Component, tags templ.Component
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = BaseWithNav(title, profile).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BaseWithNav(p.Title, p.Profile).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

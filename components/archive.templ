@@ -5,6 +5,12 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
+type ArchiveParams struct {
+	Title   string
+	Profile string
+	Items   []model.Archive
+}
+
 var header = ""
 var isOpen = false
 
@@ -18,17 +24,17 @@ func setIsOpen(f bool) (string, error) {
 	return "", nil
 }
 
-templ Archive(title, profile string, items []model.Archive) {
-	@BaseWithNav(title, profile) {
+templ (p ArchiveParams) Archive() {
+	@BaseWithNav(p.Title, p.Profile) {
 		<div class="content">
-			for _, item := range items {
+			for _, item := range p.Items {
 				if header != item.YM && isOpen {
 					{ setIsOpen(false) }
 					@templ.Raw("</ul>")
 				}
 				if header != item.YM {
 					{ setHeader(item.YM) }
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", profile, item.YM)) }>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YM)) }>
 						<h3>{ item.YM } ( { fmt.Sprintf("%d", item.YmCount) } )</h3>
 					</a>
 				}
@@ -37,7 +43,7 @@ templ Archive(title, profile string, items []model.Archive) {
 					@templ.Raw("<ul>")
 				}
 				<li>
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", profile, item.YMD)) }>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YMD)) }>
 						{ item.YMD } ( { fmt.Sprintf("%d", item.YmdCount) } )
 					</a>
 				</li>

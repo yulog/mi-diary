@@ -9,7 +9,7 @@ css emoji() {
 	height: 24px;
 }
 
-templ Reaction(profile string, items []model.Reaction) {
+templ reaction(profile string, items []model.Reaction) {
 	<ul class="tags">
 		for _, item := range items {
 			<li class="tag">

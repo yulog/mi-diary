@@ -5,7 +5,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-templ HashTag(profile string, items []model.HashTag) {
+templ hashTag(profile string, items []model.HashTag) {
 	<ul class="tags">
 		for _, item := range items {
 			<li class="tag">

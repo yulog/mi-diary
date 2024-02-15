@@ -1,29 +1,40 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/yulog/mi-diary/model"
+)
 
-templ Index(title, profile string, reaction templ.Component, tags templ.Component, users templ.Component) {
-	@BaseWithNav(title, profile) {
+type IndexParams struct {
+	Title     string
+	Profile   string
+	Reactions []model.Reaction
+	HashTags  []model.HashTag
+	Users     []model.User
+}
+
+templ (p IndexParams) Index() {
+	@BaseWithNav(p.Title, p.Profile) {
 		<div class="content">
 			<div class="box">
 				<h3>Notes</h3>
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", profile)) }>All Notes</a>
+				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) }>All Notes</a>
 			</div>
 			<div class="box">
 				<h3>Reactions</h3>
-				@reaction
+				@reaction(p.Profile, p.Reactions)
 			</div>
 			<div class="box">
 				<h3>HashTags</h3>
-				@tags
+				@hashTag(p.Profile, p.HashTags)
 			</div>
 			<div class="box">
 				<h3>Users</h3>
-				@users
+				@user(p.Profile, p.Users)
 			</div>
 			<div class="box">
 				<h3>Archives</h3>
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", profile)) }>All Archives</a>
+				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) }>All Archives</a>
 			</div>
 		</div>
 	}
