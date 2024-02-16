@@ -21,7 +21,6 @@ func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
 }
 
 func (infra *Infra) Insert(ctx context.Context, profile string, b []byte) {
-	// app := New()
 	db := infra.DB(profile)
 	// JSON Unmarshal
 	var r mi.Reactions
@@ -32,17 +31,16 @@ func (infra *Infra) Insert(ctx context.Context, profile string, b []byte) {
 }
 
 func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
-	// JSONの中身をモデルへ移す
-	var (
-		users      []model.User
-		notes      []model.Note
-		reactions  []model.Reaction
-		noteToTags []model.NoteToTag
-	)
-
 	// まとめて追加する(トランザクション)
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
+		var (
+			users      []model.User
+			notes      []model.Note
+			reactions  []model.Reaction
+			noteToTags []model.NoteToTag
+		)
+
 		for _, v := range r {
 			var dn string
 			if v.Note.User.Name == nil {
@@ -90,10 +88,14 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		// 	fmt.Println(user.ID) // id is scanned automatically
 		// }
 
-		_, err = db.NewInsert().Model(&notes).Ignore().Exec(ctx)
+		result, err := db.NewInsert().Model(&notes).Ignore().Exec(ctx)
 		if err != nil {
 			return err
 		}
+		rows, _ := result.RowsAffected()
+		fmt.Println("insert:", rows)
+		// TODO: すべて取得するようにする際はinsert件数が0まで
+		// until(?)とかを付けて繰り返す？
 		// for _, note := range notes {
 		// 	fmt.Println(note.ID) // id is scanned automatically
 		// }
@@ -245,7 +247,6 @@ func count(ctx context.Context, db *bun.DB) error {
 }
 
 func (infra *Infra) InsertEmoji(ctx context.Context, profile string, b []byte) {
-	// app := New()
 	db := infra.DB(profile)
 	// JSON Unmarshal
 	var e mi.Emoji
