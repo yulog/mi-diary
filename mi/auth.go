@@ -8,7 +8,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
-	"github.com/k0kubun/pp/v3"
 )
 
 type AuthConfig struct {
@@ -77,7 +76,7 @@ func (c *AuthConfig) Exchange() (AuthResp, error) {
 
 	var r AuthResp
 	json.Unmarshal(body, &r)
-	pp.Println(r)
+	// pp.Println(r)
 
 	return r, nil
 }

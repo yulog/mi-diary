@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yulog/mi-diary/app"
@@ -49,5 +51,5 @@ func main() {
 	profile.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
 
-	e.Logger.Fatal(e.Start(":" + app.Config.Port))
+	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
 }

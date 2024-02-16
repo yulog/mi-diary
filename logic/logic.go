@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/url"
 	"regexp"
 
@@ -34,11 +35,11 @@ func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
 	return cm.SelectProfile("Select profile...", ps)
 }
 
-func (l *Logic) HomeLogic(ctx context.Context, profile string) templ.Component {
+func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 
 	// TODO: エラーを返すようにする
 	if _, ok := l.repo.Config().Profiles[profile]; !ok {
-		return nil
+		return nil, fmt.Errorf("invalid profile: %s", profile)
 	}
 
 	return cm.IndexParams{
@@ -47,7 +48,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) templ.Component {
 		Reactions: l.repo.Reactions(ctx, profile),
 		HashTags:  l.repo.HashTags(ctx, profile),
 		Users:     l.repo.Users(ctx, profile),
-	}.Index()
+	}.Index(), nil
 }
 
 func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.Component {
@@ -170,7 +171,13 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 	}
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/users/reactions", l.repo.Config().Profiles[profile].Host)
+	// u := fmt.Sprintf("https://%s/api/users/reactions", l.repo.Config().Profiles[profile].Host)
+	// 却って分かりにくい気もする
+	u := (&url.URL{
+		Scheme: "https",
+		Host:   l.repo.Config().Profiles[profile].Host,
+	}).
+		JoinPath("api", "users", "reactions").String()
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
@@ -188,7 +195,12 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	// }
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
+	// u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
+	u := (&url.URL{
+		Scheme: "https",
+		Host:   l.repo.Config().Profiles[profile].Host,
+	}).
+		JoinPath("api", "emoji").String()
 	resp, err := mi.Post(u, b)
 	if err != nil {
 		fmt.Println(err)
@@ -204,11 +216,17 @@ func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
 
 func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
 	u, _ := url.Parse(server)
+	// c:=(&url.URL{Scheme: "http",Host: net.JoinHostPort("localhost",l.repo.Config().Port)}).JoinPath("callback",u.Host)
+
 	conf := &mi.AuthConfig{
-		Name:       "mi-diary-app",
-		Callback:   fmt.Sprintf("http://localhost:%s/callback/%s", l.repo.Config().Port, u.Host),
+		Name: "mi-diary-app",
+		Callback: (&url.URL{
+			Scheme: "http",
+			Host:   net.JoinHostPort("localhost", l.repo.Config().Port),
+		}).
+			JoinPath("callback", u.Host).String(),
 		Permission: []string{"read:reactions"},
-		Host:       server,
+		Host:       u.String(),
 	}
 	fmt.Println(conf.AuthCodeURL())
 
@@ -223,7 +241,10 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 
 	conf := &mi.AuthConfig{
 		SessionID: id,
-		Host:      fmt.Sprintf("https://%s", host),
+		Host: (&url.URL{
+			Scheme: "https",
+			Host:   host,
+		}).String(),
 	}
 	resp, _ := conf.Exchange()
 

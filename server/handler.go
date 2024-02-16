@@ -21,7 +21,11 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 	// エラーでなければ、DTOのメソッドでcomponentを作る
 
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	return renderer(c, srv.logic.HomeLogic(c.Request().Context(), profile))
+	cm, err := srv.logic.HomeLogic(c.Request().Context(), profile)
+	if err != nil {
+		return err
+	}
+	return renderer(c, cm)
 }
 
 // ReactionsHandler は /reactions/:name のハンドラ
