@@ -42,23 +42,24 @@ func loadConfig() Config {
 			},
 		},
 	}
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
+	v := viper.NewWithOptions(viper.KeyDelimiter("::"))
+	v.SetConfigName("config")
+	v.SetConfigType("json")
+	v.AddConfigPath(".")
 
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		panic(err)
 	}
 
-	viper.ReadConfig(bytes.NewBuffer(b))
-	viper.SafeWriteConfig()
-	err = viper.ReadInConfig()
+	v.ReadConfig(bytes.NewBuffer(b))
+	v.SafeWriteConfig()
+	err = v.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 	var config Config
-	err = viper.Unmarshal(&config)
+	err = v.Unmarshal(&config)
 	if err != nil {
 		panic(fmt.Errorf("unable to decode into struct, %v", err))
 	}
@@ -66,16 +67,17 @@ func loadConfig() Config {
 }
 
 func ForceWriteConfig(cfg *Config) error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
+	v := viper.NewWithOptions(viper.KeyDelimiter("::"))
+	v.SetConfigName("config")
+	v.SetConfigType("json")
+	v.AddConfigPath(".")
 
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		return err
 	}
 
-	viper.ReadConfig(bytes.NewBuffer(b))
-	viper.WriteConfig()
+	v.ReadConfig(bytes.NewBuffer(b))
+	v.WriteConfig()
 	return nil
 }
