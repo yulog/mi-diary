@@ -24,6 +24,7 @@ templ AddProfile(title string) {
 			<div class="box">
 				<h3>Add New Profile</h3>
 				@Form("/profiles", "Server URL", "server-url", "Auth")
+				<a href={ templ.URL("/") } class="button mt-5">Back</a>
 			</div>
 		</div>
 	}
