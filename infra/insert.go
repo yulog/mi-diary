@@ -59,6 +59,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				ht := model.HashTag{Text: tv}
 				_, _ = db.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
 				// pp.Println(ht.ID)
+				// id is scanned automatically
 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
 			}
 
@@ -84,9 +85,6 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		if err != nil {
 			return err
 		}
-		// for _, user := range users {
-		// 	fmt.Println(user.ID) // id is scanned automatically
-		// }
 
 		result, err := db.NewInsert().Model(&notes).Ignore().Exec(ctx)
 		if err != nil {
@@ -96,17 +94,11 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		fmt.Println("insert:", rows)
 		// TODO: すべて取得するようにする際はinsert件数が0まで
 		// until(?)とかを付けて繰り返す？
-		// for _, note := range notes {
-		// 	fmt.Println(note.ID) // id is scanned automatically
-		// }
 
 		_, err = db.NewInsert().Model(&reactions).Ignore().Exec(ctx)
 		if err != nil {
 			return err
 		}
-		// for _, reaction := range reactions {
-		// 	fmt.Println(reaction.ID) // id is scanned automatically
-		// }
 
 		// 0件の場合がある
 		if len(noteToTags) > 0 {

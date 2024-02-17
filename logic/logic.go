@@ -37,7 +37,6 @@ func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
 
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 
-	// TODO: エラーを返すようにする
 	if _, ok := l.repo.Config().Profiles[profile]; !ok {
 		return nil, fmt.Errorf("invalid profile: %s", profile)
 	}
@@ -216,7 +215,6 @@ func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
 
 func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
 	u, _ := url.Parse(server)
-	// c:=(&url.URL{Scheme: "http",Host: net.JoinHostPort("localhost",l.repo.Config().Port)}).JoinPath("callback",u.Host)
 
 	conf := &mi.AuthConfig{
 		Name: "mi-diary-app",
@@ -246,7 +244,10 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 			Host:   host,
 		}).String(),
 	}
-	resp, _ := conf.Exchange()
+	resp, err := conf.Exchange()
+	if err != nil {
+		return err
+	}
 
 	if resp.OK {
 		cfg := l.repo.Config()

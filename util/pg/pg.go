@@ -6,7 +6,6 @@ import (
 )
 
 type Pager struct {
-	// c    *echo.Context
 	page int
 	// Prev int
 	// Next int
@@ -30,11 +29,6 @@ func New(total int) *Pager {
 
 func (p *Pager) Page(page int) int {
 	p.page = page
-	// if err := echo.QueryParamsBinder(*p.c).
-	// 	Int("page", &p.page).
-	// 	BindError(); err != nil {
-	// 	return p.page, err
-	// }
 	if p.page < 1 {
 		p.page = 1
 	}
