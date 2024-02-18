@@ -86,6 +86,9 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	page = p.Page(page)
 
 	notes := l.repo.Notes(ctx, profile, p)
+	if len(notes) == 0 {
+		return nil, fmt.Errorf("note not found")
+	}
 	// title := fmt.Sprint(page)
 
 	hasNext := len(notes) >= p.Limit() && p.Next() <= p.Last()
