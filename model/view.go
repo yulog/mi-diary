@@ -16,6 +16,7 @@ type DisplayNote struct {
 	UserID       string `bun:",pk"`
 	UserName     string
 	DisplayName  string
+	AvatarURL    string
 	ReactionName string
 	Text         string
 	CreatedAt    time.Time

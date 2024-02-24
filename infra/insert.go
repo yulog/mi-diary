@@ -52,6 +52,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				ID:          v.Note.User.ID,
 				Name:        v.Note.User.Username,
 				DisplayName: dn,
+				AvatarURL:   v.Note.User.AvatarURL,
 			}
 			users = append(users, u)
 
@@ -80,12 +81,13 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 			reactions = append(reactions, r)
 		}
 
-		// 重複してたら登録しない(エラーにしない)
-		_, err := db.NewInsert().Model(&users).Ignore().Exec(ctx)
+		// 重複していたらアップデート
+		_, err := db.NewInsert().Model(&users).On("CONFLICT DO UPDATE").Exec(ctx)
 		if err != nil {
 			return err
 		}
 
+		// 重複していたら登録しない(エラーにしない)
 		result, err := db.NewInsert().Model(&notes).Ignore().Exec(ctx)
 		if err != nil {
 			return err

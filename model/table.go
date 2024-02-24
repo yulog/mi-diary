@@ -29,6 +29,7 @@ type User struct {
 	ID          string `bun:",pk"`
 	Name        string
 	DisplayName string
+	AvatarURL   string
 	Count       int64
 }
 

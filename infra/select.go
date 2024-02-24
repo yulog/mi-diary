@@ -45,7 +45,8 @@ func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string) []m
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name")
+				ColumnExpr("display_name").
+				ColumnExpr("avatar_url")
 		}).
 		Where("reaction_name = ?", name).
 		Order("created_at DESC").
@@ -74,6 +75,7 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []mo
 		Join("JOIN users as u ON u.id = note.user_id").
 		ColumnExpr("u.name as user_name").
 		ColumnExpr("u.display_name as display_name").
+		ColumnExpr("u.avatar_url as avatar_url").
 		Where("hash_tag.text = ?", name).
 		Order("created_at DESC").
 		Scan(ctx, &notes)
@@ -87,7 +89,8 @@ func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name")
+				ColumnExpr("display_name").
+				ColumnExpr("avatar_url")
 		}).
 		Where("user_name = ?", name).
 		Order("created_at DESC").
@@ -109,7 +112,8 @@ func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []mo
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name")
+				ColumnExpr("display_name").
+				ColumnExpr("avatar_url")
 		}).
 		Order("created_at DESC").
 		Limit(p.Limit()).
@@ -142,7 +146,8 @@ func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p 
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name")
+				ColumnExpr("display_name").
+				ColumnExpr("avatar_url")
 		}).
 		Where(col+" = ?", d). // 条件指定に関数適用した列を使う
 		Order("created_at DESC").
