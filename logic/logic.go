@@ -173,7 +173,7 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 	}
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	// u := fmt.Sprintf("https://%s/api/users/reactions", l.repo.Config().Profiles[profile].Host)
+	// https://host.tld/api/users/reactions
 	// 却って分かりにくい気もする
 	u := (&url.URL{
 		Scheme: "https",
@@ -192,12 +192,10 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	body := map[string]any{
 		"name": name,
 	}
-	// if id != "" {
-	// 	body["untilId"] = id
-	// }
+
 	b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	// u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
+	// https://host.tld/api/emoji
 	u := (&url.URL{
 		Scheme: "https",
 		Host:   l.repo.Config().Profiles[profile].Host,
