@@ -30,33 +30,31 @@ templ (n Note) WithPages(p Pages) {
 templ noteList(host string, items []model.DisplayNote) {
 	<ul class="columns is-multiline">
 		for _, item := range items {
-			<li class="column is-full">
-				<div class="card">
-					<div class="card-content">
-						<div class="media">
-							<div class="media-left">
-								<figure class="image is-48x48">
-									<img class="is-rounded" src={ item.AvatarURL } alt={ fmt.Sprintf("%s Avatar", item.DisplayName) }/>
-								</figure>
-							</div>
-							<div class="media-content">
-								<p>
-									{ item.DisplayName }
-								</p>
-								<p class="has-text-grey">
-									{ fmt.Sprintf("@%s", item.UserName) }
-								</p>
-							</div>
-						</div>
-						<div>
-							{ item.Text }
-						</div>
-						<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, item.ID)) } target="_blank">
-							{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
-						</a>
+			@CardAsListIsFull() {
+				<div class="media">
+					<div class="media-left">
+						<figure class="image is-48x48">
+							<img class="is-rounded" src={ item.AvatarURL } alt={ fmt.Sprintf("%s Avatar", item.DisplayName) }/>
+						</figure>
+					</div>
+					<div class="media-content">
+						<p>
+							{ item.DisplayName }
+						</p>
+						<p class="has-text-grey">
+							{ fmt.Sprintf("@%s", item.UserName) }
+						</p>
 					</div>
 				</div>
-			</li>
+				<div class="content">
+					<div>
+						{ item.Text }
+					</div>
+					<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, item.ID)) } target="_blank" class="has-text-grey is-underlined">
+						{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
+					</a>
+				</div>
+			}
 		}
 	</ul>
 }

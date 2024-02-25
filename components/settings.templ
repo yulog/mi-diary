@@ -10,15 +10,15 @@ templ Settings(title, profile string) {
 }
 
 templ getReaction(profile string) {
-	<div class="box">
+	@CardIsFull() {
 		<h3 class="title is-3">Note</h3>
-		@Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Note ID", "note-id", "Get")
-	</div>
+		@Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Note ID", "note-id", "", "Get")
+	}
 }
 
 templ getEmoji(profile string) {
-	<div class="box">
+	@CardIsFull() {
 		<h3 class="title is-3">Emoji</h3>
-		@Form(fmt.Sprintf("/profiles/%s/settings/emojis", profile), "Name", "emoji-name", "Get")
-	</div>
+		@Form(fmt.Sprintf("/profiles/%s/settings/emojis", profile), "Name", "emoji-name", "", "Get")
+	}
 }

@@ -1,0 +1,31 @@
+package components
+
+templ Card() {
+	<div class="column">
+		<div class="card">
+			<div class="card-content">
+				{ children... }
+			</div>
+		</div>
+	</div>
+}
+
+templ CardIsFull() {
+	<div class="column is-full">
+		<div class="card">
+			<div class="card-content">
+				{ children... }
+			</div>
+		</div>
+	</div>
+}
+
+templ CardAsListIsFull() {
+	<li class="column is-full">
+		<div class="card">
+			<div class="card-content">
+				{ children... }
+			</div>
+		</div>
+	</li>
+}

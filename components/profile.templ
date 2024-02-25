@@ -4,8 +4,8 @@ import "fmt"
 
 templ SelectProfile(title string, profiles []string) {
 	@BaseWithoutNav(title) {
-		<div class="content">
-			<div class="box">
+		@CardIsFull() {
+			<div class="content">
 				<h3>Profiles</h3>
 				<ul>
 					for _, profile := range profiles {
@@ -14,18 +14,18 @@ templ SelectProfile(title string, profiles []string) {
 				</ul>
 				<a href={ templ.URL("/profiles") } class="button">Add Profile</a>
 			</div>
-		</div>
+		}
 	}
 }
 
 templ AddProfile(title string) {
 	@BaseWithoutNav(title) {
-		<div class="content">
-			<div class="box">
+		@CardIsFull() {
+			<div class="content">
 				<h3>Add New Profile</h3>
-				@Form("/profiles", "Server URL", "server-url", "Auth")
+				@Form("/profiles", "Server URL", "server-url", "https://example.com", "Auth")
 				<a href={ templ.URL("/") } class="button mt-5">Back</a>
 			</div>
-		</div>
+		}
 	}
 }

@@ -16,25 +16,27 @@ type IndexParams struct {
 templ (p IndexParams) Index() {
 	@BaseWithNav(p.Title, p.Profile) {
 		<div class="content">
-			<div class="box">
-				<h3>Notes</h3>
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) }>All Notes</a>
-			</div>
-			<div class="box">
-				<h3>Reactions</h3>
-				@reaction(p.Profile, p.Reactions)
-			</div>
-			<div class="box">
-				<h3>HashTags</h3>
-				@hashTag(p.Profile, p.HashTags)
-			</div>
-			<div class="box">
-				<h3>Users</h3>
-				@user(p.Profile, p.Users)
-			</div>
-			<div class="box">
-				<h3>Archives</h3>
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) }>All Archives</a>
+			<div class="columns is-multiline">
+				@CardIsFull() {
+					<h3>Reactions</h3>
+					@reaction(p.Profile, p.Reactions)
+				}
+				@CardIsFull() {
+					<h3>HashTags</h3>
+					@hashTag(p.Profile, p.HashTags)
+				}
+				@CardIsFull() {
+					<h3>Users</h3>
+					@user(p.Profile, p.Users)
+				}
+				@Card() {
+					<h3>Notes</h3>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) }>All Notes</a>
+				}
+				@Card() {
+					<h3>Archives</h3>
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) }>All Archives</a>
+				}
 			</div>
 		</div>
 	}
