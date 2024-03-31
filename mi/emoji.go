@@ -1,3 +1,4 @@
+// [Emojis]
 // /emoji
 // https://mholt.github.io/json-to-go/ で生成後、修正
 package mi

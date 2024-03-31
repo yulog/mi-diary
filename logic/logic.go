@@ -245,7 +245,7 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 			Host:   host,
 		}).String(),
 	}
-	resp, err := conf.Exchange()
+	resp, err := conf.Exchange(ctx)
 	if err != nil {
 		return err
 	}
