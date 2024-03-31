@@ -13,9 +13,10 @@ import (
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/infra"
-	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/util/pg"
+	mi "github.com/yulog/miutil"
+	"github.com/yulog/miutil/miauth"
 )
 
 type Logic struct {
@@ -217,7 +218,7 @@ func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
 func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
 	u, _ := url.Parse(server)
 
-	conf := &mi.AuthConfig{
+	conf := &miauth.AuthConfig{
 		Name: "mi-diary-app",
 		Callback: (&url.URL{
 			Scheme: "http",
@@ -238,7 +239,7 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 		return err
 	}
 
-	conf := &mi.AuthConfig{
+	conf := &miauth.AuthConfig{
 		SessionID: id,
 		Host: (&url.URL{
 			Scheme: "https",

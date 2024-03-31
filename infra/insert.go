@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/uptrace/bun"
-	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
+	mi "github.com/yulog/miutil"
 )
 
 func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {

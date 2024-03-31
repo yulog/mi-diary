@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/yulog/mi-diary/infra"
-	"github.com/yulog/mi-diary/mi"
+	mi "github.com/yulog/miutil"
 )
 
 type EmojiLogic interface {

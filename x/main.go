@@ -11,8 +11,9 @@ import (
 
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
-	"github.com/yulog/mi-diary/mi"
 	"github.com/yulog/mi-diary/model"
+	mi "github.com/yulog/miutil"
+	"github.com/yulog/miutil/miauth"
 
 	"github.com/uptrace/bun"
 
@@ -21,7 +22,7 @@ import (
 
 func main() {
 	u, _ := url.Parse("https://misskey.io")
-	conf := &mi.AuthConfig{
+	conf := &miauth.AuthConfig{
 		Name:       "mi-diary-test",
 		Callback:   fmt.Sprintf("http://localhost:1323/callback/%s", u.Host),
 		Permission: []string{"read:reactions"},
