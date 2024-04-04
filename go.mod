@@ -3,11 +3,11 @@ module github.com/yulog/mi-diary
 go 1.22.0
 
 require (
-	github.com/a-h/templ v0.2.543
+	github.com/a-h/templ v0.2.648
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.11.4
-	github.com/uptrace/bun v1.1.17
-	modernc.org/sqlite v1.29.2
+	github.com/uptrace/bun v1.2.1
+	modernc.org/sqlite v1.29.5
 )
 
 require (
@@ -23,7 +23,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.19 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
@@ -47,10 +47,10 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
-	modernc.org/libc v1.41.0 // indirect
+	modernc.org/gc/v3 v3.0.0-20240304020402-f0dba7c97c2b // indirect
+	modernc.org/libc v1.49.0 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
-	modernc.org/memory v1.7.2 // indirect
+	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
@@ -64,11 +64,11 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/sqldef/sqldef v0.16.15
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
-	github.com/uptrace/bun/dialect/sqlitedialect v1.1.17
-	github.com/uptrace/bun/driver/sqliteshim v1.1.17
-	github.com/uptrace/bun/extra/bundebug v1.1.17
+	github.com/uptrace/bun/dialect/sqlitedialect v1.2.1
+	github.com/uptrace/bun/driver/sqliteshim v1.2.1
+	github.com/uptrace/bun/extra/bundebug v1.2.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yulog/miutil v0.0.0-20240331053136-a9d24cef0f2c
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )
