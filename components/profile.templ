@@ -4,17 +4,17 @@ import "fmt"
 
 templ SelectProfile(title string, profiles []string) {
 	@BaseWithoutNav(title) {
-		@CardIsFull() {
-			<div class="content">
-				<h3>Profiles</h3>
-				<ul>
+		<div class="columns is-centered">
+			@PanelHeaderlessIsHalf() {
+				<div class="content">
+					<div class="panel-heading">Profiles</div>
 					for _, profile := range profiles {
-						<li><a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) }>{ profile }</a></li>
+						<a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="panel-block">{ profile }</a>
 					}
-				</ul>
-				<a href={ templ.URL("/profiles") } class="button">Add Profile</a>
-			</div>
-		}
+					<span class="panel-block"><a href={ templ.URL("/profiles") } class="button is-primary is-outlined is-fullwidth">Add Profile</a></span>
+				</div>
+			}
+		</div>
 	}
 }
 

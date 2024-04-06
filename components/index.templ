@@ -29,13 +29,21 @@ templ (p IndexParams) Index() {
 					<h3>Users</h3>
 					@user(p.Profile, p.Users)
 				}
-				@Card() {
-					<h3>Notes</h3>
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) }>All Notes</a>
+				@CardFrame() {
+					@CardContent() {
+						<h3>Notes</h3>
+					}
+					@CardFooter() {
+						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) } class="card-footer-item">View All</a>
+					}
 				}
-				@Card() {
-					<h3>Archives</h3>
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) }>All Archives</a>
+				@CardFrame() {
+					@CardContent() {
+						<h3>Archives</h3>
+					}
+					@CardFooter() {
+						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) } class="card-footer-item">View All</a>
+					}
 				}
 			</div>
 		</div>

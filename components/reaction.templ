@@ -10,18 +10,16 @@ css emoji() {
 }
 
 templ reaction(profile string, items []model.Reaction) {
-	<ul class="tags">
+	<div class="tags ml-5">
 		for _, item := range items {
-			<li class="tag">
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name)) } class="level-left">
-					if item.Image != "" {
-						<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", emoji() }/>
-					} else {
-						<span class="level-item">{ item.Name }</span>
-					}
-					<span class="level-item">( { fmt.Sprintf("%d", item.Count) } )</span>
-				</a>
-			</li>
+			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name)) } class="tag level-left">
+				if item.Image != "" {
+					<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", emoji() }/>
+				} else {
+					<span class="level-item">{ item.Name }</span>
+				}
+				<span class="level-item">( { fmt.Sprintf("%d", item.Count) } )</span>
+			</a>
 		}
-	</ul>
+	</div>
 }

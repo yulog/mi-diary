@@ -1,21 +1,19 @@
 package components
 
 templ Card() {
-	<div class="column">
-		<div class="card">
-			<div class="card-content">
-				{ children... }
-			</div>
-		</div>
-	</div>
+	@CardFrame() {
+		@CardContent() {
+			{ children... }
+		}
+	}
 }
 
 templ CardIsFull() {
 	<div class="column is-full">
 		<div class="card">
-			<div class="card-content">
+			@CardContent() {
 				{ children... }
-			</div>
+			}
 		</div>
 	</div>
 }
@@ -23,9 +21,29 @@ templ CardIsFull() {
 templ CardAsListIsFull() {
 	<li class="column is-full">
 		<div class="card">
-			<div class="card-content">
+			@CardContent() {
 				{ children... }
-			</div>
+			}
 		</div>
 	</li>
+}
+
+templ CardFrame() {
+	<div class="column">
+		<div class="card">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ CardContent() {
+	<div class="card-content">
+		{ children... }
+	</div>
+}
+
+templ CardFooter() {
+	<footer class="card-footer">
+		{ children... }
+	</footer>
 }
