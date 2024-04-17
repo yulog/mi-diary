@@ -14,13 +14,14 @@ type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
 	ID           string `bun:",pk"`
-	UserID       string `bun:",pk"`
+	UserID       string // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
 	ReactionName string
 	Text         string
 	CreatedAt    time.Time
 	User         User      `bun:"rel:belongs-to,join:user_id=id"`
 	Reaction     Reaction  `bun:"rel:belongs-to,join:reaction_name=name"`
 	Tags         []HashTag `bun:"m2m:note_to_tags,join:Note=HashTag"`
+	Files        []File    `bun:"m2m:note_to_files,join:Note=File"`
 }
 
 type User struct {
@@ -55,6 +56,23 @@ type NoteToTag struct {
 	Note      *Note    `bun:"rel:belongs-to,join:note_id=id"`
 	HashTagID int64    `bun:",pk"`
 	HashTag   *HashTag `bun:"rel:belongs-to,join:hash_tag_id=id"`
+}
+
+type File struct {
+	// bun.BaseModel `bun:"table:files,alias:f"`
+
+	ID           string `bun:",pk"`
+	Name         string
+	URL          string
+	ThumbnailURL string
+	Notes        []Note `bun:"m2m:note_to_files,join:File=Note"`
+}
+
+type NoteToFile struct {
+	NoteID string `bun:",pk"`
+	Note   *Note  `bun:"rel:belongs-to,join:note_id=id"`
+	FileID string `bun:",pk"`
+	File   *File  `bun:"rel:belongs-to,join:file_id=id"`
 }
 
 type Month struct {

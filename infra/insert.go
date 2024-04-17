@@ -35,10 +35,11 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
 		var (
-			users      []model.User
-			notes      []model.Note
-			reactions  []model.Reaction
-			noteToTags []model.NoteToTag
+			users       []model.User
+			notes       []model.Note
+			reactions   []model.Reaction
+			noteToTags  []model.NoteToTag
+			noteToFiles []model.NoteToFile
 		)
 
 		for _, v := range r {
@@ -62,6 +63,17 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 				// pp.Println(ht.ID)
 				// id is scanned automatically
 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+			}
+
+			for _, fv := range v.Note.Files {
+				f := model.File{
+					ID:           fv.ID,
+					Name:         fv.Name,
+					URL:          fv.URL,
+					ThumbnailURL: fv.ThumbnailURL,
+				}
+				_, _ = db.NewInsert().Model(&f).On("CONFLICT DO UPDATE").Exec(ctx)
+				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
 			}
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
@@ -105,6 +117,13 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		// 0件の場合がある
 		if len(noteToTags) > 0 {
 			_, err = db.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(noteToFiles) > 0 {
+			_, err = db.NewInsert().Model(&noteToFiles).Ignore().Exec(ctx)
 			if err != nil {
 				return err
 			}

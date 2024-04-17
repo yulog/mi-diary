@@ -11,7 +11,15 @@ type Note struct {
 	Title   string
 	Profile string
 	Host    string
-	Items   []model.DisplayNote
+	Items   []model.Note
+}
+
+css grid() {
+	grid-template-columns: repeat(auto-fit, 128px);
+}
+
+css cell() {
+	width: fit-content;
 }
 
 templ (n Note) WithPage() {
@@ -27,28 +35,50 @@ templ (n Note) WithPages(p Pages) {
 }
 
 // SQLite は日時をUTCで保持する
-templ noteList(host string, items []model.DisplayNote) {
+templ noteList(host string, items []model.Note) {
+	<style type="text/css">
+		img.Thumbnail {
+			height: 128px;
+			width: 128px;
+			object-fit: contain;
+		}
+	</style>
 	<ul class="columns is-multiline">
 		for _, item := range items {
 			@CardAsListIsFull() {
 				<div class="media">
 					<div class="media-left">
 						<figure class="image is-48x48">
-							<img class="is-rounded" src={ item.AvatarURL } alt={ fmt.Sprintf("%s Avatar", item.DisplayName) }/>
+							<img class="is-rounded" src={ item.User.AvatarURL } alt={ fmt.Sprintf("%s Avatar", item.User.DisplayName) }/>
 						</figure>
 					</div>
 					<div class="media-content">
 						<p>
-							{ item.DisplayName }
+							{ item.User.DisplayName }
 						</p>
 						<p class="has-text-grey">
-							{ fmt.Sprintf("@%s", item.UserName) }
+							{ fmt.Sprintf("@%s", item.User.Name) }
 						</p>
 					</div>
 				</div>
 				<div class="content">
 					<div>
 						{ item.Text }
+					</div>
+					<div class={ "grid", grid() }>
+						for _,file := range item.Files {
+							<div class={ "cell", cell() }>
+								<div class="card">
+									<div class="card-image">
+										<a href={ templ.URL(file.URL) } class="luminous">
+											<figure class="image">
+												<img src={ file.ThumbnailURL } alt={ file.Name } class="Thumbnail"/>
+											</figure>
+										</a>
+									</div>
+								</div>
+							</div>
+						}
 					</div>
 					<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, item.ID)) } target="_blank" class="has-text-grey is-underlined">
 						{ item.ID } ({ item.CreatedAt.In(time.Local).Format(time.DateTime) })
@@ -57,4 +87,11 @@ templ noteList(host string, items []model.DisplayNote) {
 			}
 		}
 	</ul>
+	<script type="text/javascript">
+		new LuminousGallery(document.querySelectorAll(".luminous"), {}, {
+  			caption: (elem) => {
+				return elem.querySelector("img").getAttribute("alt");
+  			}
+		});
+	</script>
 }

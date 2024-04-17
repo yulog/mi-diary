@@ -48,6 +48,8 @@ func GenerateSchema() {
 		(*model.Reaction)(nil),
 		(*model.HashTag)(nil),
 		(*model.NoteToTag)(nil),
+		(*model.File)(nil),
+		(*model.NoteToFile)(nil),
 		(*model.Month)(nil),
 		(*model.Day)(nil),
 	}

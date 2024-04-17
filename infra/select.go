@@ -38,63 +38,54 @@ func (infra *Infra) Users(ctx context.Context, profile string) []model.User {
 	return users
 }
 
-func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string) []model.DisplayNote {
-	var notes []model.DisplayNote
+func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string) []model.Note {
+	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name").
-				ColumnExpr("avatar_url")
-		}).
+		Model(&notes).
+		Relation("User").
+		Relation("Files").
 		Where("reaction_name = ?", name).
 		Order("created_at DESC").
-		Scan(ctx, &notes)
+		Scan(ctx)
 	return notes
 }
 
-func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []model.DisplayNote {
-	var notes []model.DisplayNote
-	infra.DB(profile).
+func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []model.Note {
+	// サブクエリを使う
+	// note idだけ必要
+	sq := infra.DB(profile).
 		NewSelect().
 		Model((*model.NoteToTag)(nil)).
 		// 必要な列だけ選択して、不要な列をなくす
-		Relation("Note", func(q *bun.SelectQuery) *bun.SelectQuery {
-			// 全部asするの面倒…
-			return q.ColumnExpr("note.id as id").
-				ColumnExpr("note.user_id as user_id").
-				ColumnExpr("note.reaction_name as reaction_name").
-				ColumnExpr("note.text as text").
-				ColumnExpr("note.created_at as created_at")
-		}).
 		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.ExcludeColumn("*")
 		}).
-		// 間接的なリレーションはRelationだと結合できない？
-		Join("JOIN users as u ON u.id = note.user_id").
-		ColumnExpr("u.name as user_name").
-		ColumnExpr("u.display_name as display_name").
-		ColumnExpr("u.avatar_url as avatar_url").
-		Where("hash_tag.text = ?", name).
+		Column("note_id").
+		Where("hash_tag.text = ?", name)
+
+	var notes []model.Note
+	infra.DB(profile).
+		NewSelect().
+		Model(&notes).
+		Relation("User").
+		Relation("Files").
+		Where("n.id IN (?)", sq). // サブクエリを使う
 		Order("created_at DESC").
-		Scan(ctx, &notes)
+		Scan(ctx)
 	return notes
 }
 
-func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model.DisplayNote {
-	var notes []model.DisplayNote
+func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model.Note {
+	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name").
-				ColumnExpr("avatar_url")
-		}).
-		Where("user_name = ?", name).
+		Model(&notes).
+		Relation("User").
+		Relation("Files").
+		Where("user.name = ?", name).
 		Order("created_at DESC").
-		Scan(ctx, &notes)
+		Scan(ctx)
 	return notes
 }
 
@@ -105,20 +96,17 @@ func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []model.DisplayNote {
-	var notes []model.DisplayNote
+func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []model.Note {
+	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name").
-				ColumnExpr("avatar_url")
-		}).
+		Model(&notes).
+		Relation("User").
+		Relation("Files").
 		Order("created_at DESC").
 		Limit(p.Limit()).
 		Offset(p.Offset()).
-		Scan(ctx, &notes)
+		Scan(ctx)
 	return notes
 }
 
@@ -139,20 +127,17 @@ func (infra *Infra) Archives(ctx context.Context, profile string) []model.Archiv
 	return archives
 }
 
-func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p *pg.Pager) []model.DisplayNote {
-	var notes []model.DisplayNote
+func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p *pg.Pager) []model.Note {
+	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ColumnExpr("name as user_name").
-				ColumnExpr("display_name").
-				ColumnExpr("avatar_url")
-		}).
-		Where(col+" = ?", d). // 条件指定に関数適用した列を使う
+		Model(&notes).
+		Relation("User").
+		Relation("Files").
+		Where("? = ?", bun.Safe(col), d). // 条件指定に関数適用した列を使う
 		Order("created_at DESC").
 		Limit(p.Limit()).
 		Offset(p.Offset()).
-		Scan(ctx, &notes)
+		Scan(ctx)
 	return notes
 }

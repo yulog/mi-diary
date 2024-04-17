@@ -44,7 +44,10 @@ func connect(profile string) *bun.DB {
 		bundebug.FromEnv("BUNDEBUG"),
 	))
 	// modelを最初に使う前にやる
-	db.RegisterModel((*model.NoteToTag)(nil))
+	db.RegisterModel(
+		(*model.NoteToTag)(nil),
+		(*model.NoteToFile)(nil),
+	)
 
 	return db
 }
