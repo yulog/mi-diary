@@ -42,6 +42,9 @@ templ noteList(host string, items []model.Note) {
 			width: 128px;
 			object-fit: contain;
 		}
+		.lum-lightbox.lum-open{
+			z-index: 30;
+		}
 	</style>
 	<ul class="columns is-multiline">
 		for _, item := range items {
