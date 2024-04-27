@@ -1,7 +1,7 @@
 package components
 
 templ Form(postURL, label, inputName, placeholder, button string) {
-	<form hx-post={ postURL } hx-swap="none">
+	<form hx-post={ string(templ.URL(postURL)) } hx-swap="none">
 		<label class="label">
 			{ label }
 			<div class="field has-addons">
