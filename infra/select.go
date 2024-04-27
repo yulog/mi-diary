@@ -130,20 +130,14 @@ func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []mo
 	return notes
 }
 
-func (infra *Infra) Archives(ctx context.Context, profile string) []model.Archive {
-	var archives []model.Archive
+func (infra *Infra) Archives(ctx context.Context, profile string) []model.Day {
+	var archives []model.Day
 	infra.DB(profile).
 		NewSelect().
-		Model((*model.Day)(nil)).
-		Relation("Month", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Column("")
-		}).
-		ColumnExpr("d.ym as ym").
-		ColumnExpr("month.count as ym_count").
-		ColumnExpr("d.ymd as ymd").
-		ColumnExpr("d.count as ymd_count").
-		Order("ym DESC", "ymd DESC").
-		Scan(ctx, &archives)
+		Model(&archives).
+		Relation("Month").
+		Order("month.ym DESC", "ymd DESC").
+		Scan(ctx)
 	return archives
 }
 

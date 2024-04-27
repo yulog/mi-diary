@@ -18,7 +18,7 @@ import (
 type ArchiveParams struct {
 	Title   string
 	Profile string
-	Items   []model.Archive
+	Items   []model.Day
 }
 
 var header = ""
@@ -58,7 +58,7 @@ func (p ArchiveParams) Archive() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, item := range p.Items {
-				if header != item.YM && isOpen {
+				if header != item.Month.YM && isOpen {
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(setIsOpen(false))
 					if templ_7745c5c3_Err != nil {
@@ -77,11 +77,11 @@ func (p ArchiveParams) Archive() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if header != item.YM {
+				if header != item.Month.YM {
 					var templ_7745c5c3_Var4 string
-					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(setHeader(item.YM))
+					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(setHeader(item.Month.YM))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 36, Col: 25}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 36, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -91,7 +91,7 @@ func (p ArchiveParams) Archive() templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var5 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YM))
+					var templ_7745c5c3_Var5 templ.SafeURL = templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.Month.YM))
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -101,9 +101,9 @@ func (p ArchiveParams) Archive() templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var6 string
-					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.YM)
+					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Month.YM)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 38, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 38, Col: 25}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -114,9 +114,9 @@ func (p ArchiveParams) Archive() templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.YmCount))
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Month.Count))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 38, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 38, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -173,9 +173,9 @@ func (p ArchiveParams) Archive() templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.YmdCount))
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Count))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 47, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\archive.templ`, Line: 47, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {

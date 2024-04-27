@@ -8,7 +8,7 @@ import (
 type ArchiveParams struct {
 	Title   string
 	Profile string
-	Items   []model.Archive
+	Items   []model.Day
 }
 
 var header = ""
@@ -28,14 +28,14 @@ templ (p ArchiveParams) Archive() {
 	@BaseWithNav(p.Title, p.Profile) {
 		<div class="content">
 			for _, item := range p.Items {
-				if header != item.YM && isOpen {
+				if header != item.Month.YM && isOpen {
 					{ setIsOpen(false) }
 					@templ.Raw("</ul>")
 				}
-				if header != item.YM {
-					{ setHeader(item.YM) }
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YM)) }>
-						<h3>{ item.YM } ( { fmt.Sprintf("%d", item.YmCount) } )</h3>
+				if header != item.Month.YM {
+					{ setHeader(item.Month.YM) }
+					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.Month.YM)) }>
+						<h3>{ item.Month.YM } ( { fmt.Sprintf("%d", item.Month.Count) } )</h3>
 					</a>
 				}
 				if !isOpen {
@@ -44,7 +44,7 @@ templ (p ArchiveParams) Archive() {
 				}
 				<li>
 					<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YMD)) }>
-						{ item.YMD } ( { fmt.Sprintf("%d", item.YmdCount) } )
+						{ item.YMD } ( { fmt.Sprintf("%d", item.Count) } )
 					</a>
 				</li>
 			}
