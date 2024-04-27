@@ -3,11 +3,11 @@ package infra
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/goccy/go-json"
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
@@ -16,21 +16,20 @@ import (
 func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
 	// JSON読み込み
 	f, _ := os.ReadFile("users_reactions.json")
+	var r mi.Reactions
+	json.Unmarshal(f, &r)
 
-	infra.Insert(ctx, profile, f)
+	infra.Insert(ctx, profile, &r)
 }
 
-func (infra *Infra) Insert(ctx context.Context, profile string, b []byte) {
+func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) {
 	db := infra.DB(profile)
-	// JSON Unmarshal
-	var r mi.Reactions
-	json.Unmarshal(b, &r)
 	// pp.Println(r)
 
 	tx(ctx, db, r)
 }
 
-func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
+func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) {
 	// まとめて追加する(トランザクション)
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
@@ -39,10 +38,11 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 			notes       []model.Note
 			reactions   []model.Reaction
 			noteToTags  []model.NoteToTag
+			files       []model.File
 			noteToFiles []model.NoteToFile
 		)
 
-		for _, v := range r {
+		for _, v := range *r {
 			var dn string
 			if v.Note.User.Name == nil {
 				dn = v.Note.User.Username
@@ -59,7 +59,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 
 			for _, tv := range v.Note.Tags {
 				ht := model.HashTag{Text: tv}
-				_, _ = db.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
+				_, _ = tx.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
 				// pp.Println(ht.ID)
 				// id is scanned automatically
 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
@@ -73,7 +73,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 					ThumbnailURL: fv.ThumbnailURL,
 					CreatedAt:    fv.CreatedAt,
 				}
-				_, _ = db.NewInsert().Model(&f).On("CONFLICT DO UPDATE").Exec(ctx)
+				files = append(files, f)
 				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
 			}
 
@@ -95,13 +95,13 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		}
 
 		// 重複していたらアップデート
-		_, err := db.NewInsert().Model(&users).On("CONFLICT DO UPDATE").Exec(ctx)
+		_, err := tx.NewInsert().Model(&users).On("CONFLICT DO UPDATE").Exec(ctx)
 		if err != nil {
 			return err
 		}
 
 		// 重複していたら登録しない(エラーにしない)
-		result, err := db.NewInsert().Model(&notes).Ignore().Exec(ctx)
+		result, err := tx.NewInsert().Model(&notes).Ignore().Exec(ctx)
 		if err != nil {
 			return err
 		}
@@ -110,27 +110,34 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 		// TODO: すべて取得するようにする際はinsert件数が0まで
 		// until(?)とかを付けて繰り返す？
 
-		_, err = db.NewInsert().Model(&reactions).Ignore().Exec(ctx)
+		_, err = tx.NewInsert().Model(&reactions).Ignore().Exec(ctx)
 		if err != nil {
 			return err
 		}
 
 		// 0件の場合がある
 		if len(noteToTags) > 0 {
-			_, err = db.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+			_, err = tx.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(files) > 0 {
+			_, err = tx.NewInsert().Model(&files).On("CONFLICT DO UPDATE").Exec(ctx)
 			if err != nil {
 				return err
 			}
 		}
 
 		if len(noteToFiles) > 0 {
-			_, err = db.NewInsert().Model(&noteToFiles).Ignore().Exec(ctx)
+			_, err = tx.NewInsert().Model(&noteToFiles).Ignore().Exec(ctx)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = count(ctx, db)
+		err = count(ctx, tx)
 		// TODO: あってもなくても変わらない vs 統一感
 		if err != nil {
 			return err
@@ -143,7 +150,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 	}
 }
 
-func count(ctx context.Context, db *bun.DB) error {
+func count(ctx context.Context, db bun.IDB) error {
 	// リアクションのカウント
 	var reactions []model.Reaction
 	err := db.NewSelect().
@@ -260,11 +267,8 @@ func count(ctx context.Context, db *bun.DB) error {
 	return err
 }
 
-func (infra *Infra) InsertEmoji(ctx context.Context, profile string, b []byte) {
+func (infra *Infra) InsertEmoji(ctx context.Context, profile string, e *mi.Emoji) {
 	db := infra.DB(profile)
-	// JSON Unmarshal
-	var e mi.Emoji
-	json.Unmarshal(b, &e)
 	// pp.Println(r)
 
 	// TODO: emoji画像をローカルに保存する

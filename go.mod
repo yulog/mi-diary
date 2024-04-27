@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/uptrace/bun v1.2.1
-	modernc.org/sqlite v1.29.7
+	modernc.org/sqlite v1.29.8
 )
 
 require (
@@ -48,7 +48,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240304020402-f0dba7c97c2b // indirect
-	modernc.org/libc v1.49.3 // indirect
+	modernc.org/libc v1.50.4 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
@@ -57,7 +57,7 @@ require (
 
 require (
 	github.com/goccy/go-json v0.10.2
-	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/magefile/mage v1.15.0
@@ -69,6 +69,6 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/yulog/miutil v0.0.0-20240331053136-a9d24cef0f2c
+	github.com/yulog/miutil v0.0.0-20240427125314-2a19fa5285de
 	golang.org/x/sys v0.19.0 // indirect
 )

@@ -1,10 +1,12 @@
 package logic
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"net/url"
 
+	"github.com/goccy/go-json"
 	"github.com/yulog/mi-diary/infra"
 	mi "github.com/yulog/miutil"
 )
@@ -25,16 +27,23 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 	body := map[string]any{
 		"name": name,
 	}
-	// if id != "" {
-	// 	body["untilId"] = id
-	// }
-	b, _ := json.Marshal(body)
+
+	// b, _ := json.Marshal(body)
 	// fmt.Println(string(b))
-	u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
-	resp, err := mi.Post(u, b)
+	// https://host.tld/api/emoji
+	// u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
+	u := (&url.URL{
+		Scheme: "https",
+		Host:   l.repo.Config().Profiles[profile].Host,
+	}).
+		JoinPath("api", "emoji").String()
+	buf := bytes.NewBuffer(nil)
+	json.NewEncoder(buf).Encode(body)
+
+	emoji, err := mi.Post2[mi.Emoji](u, buf)
 	if err != nil {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	l.repo.InsertEmoji(ctx, profile, resp)
+	l.repo.InsertEmoji(ctx, profile, emoji)
 }

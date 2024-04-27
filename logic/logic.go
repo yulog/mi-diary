@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -207,8 +208,7 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 	if id != "" {
 		body["untilId"] = id
 	}
-	b, _ := json.Marshal(body)
-	// fmt.Println(string(b))
+
 	// https://host.tld/api/users/reactions
 	// 却って分かりにくい気もする
 	u := (&url.URL{
@@ -216,12 +216,16 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 		Host:   l.repo.Config().Profiles[profile].Host,
 	}).
 		JoinPath("api", "users", "reactions").String()
-	resp, err := mi.Post(u, b)
+
+	buf := bytes.NewBuffer(nil)
+	json.NewEncoder(buf).Encode(body)
+
+	r, err := mi.Post2[mi.Reactions](u, buf)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// fmt.Println(string(resp))
-	l.repo.Insert(ctx, profile, resp)
+
+	l.repo.Insert(ctx, profile, r)
 }
 
 func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
@@ -229,20 +233,21 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 		"name": name,
 	}
 
-	b, _ := json.Marshal(body)
-	// fmt.Println(string(b))
 	// https://host.tld/api/emoji
 	u := (&url.URL{
 		Scheme: "https",
 		Host:   l.repo.Config().Profiles[profile].Host,
 	}).
 		JoinPath("api", "emoji").String()
-	resp, err := mi.Post(u, b)
+	buf := bytes.NewBuffer(nil)
+	json.NewEncoder(buf).Encode(body)
+
+	emoji, err := mi.Post2[mi.Emoji](u, buf)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// fmt.Println(string(resp))
-	l.repo.InsertEmoji(ctx, profile, resp)
+
+	l.repo.InsertEmoji(ctx, profile, emoji)
 }
 
 func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
