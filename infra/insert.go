@@ -71,6 +71,7 @@ func tx(ctx context.Context, db *bun.DB, r mi.Reactions) {
 					Name:         fv.Name,
 					URL:          fv.URL,
 					ThumbnailURL: fv.ThumbnailURL,
+					CreatedAt:    fv.CreatedAt,
 				}
 				_, _ = db.NewInsert().Model(&f).On("CONFLICT DO UPDATE").Exec(ctx)
 				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})

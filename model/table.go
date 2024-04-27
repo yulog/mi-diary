@@ -65,6 +65,7 @@ type File struct {
 	Name         string
 	URL          string
 	ThumbnailURL string
+	CreatedAt    time.Time
 	Notes        []Note `bun:"m2m:note_to_files,join:File=Note"`
 }
 

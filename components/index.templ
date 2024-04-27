@@ -39,6 +39,14 @@ templ (p IndexParams) Index() {
 				}
 				@CardFrame() {
 					@CardContent() {
+						<h3>Files</h3>
+					}
+					@CardFooter() {
+						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/files", p.Profile)) } class="card-footer-item">View All</a>
+					}
+				}
+				@CardFrame() {
+					@CardContent() {
 						<h3>Archives</h3>
 					}
 					@CardFooter() {

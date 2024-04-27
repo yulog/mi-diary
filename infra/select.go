@@ -89,6 +89,26 @@ func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model
 	return notes
 }
 
+func (infra *Infra) FileCount(ctx context.Context, profile string) (int, error) {
+	return infra.DB(profile).
+		NewSelect().
+		Model((*model.File)(nil)).
+		Count(ctx)
+}
+
+func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) []model.File {
+	var files []model.File
+	infra.DB(profile).
+		NewSelect().
+		Model(&files).
+		Relation("Notes").
+		Order("created_at DESC").
+		Limit(p.Limit()).
+		Offset(p.Offset()).
+		Scan(ctx)
+	return files
+}
+
 func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) {
 	return infra.DB(profile).
 		NewSelect().

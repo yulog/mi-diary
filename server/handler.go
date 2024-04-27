@@ -52,6 +52,23 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 	return renderer(c, srv.logic.UsersLogic(c.Request().Context(), profile, name))
 }
 
+// FilesHandler は /files のハンドラ
+func (srv *Server) FilesHandler(c echo.Context) error {
+	profile := c.Param("profile")
+	var p int
+	if err := echo.QueryParamsBinder(c).
+		Int("page", &p).
+		BindError(); err != nil {
+		return err
+	}
+
+	com, err := srv.logic.FilesLogic(c.Request().Context(), profile, p)
+	if err != nil {
+		return err
+	}
+	return renderer(c, com)
+}
+
 // NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
 	profile := c.Param("profile")

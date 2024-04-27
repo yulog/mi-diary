@@ -44,6 +44,7 @@ func main() {
 	profile.GET("/reactions/:name", srv.ReactionsHandler)
 	profile.GET("/hashtags/:name", srv.HashTagsHandler)
 	profile.GET("/users/:name", srv.UsersHandler)
+	profile.GET("/files", srv.FilesHandler)
 	profile.GET("/notes", srv.NotesHandler)
 	profile.GET("/archives", srv.ArchivesHandler)
 	profile.GET("/archives/:date", srv.ArchiveNotesHandler)

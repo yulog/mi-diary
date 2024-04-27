@@ -1,0 +1,69 @@
+package components
+
+import (
+	"fmt"
+
+	"github.com/yulog/mi-diary/model"
+)
+
+type File struct {
+	Title   string
+	Profile string
+	Host    string
+	Items   []model.File
+}
+
+templ (n File) WithPage() {
+	@BaseWithNav(n.Title, n.Profile) {
+		@fileList(n.Host, n.Items)
+	}
+}
+
+templ (n File) WithPages(p Pages) {
+	@Pagination(n.Title, n.Profile, p) {
+		@fileList(n.Host, n.Items)
+	}
+}
+
+// SQLite は日時をUTCで保持する
+templ fileList(host string, items []model.File) {
+	<style type="text/css">
+		img.Thumbnail {
+			height: 128px;
+			width: 128px;
+			object-fit: contain;
+		}
+		.lum-lightbox.lum-open{
+			z-index: 30;
+		}
+	</style>
+	<div class={ "grid", grid() }>
+		for _,file := range items {
+			<div class={ "cell", cell() }>
+				<div class="card">
+					<div class="card-image">
+						<a href={ templ.URL(file.URL) } class="luminous">
+							<figure class="image">
+								<img src={ file.ThumbnailURL } alt={ file.Name } class="Thumbnail"/>
+							</figure>
+						</a>
+					</div>
+					@CardFooter() {
+						for _, note := range file.Notes {
+							<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.ID)) } target="_blank" class="card-footer-item">
+								...
+							</a>
+						}
+					}
+				</div>
+			</div>
+		}
+	</div>
+	<script type="text/javascript">
+		new LuminousGallery(document.querySelectorAll(".luminous"), {}, {
+  			caption: (elem) => {
+				return elem.querySelector("img").getAttribute("alt");
+  			}
+		});
+	</script>
+}

@@ -78,6 +78,41 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Comp
 	}.WithPage()
 }
 
+func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
+	count, err := l.repo.FileCount(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(count)
+	p := pg.New(count)
+	page = p.Page(page)
+
+	files := l.repo.Files(ctx, profile, p)
+	if len(files) == 0 {
+		return nil, fmt.Errorf("file not found")
+	}
+
+	hasNext := len(files) >= p.Limit() && p.Next() <= p.Last()
+	hasLast := p.Next() < p.Last()
+
+	n := cm.File{
+		Title:   fmt.Sprint(page),
+		Profile: profile,
+		Host:    l.repo.Config().Profiles[profile].Host,
+		Items:   files,
+	}
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: hasLast,
+	}
+
+	return n.WithPages(cp), nil
+}
+
 func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
 	count, err := l.repo.NoteCount(ctx, profile)
 	if err != nil {
