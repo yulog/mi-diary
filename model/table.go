@@ -81,6 +81,7 @@ type Month struct {
 
 	YM    string `bun:",pk"`
 	Count int64
+	Days  []*Day `bun:"rel:has-many,join:ym=ym"`
 }
 
 type Day struct {

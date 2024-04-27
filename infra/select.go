@@ -130,13 +130,15 @@ func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []mo
 	return notes
 }
 
-func (infra *Infra) Archives(ctx context.Context, profile string) []model.Day {
-	var archives []model.Day
+func (infra *Infra) Archives(ctx context.Context, profile string) []model.Month {
+	var archives []model.Month
 	infra.DB(profile).
 		NewSelect().
 		Model(&archives).
-		Relation("Month").
-		Order("month.ym DESC", "ymd DESC").
+		Relation("Days", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("ymd DESC")
+		}).
+		Order("ym DESC").
 		Scan(ctx)
 	return archives
 }
