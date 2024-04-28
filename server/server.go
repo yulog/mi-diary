@@ -18,3 +18,12 @@ func New(l *logic.Logic) *Server {
 func renderer(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
+
+func page(c echo.Context, p *int) error {
+	if err := echo.QueryParamsBinder(c).
+		Int("page", p).
+		BindError(); err != nil {
+		return err
+	}
+	return nil
+}

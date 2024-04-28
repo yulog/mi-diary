@@ -32,33 +32,43 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 func (srv *Server) ReactionsHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
+	var p int
+	if err := page(c, &p); err != nil {
+		return err
+	}
 
-	return renderer(c, srv.logic.ReactionsLogic(c.Request().Context(), profile, name))
+	return renderer(c, srv.logic.ReactionsLogic(c.Request().Context(), profile, name, p))
 }
 
 // HashTagsHandler は /hashtags/:name のハンドラ
 func (srv *Server) HashTagsHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
+	var p int
+	if err := page(c, &p); err != nil {
+		return err
+	}
 
-	return renderer(c, srv.logic.HashTagsLogic(c.Request().Context(), profile, name))
+	return renderer(c, srv.logic.HashTagsLogic(c.Request().Context(), profile, name, p))
 }
 
 // UsersHandler は /users/:name のハンドラ
 func (srv *Server) UsersHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	name := c.Param("name")
+	var p int
+	if err := page(c, &p); err != nil {
+		return err
+	}
 
-	return renderer(c, srv.logic.UsersLogic(c.Request().Context(), profile, name))
+	return renderer(c, srv.logic.UsersLogic(c.Request().Context(), profile, name, p))
 }
 
 // FilesHandler は /files のハンドラ
 func (srv *Server) FilesHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	var p int
-	if err := echo.QueryParamsBinder(c).
-		Int("page", &p).
-		BindError(); err != nil {
+	if err := page(c, &p); err != nil {
 		return err
 	}
 
@@ -73,9 +83,7 @@ func (srv *Server) FilesHandler(c echo.Context) error {
 func (srv *Server) NotesHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	var p int
-	if err := echo.QueryParamsBinder(c).
-		Int("page", &p).
-		BindError(); err != nil {
+	if err := page(c, &p); err != nil {
 		return err
 	}
 
@@ -98,9 +106,7 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	d := c.Param("date")
 	var p int
-	if err := echo.QueryParamsBinder(c).
-		Int("page", &p).
-		BindError(); err != nil {
+	if err := page(c, &p); err != nil {
 		return err
 	}
 

@@ -38,7 +38,7 @@ func (infra *Infra) Users(ctx context.Context, profile string) []model.User {
 	return users
 }
 
-func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string) []model.Note {
+func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
 	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
@@ -47,11 +47,13 @@ func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string) []m
 		Relation("Files").
 		Where("reaction_name = ?", name).
 		Order("created_at DESC").
+		Limit(p.Limit()).
+		Offset(p.Offset()).
 		Scan(ctx)
 	return notes
 }
 
-func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []model.Note {
+func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
 	// サブクエリを使う
 	// note idだけ必要
 	sq := infra.DB(profile).
@@ -62,7 +64,9 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []mo
 			return q.ExcludeColumn("*")
 		}).
 		Column("note_id").
-		Where("hash_tag.text = ?", name)
+		Where("hash_tag.text = ?", name).
+		Limit(p.Limit()).
+		Offset(p.Offset())
 
 	var notes []model.Note
 	infra.DB(profile).
@@ -76,7 +80,7 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string) []mo
 	return notes
 }
 
-func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model.Note {
+func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
 	var notes []model.Note
 	infra.DB(profile).
 		NewSelect().
@@ -85,6 +89,8 @@ func (infra *Infra) UserNotes(ctx context.Context, profile, name string) []model
 		Relation("Files").
 		Where("user.name = ?", name).
 		Order("created_at DESC").
+		Limit(p.Limit()).
+		Offset(p.Offset()).
 		Scan(ctx)
 	return notes
 }

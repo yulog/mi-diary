@@ -52,31 +52,82 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	}.Index(), nil
 }
 
-func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string) templ.Component {
-	return cm.Note{
+func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, page int) templ.Component {
+	p := pg.New(0)
+	page = p.Page(page)
+
+	notes := l.repo.ReactionNotes(ctx, profile, name, p)
+
+	hasNext := len(notes) >= p.Limit()
+
+	n := cm.Note{
 		Title:   name,
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   l.repo.ReactionNotes(ctx, profile, name),
-	}.WithPage()
+		Items:   notes,
+	}
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: false,
+	}
+
+	return n.WithPages(cp)
 }
 
-func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string) templ.Component {
-	return cm.Note{
+func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, page int) templ.Component {
+	p := pg.New(0)
+	page = p.Page(page)
+
+	notes := l.repo.HashTagNotes(ctx, profile, name, p)
+
+	hasNext := len(notes) >= p.Limit()
+
+	n := cm.Note{
 		Title:   name,
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   l.repo.HashTagNotes(ctx, profile, name),
-	}.WithPage()
+		Items:   notes,
+	}
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: false,
+	}
+
+	return n.WithPages(cp)
 }
 
-func (l *Logic) UsersLogic(ctx context.Context, profile, name string) templ.Component {
-	return cm.Note{
-		Title:   name,
+func (l *Logic) UsersLogic(ctx context.Context, profile, name string, page int) templ.Component {
+	p := pg.New(0)
+	page = p.Page(page)
+
+	notes := l.repo.UserNotes(ctx, profile, name, p)
+
+	hasNext := len(notes) >= p.Limit()
+
+	n := cm.Note{
+		Title:   fmt.Sprintf("%s - %d", name, page),
 		Profile: profile,
 		Host:    l.repo.Config().Profiles[profile].Host,
-		Items:   l.repo.UserNotes(ctx, profile, name),
-	}.WithPage()
+		Items:   notes,
+	}
+	cp := cm.Pages{
+		Current: page,
+		Prev:    p.Prev(),
+		Next:    p.Next(),
+		Last:    p.Last(),
+		HasNext: hasNext,
+		HasLast: false,
+	}
+
+	return n.WithPages(cp)
 }
 
 func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
