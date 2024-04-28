@@ -101,7 +101,9 @@ func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) []mo
 	infra.DB(profile).
 		NewSelect().
 		Model(&files).
-		Relation("Notes").
+		Relation("Notes", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Relation("User")
+		}).
 		Order("created_at DESC").
 		Limit(p.Limit()).
 		Offset(p.Offset()).
