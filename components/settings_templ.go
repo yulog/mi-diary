@@ -82,7 +82,7 @@ func getReaction(profile string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Note ID", "note-id", "", "Get").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

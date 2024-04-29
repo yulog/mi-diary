@@ -80,6 +80,7 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) {
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 			n := model.Note{
 				ID:           v.Note.ID,
+				ReactionID:   v.ID,
 				UserID:       v.Note.User.ID,
 				ReactionName: reactionName,
 				Text:         v.Note.Text,

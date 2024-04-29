@@ -123,7 +123,7 @@ func (srv *Server) SettingsHandler(c echo.Context) error {
 // SettingsReactionsHandler は /settings/reactions のハンドラ
 func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 	profile := c.Param("profile")
-	id := c.FormValue("note-id")
+	id := c.FormValue("reaction-id")
 
 	srv.logic.SettingsReactionsLogic(c.Request().Context(), profile, id)
 	return c.HTML(http.StatusOK, id)

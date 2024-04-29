@@ -14,6 +14,7 @@ type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
 	ID           string `bun:",pk"`
+	ReactionID   string
 	UserID       string // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
 	ReactionName string
 	Text         string
