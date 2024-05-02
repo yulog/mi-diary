@@ -39,7 +39,6 @@ func main() {
 	job := e.Group("/job")
 	job.GET("", srv.JobHandler)
 	job.GET("/progress", srv.JobProgressHandler)
-	// job.POST("/start", server.MakeHandler(srv.JobStartHandler, app.Job))
 	job.POST("/start", srv.JobStartHandler)
 
 	profiles := e.Group("/profiles")
