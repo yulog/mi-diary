@@ -281,7 +281,6 @@ func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
 }
 
 func (l *Logic) JobProcesser() {
-	// for j := range job {
 	for j := range l.repo.GetJob() {
 		for i := 0; i < 10; i++ {
 			p := l.repo.GetProgress()

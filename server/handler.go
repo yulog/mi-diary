@@ -126,7 +126,7 @@ func (srv *Server) ManageHandler(c echo.Context) error {
 	return renderer(c, srv.logic.ManageLogic(c.Request().Context()))
 }
 
-// func (srv *Server) JobStartHandler(c echo.Context, ch chan app.Job) error {
+// JobStartHandler は /job/start のハンドラ
 func (srv *Server) JobStartHandler(c echo.Context) error {
 	j := new(Job)
 	if err := c.Bind(j); err != nil {
@@ -138,15 +138,10 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 		ID:      j.ID,
 	}
 
-	// fmt.Println(id)
-	// ジョブキューとかに処理を渡す
-	// ch <- job
-
-	// srv.logic.JobStartLogic(c.Request().Context())
-
 	return renderer(c, srv.logic.JobStartLogic(c.Request().Context(), job))
 }
 
+// JobProgressHandler は /job/progress のハンドラ
 func (srv *Server) JobProgressHandler(c echo.Context) error {
 	p, cm := srv.logic.JobProgressLogic(c.Request().Context())
 
@@ -157,6 +152,7 @@ func (srv *Server) JobProgressHandler(c echo.Context) error {
 	return renderer(c, cm)
 }
 
+// JobHandler は /job のハンドラ
 func (srv *Server) JobHandler(c echo.Context) error {
 	profile := c.Param("profile")
 	cm := srv.logic.JobLogic(c.Request().Context(), profile)
