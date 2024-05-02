@@ -34,6 +34,13 @@ func main() {
 
 	e.GET("/", srv.RootHandler)
 	e.GET("/callback/:host", srv.CallbackHandler)
+	e.GET("/manage", srv.ManageHandler)
+
+	job := e.Group("/job")
+	job.GET("", srv.JobHandler)
+	job.GET("/progress", srv.JobProgressHandler)
+	// job.POST("/start", server.MakeHandler(srv.JobStartHandler, app.Job))
+	job.POST("/start", srv.JobStartHandler)
 
 	profiles := e.Group("/profiles")
 	profiles.GET("", srv.NewProfilesHandler)
@@ -51,6 +58,8 @@ func main() {
 	profile.GET("/settings", srv.SettingsHandler)
 	profile.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
+
+	go logic.JobProcesser()
 
 	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
 }

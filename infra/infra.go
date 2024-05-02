@@ -27,6 +27,27 @@ func (infra *Infra) Config() *app.Config {
 	return &infra.app.Config
 }
 
+func (infra *Infra) GetProgress() int {
+	infra.app.Progress.RLock()
+	defer infra.app.Progress.RUnlock()
+	return infra.app.Progress.Progress
+}
+
+func (infra *Infra) SetProgress(p int) int {
+	infra.app.Progress.Lock()
+	defer infra.app.Progress.Unlock()
+	infra.app.Progress.Progress = p
+	return p
+}
+
+func (infra *Infra) GetJob() chan app.Job {
+	return infra.app.Job
+}
+
+func (infra *Infra) SetJob(j app.Job) {
+	infra.app.Job <- j
+}
+
 func (infra *Infra) DB(profile string) *bun.DB {
 	v, _ := infra.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)

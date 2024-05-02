@@ -4,7 +4,14 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yulog/mi-diary/app"
 )
+
+type Job struct {
+	Profile string `form:"profile"`
+	Type    int    `form:"job-type"`
+	ID      string `form:"id"`
+}
 
 // RootHandler は / のハンドラ
 func (srv *Server) RootHandler(c echo.Context) error {
@@ -111,6 +118,50 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	}
 
 	return renderer(c, srv.logic.ArchiveNotesLogic(c.Request().Context(), profile, d, p))
+}
+
+// ManageHandler は /manage のハンドラ
+func (srv *Server) ManageHandler(c echo.Context) error {
+
+	return renderer(c, srv.logic.ManageLogic(c.Request().Context()))
+}
+
+// func (srv *Server) JobStartHandler(c echo.Context, ch chan app.Job) error {
+func (srv *Server) JobStartHandler(c echo.Context) error {
+	j := new(Job)
+	if err := c.Bind(j); err != nil {
+		return c.String(http.StatusBadRequest, "bad request")
+	}
+	job := app.Job{
+		Profile: j.Profile,
+		Type:    app.JobType(j.Type),
+		ID:      j.ID,
+	}
+
+	// fmt.Println(id)
+	// ジョブキューとかに処理を渡す
+	// ch <- job
+
+	// srv.logic.JobStartLogic(c.Request().Context())
+
+	return renderer(c, srv.logic.JobStartLogic(c.Request().Context(), job))
+}
+
+func (srv *Server) JobProgressHandler(c echo.Context) error {
+	p, cm := srv.logic.JobProgressLogic(c.Request().Context())
+
+	if p >= 100 {
+		c.Response().Header().Set("hx-trigger", "done")
+	}
+
+	return renderer(c, cm)
+}
+
+func (srv *Server) JobHandler(c echo.Context) error {
+	profile := c.Param("profile")
+	cm := srv.logic.JobLogic(c.Request().Context(), profile)
+
+	return renderer(c, cm)
 }
 
 // SettingsHandler は /settings のハンドラ

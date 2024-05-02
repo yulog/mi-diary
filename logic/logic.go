@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"regexp"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/goccy/go-json"
@@ -243,6 +244,52 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 	}
 
 	return n.WithPages(cp)
+}
+
+func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
+	p := l.repo.GetProgress()
+	var ps []string
+	for k := range l.repo.Config().Profiles {
+		ps = append(ps, k)
+	}
+	if p > 0 {
+		return cm.ManageStart("Manage")
+	}
+	return cm.ManageInit("Manage", ps)
+}
+
+func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
+	l.repo.SetJob(job)
+
+	return cm.Start("/job", fmt.Sprintf("/profiles/%s/settings/reactions", "profile"), "Reaction ID", "reaction-id", "", "Get", job.Profile, job.Type.String(), job.ID)
+}
+
+func (l *Logic) JobProgressLogic(ctx context.Context) (int, templ.Component) {
+	p := l.repo.GetProgress()
+	return p, cm.Progress(p)
+}
+
+func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
+	res := l.repo.GetProgress()
+	l.repo.SetProgress(0)
+	var ps []string
+	for k := range l.repo.Config().Profiles {
+		ps = append(ps, k)
+	}
+
+	return cm.Job("/job", "/job/progress", fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get", res, ps)
+}
+
+func (l *Logic) JobProcesser() {
+	// for j := range job {
+	for j := range l.repo.GetJob() {
+		for i := 0; i < 10; i++ {
+			p := l.repo.GetProgress()
+			p = l.repo.SetProgress(p + 10)
+			fmt.Println(j, p)
+			time.Sleep(time.Second)
+		}
+	}
 }
 
 func (l *Logic) SettingsLogic(ctx context.Context, profile string) templ.Component {

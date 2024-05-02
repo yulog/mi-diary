@@ -1,0 +1,164 @@
+package components
+
+import (
+	"fmt"
+)
+
+templ Initial(postURL, label, inputName, placeholder, button string, profiles []string) {
+	<div hx-target="this" hx-swap="outerHTML">
+		// <h3>Start Progress</h3>
+		<form hx-post={ string(templ.URL("/job/start")) }>
+			<div class="field">
+				<label class="label">
+					Select Job
+				</label>
+				<div class="field-body">
+					<div class="field">
+						<div class="field has-addons">
+							<p class="control">
+								<span class="select">
+									<select name="profile">
+										<option></option>
+										for _, profile := range profiles {
+											<option>{ profile }</option>
+										}
+									</select>
+								</span>
+							</p>
+							<p class="control">
+								<span class="select">
+									<select name="job-type">
+										<option value="1">reaction</option>
+										<option value="2">reaction(full scan)</option>
+										<option value="3">emoji</option>
+									</select>
+								</span>
+							</p>
+							<div class="control">
+								<input class="input" name="id" type="text" placeholder=""/>
+							</div>
+							<div class="control">
+								<button class="button is-link">
+									{ button }
+								</button>
+							</div>
+						</div>
+						<p class="help"></p>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+}
+
+templ Start(getURL, postURL, label, inputName, placeholder, button, profile, jobType, id string) {
+	<div hx-trigger="done" hx-get="/job" hx-swap="outerHTML" hx-target="this">
+		// <h3 role="status" id="pblabel" tabindex="-1" autofocus>Running</h3>
+		<form hx-post={ string(templ.URL("/job/start")) }>
+			<div class="field">
+				<label class="label">
+					Running
+				</label>
+				<div class="field-body">
+					<div class="field">
+						<div class="field has-addons">
+							<p class="control">
+								<span class="select">
+									<select name="profile" disabled>
+										<option>{ profile }</option>
+									</select>
+								</span>
+							</p>
+							<p class="control">
+								<span class="select">
+									<select name="job-type" disabled>
+										<option>{ jobType }</option>
+									</select>
+								</span>
+							</p>
+							<div class="control">
+								<input class="input" name="id" type="text" placeholder={ placeholder } value={ id } disabled/>
+							</div>
+							<div class="control">
+								<button class="button is-link is-loading">
+									{ button }
+								</button>
+							</div>
+						</div>
+						<div
+							hx-get="/job/progress"
+							hx-trigger="every 600ms"
+							hx-target="this"
+							hx-swap="innerHTML"
+						>
+							<p class="help progress">
+								Running : -
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+}
+
+templ Progress(p int) {
+	<p class="help progress">
+		{ fmt.Sprintf("Running : %d", p) }
+	</p>
+}
+
+templ Job(getURL, getProgressURL, postURL, label, inputName, placeholder, button string, p int, profiles []string) {
+	<div hx-trigger="done" hx-get="/job" hx-swap="outerHTML" hx-target="this">
+		// <h3 role="status" id="pblabel" tabindex="-1" autofocus>Complete</h3>
+		<form hx-post={ string(templ.URL("/job/start")) } classes="add show:600ms">
+			<div class="field">
+				<label class="label">
+					Complete
+				</label>
+				<div class="field-body">
+					<div class="field">
+						<div class="field has-addons">
+							<p class="control">
+								<span class="select">
+									<select name="profile">
+										<option></option>
+										for _, profile := range profiles {
+											<option>{ profile }</option>
+										}
+									</select>
+								</span>
+							</p>
+							<p class="control">
+								<span class="select">
+									<select name="job-type">
+										<option value="1">reaction</option>
+										<option value="3">emoji</option>
+									</select>
+								</span>
+							</p>
+							<div class="control">
+								<input class="input" name="id" type="text" placeholder={ placeholder }/>
+							</div>
+							<div class="control">
+								<button class="button is-link">
+									{ button }
+								</button>
+							</div>
+						</div>
+						<div
+							hx-get="/job/progress"
+							hx-trigger="none"
+							hx-target="this"
+							hx-swap="innerHTML"
+						>
+							<p class="help progress">
+								{ fmt.Sprintf("Complete : %d", p) }
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+}
