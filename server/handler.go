@@ -143,9 +143,9 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 
 // JobProgressHandler は /job/progress のハンドラ
 func (srv *Server) JobProgressHandler(c echo.Context) error {
-	p, cm := srv.logic.JobProgressLogic(c.Request().Context())
+	_, d, cm := srv.logic.JobProgressLogic(c.Request().Context())
 
-	if p >= 100 {
+	if d {
 		c.Response().Header().Set("hx-trigger", "done")
 	}
 
