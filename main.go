@@ -57,7 +57,7 @@ func main() {
 	profile.GET("/archives/:date", srv.ArchiveNotesHandler)
 	profile.GET("/settings", srv.SettingsHandler)
 	profile.POST("/settings/reactions", srv.SettingsReactionsHandler)
-	profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
+	// profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
 
 	// TODO: context良く分からない
 	go logic.JobProcesser(context.Background())

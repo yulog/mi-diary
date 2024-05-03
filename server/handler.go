@@ -177,13 +177,13 @@ func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
 }
 
 // SettingsEmojisHandler は /settings/emojis のハンドラ
-func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	name := c.FormValue("emoji-name")
+// func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
+// 	profile := c.Param("profile")
+// 	name := c.FormValue("emoji-name")
 
-	srv.logic.SettingsEmojisLogic(c.Request().Context(), profile, name)
-	return c.HTML(http.StatusOK, name)
-}
+// 	srv.logic.SettingsEmojisLogic(c.Request().Context(), profile, name)
+// 	return c.HTML(http.StatusOK, name)
+// }
 
 // NewProfilesHandler は /profiles のハンドラ
 func (srv *Server) NewProfilesHandler(c echo.Context) error {

@@ -5,7 +5,7 @@ import "fmt"
 templ Settings(title, profile string) {
 	@BaseWithNav(title, profile) {
 		@getReaction(profile)
-		@getEmoji(profile)
+		// @getEmoji(profile)
 	}
 }
 
@@ -16,9 +16,9 @@ templ getReaction(profile string) {
 	}
 }
 
-templ getEmoji(profile string) {
-	@CardIsFull() {
-		<h3 class="title is-3">Emoji</h3>
-		@Form(fmt.Sprintf("/profiles/%s/settings/emojis", profile), "Name", "emoji-name", "", "Get")
-	}
-}
+// templ getEmoji(profile string) {
+// 	@CardIsFull() {
+// 		<h3 class="title is-3">Emoji</h3>
+// 		@Form(fmt.Sprintf("/profiles/%s/settings/emojis", profile), "Name", "emoji-name", "", "Get")
+// 	}
+// }
