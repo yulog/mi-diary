@@ -1,7 +1,5 @@
 package components
 
-import "fmt"
-
 templ ManageInit(title string, profiles []string) {
 	@BaseWithoutNav(title) {
 		@jobInit(profiles)
@@ -12,8 +10,7 @@ templ ManageInit(title string, profiles []string) {
 templ jobInit(profiles []string) {
 	@CardIsFull() {
 		<h3 class="title is-3">Job</h3>
-		@Initial(fmt.Sprintf("/profiles/%s/settings/reactions", "profile"), "Reaction ID", "reaction-id", "", "Get", profiles)
-		// @Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get")
+		@Initial("", "Get", profiles)
 	}
 }
 
@@ -27,8 +24,7 @@ templ ManageStart(title string) {
 templ jobStart() {
 	@CardIsFull() {
 		<h3 class="title is-3">Job</h3>
-		@Start("/job", fmt.Sprintf("/profiles/%s/settings/reactions", "profile"), "Reaction ID", "reaction-id", "", "Get", "", "", "")
-		// @Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get")
+		@Start("", "Get", "", "", "")
 	}
 }
 

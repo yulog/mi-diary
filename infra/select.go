@@ -18,6 +18,16 @@ func (infra *Infra) Reactions(ctx context.Context, profile string) []model.React
 	return reactions
 }
 
+func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) []model.Reaction {
+	var reactions []model.Reaction
+	infra.DB(profile).
+		NewSelect().
+		Model(&reactions).
+		Where("image = ?", "").
+		Scan(ctx)
+	return reactions
+}
+
 func (infra *Infra) HashTags(ctx context.Context, profile string) []model.HashTag {
 	var tags []model.HashTag
 	infra.DB(profile).

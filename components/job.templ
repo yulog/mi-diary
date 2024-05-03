@@ -4,9 +4,8 @@ import (
 	"fmt"
 )
 
-templ Initial(postURL, label, inputName, placeholder, button string, profiles []string) {
+templ Initial(placeholder, button string, profiles []string) {
 	<div hx-target="this" hx-swap="outerHTML">
-		// <h3>Start Progress</h3>
 		<form hx-post={ string(templ.URL("/job/start")) }>
 			<div class="field">
 				<label class="label">
@@ -51,9 +50,8 @@ templ Initial(postURL, label, inputName, placeholder, button string, profiles []
 	</div>
 }
 
-templ Start(getURL, postURL, label, inputName, placeholder, button, profile, jobType, id string) {
+templ Start(placeholder, button, profile, jobType, id string) {
 	<div hx-trigger="done" hx-get="/job" hx-swap="outerHTML" hx-target="this">
-		// <h3 role="status" id="pblabel" tabindex="-1" autofocus>Running</h3>
 		<form hx-post={ string(templ.URL("/job/start")) }>
 			<div class="field">
 				<label class="label">
@@ -102,15 +100,14 @@ templ Start(getURL, postURL, label, inputName, placeholder, button, profile, job
 	</div>
 }
 
-templ Progress(p int) {
+templ Progress(p string) {
 	<p class="help progress">
-		{ fmt.Sprintf("Running : %d", p) }
+		{ fmt.Sprintf("Running : %s", p) }
 	</p>
 }
 
-templ Job(getURL, getProgressURL, postURL, label, inputName, placeholder, button string, p int, profiles []string) {
+templ Job(placeholder, button string, p string, profiles []string) {
 	<div hx-trigger="done" hx-get="/job" hx-swap="outerHTML" hx-target="this">
-		// <h3 role="status" id="pblabel" tabindex="-1" autofocus>Complete</h3>
 		<form hx-post={ string(templ.URL("/job/start")) } classes="add show:600ms">
 			<div class="field">
 				<label class="label">
@@ -153,7 +150,7 @@ templ Job(getURL, getProgressURL, postURL, label, inputName, placeholder, button
 							hx-swap="innerHTML"
 						>
 							<p class="help progress">
-								{ fmt.Sprintf("Complete : %d", p) }
+								{ fmt.Sprintf("Complete : %s", p) }
 							</p>
 						</div>
 					</div>

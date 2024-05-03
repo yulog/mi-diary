@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand/v2"
 	"net"
 	"net/url"
 	"regexp"
@@ -247,7 +248,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 }
 
 func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
-	p := l.repo.GetProgress()
+	p, _ := l.repo.GetProgress()
 	var ps []string
 	for k := range l.repo.Config().Profiles {
 		ps = append(ps, k)
@@ -261,34 +262,60 @@ func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
 	l.repo.SetJob(job)
 
-	return cm.Start("/job", fmt.Sprintf("/profiles/%s/settings/reactions", "profile"), "Reaction ID", "reaction-id", "", "Get", job.Profile, job.Type.String(), job.ID)
+	return cm.Start("", "Get", job.Profile, job.Type.String(), job.ID)
 }
 
-func (l *Logic) JobProgressLogic(ctx context.Context) (int, templ.Component) {
-	p := l.repo.GetProgress()
-	return p, cm.Progress(p)
+func (l *Logic) JobProgressLogic(ctx context.Context) (int, bool, templ.Component) {
+	p, t := l.repo.GetProgress()
+
+	return p, l.repo.GetProgressDone(), cm.Progress(fmt.Sprintf("%d / %d", p, t))
 }
 
 func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
-	res := l.repo.GetProgress()
-	l.repo.SetProgress(0)
+	p, t := l.repo.GetProgress()
+	l.repo.SetProgress(0, 0)
+	l.repo.SetProgressDone(false)
 	var ps []string
 	for k := range l.repo.Config().Profiles {
 		ps = append(ps, k)
 	}
 
-	return cm.Job("/job", "/job/progress", fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get", res, ps)
+	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), ps)
 }
 
-func (l *Logic) JobProcesser() {
+func (l *Logic) JobProcesser(ctx context.Context) {
 	for j := range l.repo.GetJob() {
-		for i := 0; i < 10; i++ {
-			p := l.repo.GetProgress()
-			p = l.repo.SetProgress(p + 10)
-			fmt.Println(j, p)
-			time.Sleep(time.Second)
+		switch j.Type {
+		case app.Emoji:
+			if j.ID != "" {
+				l.SettingsEmojisLogic(ctx, j.Profile, j.ID)
+			} else {
+				l.EmojiJob(ctx, j)
+			}
+		default:
+			for i := 0; i < 10; i++ {
+				p, _ := l.repo.GetProgress()
+				p, t := l.repo.SetProgress(p+10, 0)
+				fmt.Println(j, p, t)
+				time.Sleep(time.Second)
+			}
+			// l.repo.SetProgressDone(true)
 		}
+		l.repo.SetProgressDone(true)
 	}
+}
+
+func (l *Logic) EmojiJob(ctx context.Context, j app.Job) {
+	r := l.repo.ReactionImageEmpty(ctx, j.Profile)
+
+	for _, v := range r {
+		l.SettingsEmojisLogic(ctx, j.Profile, v.Name)
+		p, _ := l.repo.GetProgress()
+		l.repo.SetProgress(p+1, len(r))
+		time.Sleep(rand.N(time.Second))
+	}
+
+	// l.repo.SetProgressDone(true)
 }
 
 func (l *Logic) SettingsLogic(ctx context.Context, profile string) templ.Component {

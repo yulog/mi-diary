@@ -57,6 +57,8 @@ type Job struct {
 type Progress struct {
 	sync.RWMutex
 	Progress int
+	Total    int
+	Done     bool
 }
 
 func New() *App {

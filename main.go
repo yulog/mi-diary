@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 
 	"github.com/labstack/echo/v4"
@@ -58,7 +59,8 @@ func main() {
 	profile.POST("/settings/reactions", srv.SettingsReactionsHandler)
 	profile.POST("/settings/emojis", srv.SettingsEmojisHandler)
 
-	go logic.JobProcesser()
+	// TODO: context良く分からない
+	go logic.JobProcesser(context.Background())
 
 	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
 }

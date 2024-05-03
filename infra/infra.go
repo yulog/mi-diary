@@ -27,17 +27,31 @@ func (infra *Infra) Config() *app.Config {
 	return &infra.app.Config
 }
 
-func (infra *Infra) GetProgress() int {
+func (infra *Infra) GetProgress() (int, int) {
 	infra.app.Progress.RLock()
 	defer infra.app.Progress.RUnlock()
-	return infra.app.Progress.Progress
+	return infra.app.Progress.Progress, infra.app.Progress.Total
 }
 
-func (infra *Infra) SetProgress(p int) int {
+func (infra *Infra) SetProgress(p, t int) (int, int) {
 	infra.app.Progress.Lock()
 	defer infra.app.Progress.Unlock()
 	infra.app.Progress.Progress = p
-	return p
+	infra.app.Progress.Total = t
+	return p, t
+}
+
+func (infra *Infra) GetProgressDone() bool {
+	infra.app.Progress.RLock()
+	defer infra.app.Progress.RUnlock()
+	return infra.app.Progress.Done
+}
+
+func (infra *Infra) SetProgressDone(d bool) bool {
+	infra.app.Progress.Lock()
+	defer infra.app.Progress.Unlock()
+	infra.app.Progress.Done = d
+	return d
 }
 
 func (infra *Infra) GetJob() chan app.Job {
