@@ -372,6 +372,9 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	}
 
 	l.repo.InsertEmoji(ctx, profile, emoji)
+
+	p, _ := l.repo.GetProgress()
+	l.repo.SetProgress(p+1, 1)
 }
 
 func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
