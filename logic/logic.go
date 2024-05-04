@@ -318,11 +318,6 @@ func (l *Logic) EmojiJob(ctx context.Context, j app.Job) {
 	// l.repo.SetProgressDone(true)
 }
 
-func (l *Logic) SettingsLogic(ctx context.Context, profile string) templ.Component {
-
-	return cm.Settings("settings", profile)
-}
-
 func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) {
 	body := map[string]any{
 		"i":      l.repo.Config().Profiles[profile].I,
