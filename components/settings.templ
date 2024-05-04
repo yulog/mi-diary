@@ -1,20 +1,19 @@
 package components
 
-import "fmt"
-
+// import "fmt"
 templ Settings(title, profile string) {
 	@BaseWithNav(title, profile) {
-		@getReaction(profile)
+		// @getReaction(profile)
 		// @getEmoji(profile)
 	}
 }
 
-templ getReaction(profile string) {
-	@CardIsFull() {
-		<h3 class="title is-3">Note</h3>
-		@Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get")
-	}
-}
+// templ getReaction(profile string) {
+// 	@CardIsFull() {
+// 		<h3 class="title is-3">Note</h3>
+// 		@Form(fmt.Sprintf("/profiles/%s/settings/reactions", profile), "Reaction ID", "reaction-id", "", "Get")
+// 	}
+// }
 
 // templ getEmoji(profile string) {
 // 	@CardIsFull() {

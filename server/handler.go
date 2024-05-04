@@ -161,20 +161,20 @@ func (srv *Server) JobHandler(c echo.Context) error {
 }
 
 // SettingsHandler は /settings のハンドラ
-func (srv *Server) SettingsHandler(c echo.Context) error {
-	profile := c.Param("profile")
+// func (srv *Server) SettingsHandler(c echo.Context) error {
+// 	profile := c.Param("profile")
 
-	return renderer(c, srv.logic.SettingsLogic(c.Request().Context(), profile))
-}
+// 	return renderer(c, srv.logic.SettingsLogic(c.Request().Context(), profile))
+// }
 
 // SettingsReactionsHandler は /settings/reactions のハンドラ
-func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	id := c.FormValue("reaction-id")
+// func (srv *Server) SettingsReactionsHandler(c echo.Context) error {
+// 	profile := c.Param("profile")
+// 	id := c.FormValue("reaction-id")
 
-	srv.logic.SettingsReactionsLogic(c.Request().Context(), profile, id)
-	return c.HTML(http.StatusOK, id)
-}
+// 	srv.logic.SettingsReactionsLogic(c.Request().Context(), profile, id)
+// 	return c.HTML(http.StatusOK, id)
+// }
 
 // SettingsEmojisHandler は /settings/emojis のハンドラ
 // func (srv *Server) SettingsEmojisHandler(c echo.Context) error {
