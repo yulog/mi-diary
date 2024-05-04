@@ -8,8 +8,8 @@ import (
 )
 
 type Job struct {
-	Profile string `form:"profile"`
-	Type    int    `form:"job-type"`
+	Profile string `form:"profile" validate:"required"`
+	Type    int    `form:"job-type" validate:"required"`
 	ID      string `form:"id"`
 }
 
@@ -131,6 +131,9 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 	j := new(Job)
 	if err := c.Bind(j); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
+	}
+	if err := c.Validate(j); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 	job := app.Job{
 		Profile: j.Profile,

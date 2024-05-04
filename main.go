@@ -31,7 +31,7 @@ func main() {
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
-	// e.Validator = &Validator{validator: validator.New()}
+	e.Validator = server.NewValidator()
 
 	e.GET("/", srv.RootHandler)
 	e.GET("/callback/:host", srv.CallbackHandler)
