@@ -23,6 +23,9 @@ func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
 }
 
 func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) int64 {
+	if len(*r) == 0 {
+		return 0
+	}
 	db := infra.DB(profile)
 	// pp.Println(r)
 

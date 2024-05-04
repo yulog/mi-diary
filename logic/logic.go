@@ -253,6 +253,7 @@ func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 	for k := range l.repo.Config().Profiles {
 		ps = append(ps, k)
 	}
+	// TODO: 進行中の判定これで良いの？
 	if p > 0 {
 		return cm.ManageStart("Manage")
 	}
@@ -288,13 +289,13 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 		switch j.Type {
 		case app.Reaction:
 			l.ReactionJob(ctx, j)
+		case app.ReactionFull:
+			l.ReactionFullJob(ctx, j)
 		case app.Emoji:
 			if j.ID != "" {
-				l.SettingsEmojisLogic(ctx, j.Profile, j.ID)
-				p, _ := l.repo.GetProgress()
-				l.repo.SetProgress(p+1, 1)
+				l.EmojiOneJob(ctx, j)
 			} else {
-				l.EmojiJob(ctx, j)
+				l.EmojiFullJob(ctx, j)
 			}
 		default:
 			for i := 0; i < 10; i++ {
@@ -309,48 +310,64 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 }
 
 func (l *Logic) ReactionJob(ctx context.Context, j app.Job) {
-	var (
-		rid = j.ID
-		gc  = 0
-		ac  = 0
-	)
+	var rid = j.ID
 	for {
-		ac, gc, rid = l.SettingsReactionsLogic(ctx, j.Profile, rid)
+		gc, r := l.GetReactions(ctx, j.Profile, rid)
+		ac := l.repo.Insert(ctx, j.Profile, r)
+
+		p, t := l.repo.GetProgress()
+		l.repo.SetProgress(p+int(ac), t+gc)
+
 		fmt.Println("insert count:", ac)
 		if gc == 0 || ac == 0 {
 			break
 		}
+		rid = (*r)[gc-1].ID
 		time.Sleep(rand.N(time.Second))
 	}
 }
 
 func (l *Logic) ReactionFullJob(ctx context.Context, j app.Job) {
-	var (
-		rid = j.ID
-		gc  = 0
-	)
+	var rid = j.ID
 	for {
-		_, gc, rid = l.SettingsReactionsLogic(ctx, j.Profile, rid)
+		gc, r := l.GetReactions(ctx, j.Profile, rid)
+		ac := l.repo.Insert(ctx, j.Profile, r)
+
+		p, t := l.repo.GetProgress()
+		l.repo.SetProgress(p+int(ac), t+gc)
+
 		fmt.Println("get count:", gc)
 		if gc == 0 {
 			break
 		}
+		rid = (*r)[gc-1].ID
 		time.Sleep(rand.N(time.Second))
 	}
 }
 
-func (l *Logic) EmojiJob(ctx context.Context, j app.Job) {
+func (l *Logic) EmojiOneJob(ctx context.Context, j app.Job) {
+	emoji := l.GetEmoji(ctx, j.Profile, j.ID)
+	l.repo.InsertEmoji(ctx, j.Profile, emoji)
+
+	p, _ := l.repo.GetProgress()
+	l.repo.SetProgress(p+1, 1)
+}
+
+func (l *Logic) EmojiFullJob(ctx context.Context, j app.Job) {
 	r := l.repo.ReactionImageEmpty(ctx, j.Profile)
 
 	for _, v := range r {
-		l.SettingsEmojisLogic(ctx, j.Profile, v.Name)
+		emoji := l.GetEmoji(ctx, j.Profile, v.Name)
+		l.repo.InsertEmoji(ctx, j.Profile, emoji)
+
 		p, _ := l.repo.GetProgress()
 		l.repo.SetProgress(p+1, len(r))
+
 		time.Sleep(rand.N(time.Second))
 	}
 }
 
-func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) (ac int, gc int, rid string) {
+func (l *Logic) GetReactions(ctx context.Context, profile, id string) (int, *mi.Reactions) {
 	body := map[string]any{
 		"i":      l.repo.Config().Profiles[profile].I,
 		"limit":  20,
@@ -376,21 +393,10 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 		fmt.Println(err)
 	}
 
-	// 取得結果が0件ならここでやめる
-	gc = len(*r)
-	if gc == 0 {
-		return 0, 0, ""
-	}
-
-	rows := l.repo.Insert(ctx, profile, r)
-
-	p, t := l.repo.GetProgress()
-	l.repo.SetProgress(p+int(rows), t+len(*r))
-
-	return int(rows), len(*r), (*r)[len(*r)-1].ID
+	return len(*r), r
 }
 
-func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
+func (l *Logic) GetEmoji(ctx context.Context, profile, name string) *mi.Emoji {
 	body := map[string]any{
 		"name": name,
 	}
@@ -409,7 +415,7 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 		fmt.Println(err)
 	}
 
-	l.repo.InsertEmoji(ctx, profile, emoji)
+	return emoji
 }
 
 func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
