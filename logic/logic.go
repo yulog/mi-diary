@@ -286,9 +286,13 @@ func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
 func (l *Logic) JobProcesser(ctx context.Context) {
 	for j := range l.repo.GetJob() {
 		switch j.Type {
+		case app.Reaction:
+			l.ReactionJob(ctx, j)
 		case app.Emoji:
 			if j.ID != "" {
 				l.SettingsEmojisLogic(ctx, j.Profile, j.ID)
+				p, _ := l.repo.GetProgress()
+				l.repo.SetProgress(p+1, 1)
 			} else {
 				l.EmojiJob(ctx, j)
 			}
@@ -299,9 +303,39 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 				fmt.Println(j, p, t)
 				time.Sleep(time.Second)
 			}
-			// l.repo.SetProgressDone(true)
 		}
 		l.repo.SetProgressDone(true)
+	}
+}
+
+func (l *Logic) ReactionJob(ctx context.Context, j app.Job) {
+	var (
+		rid = j.ID
+		gc  = 0
+		ac  = 0
+	)
+	for {
+		ac, gc, rid = l.SettingsReactionsLogic(ctx, j.Profile, rid)
+		fmt.Println("insert count:", ac)
+		if gc == 0 || ac == 0 {
+			break
+		}
+		time.Sleep(rand.N(time.Second))
+	}
+}
+
+func (l *Logic) ReactionFullJob(ctx context.Context, j app.Job) {
+	var (
+		rid = j.ID
+		gc  = 0
+	)
+	for {
+		_, gc, rid = l.SettingsReactionsLogic(ctx, j.Profile, rid)
+		fmt.Println("get count:", gc)
+		if gc == 0 {
+			break
+		}
+		time.Sleep(rand.N(time.Second))
 	}
 }
 
@@ -314,11 +348,9 @@ func (l *Logic) EmojiJob(ctx context.Context, j app.Job) {
 		l.repo.SetProgress(p+1, len(r))
 		time.Sleep(rand.N(time.Second))
 	}
-
-	// l.repo.SetProgressDone(true)
 }
 
-func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) {
+func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) (ac int, gc int, rid string) {
 	body := map[string]any{
 		"i":      l.repo.Config().Profiles[profile].I,
 		"limit":  20,
@@ -344,7 +376,18 @@ func (l *Logic) SettingsReactionsLogic(ctx context.Context, profile, id string) 
 		fmt.Println(err)
 	}
 
-	l.repo.Insert(ctx, profile, r)
+	// 取得結果が0件ならここでやめる
+	gc = len(*r)
+	if gc == 0 {
+		return 0, 0, ""
+	}
+
+	rows := l.repo.Insert(ctx, profile, r)
+
+	p, t := l.repo.GetProgress()
+	l.repo.SetProgress(p+int(rows), t+len(*r))
+
+	return int(rows), len(*r), (*r)[len(*r)-1].ID
 }
 
 func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
@@ -367,9 +410,6 @@ func (l *Logic) SettingsEmojisLogic(ctx context.Context, profile, name string) {
 	}
 
 	l.repo.InsertEmoji(ctx, profile, emoji)
-
-	p, _ := l.repo.GetProgress()
-	l.repo.SetProgress(p+1, 1)
 }
 
 func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {

@@ -22,14 +22,14 @@ func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
 	infra.Insert(ctx, profile, &r)
 }
 
-func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) {
+func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) int64 {
 	db := infra.DB(profile)
 	// pp.Println(r)
 
-	tx(ctx, db, r)
+	return tx(ctx, db, r)
 }
 
-func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) {
+func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 	// まとめて追加する(トランザクション)
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
@@ -106,7 +106,7 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) {
 		if err != nil {
 			return err
 		}
-		rows, _ := result.RowsAffected()
+		rows, _ = result.RowsAffected()
 		fmt.Println("insert:", rows)
 		// TODO: すべて取得するようにする際はinsert件数が0まで
 		// until(?)とかを付けて繰り返す？
@@ -149,6 +149,7 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) {
 		fmt.Println(err)
 		panic(err)
 	}
+	return
 }
 
 func count(ctx context.Context, db bun.IDB) error {
