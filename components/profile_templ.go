@@ -144,7 +144,7 @@ func AddProfile(title string) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = Form("/profiles", "Server URL", "server-url", "https://example.com", "Auth").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Form(FormParams{PostURL: "/profiles", Label: "Server URL", InputName: "server-url", PlaceHolder: "https://example.com", Button: "Auth"}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

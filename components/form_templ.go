@@ -10,7 +10,15 @@ import "context"
 import "io"
 import "bytes"
 
-func Form(postURL, label, inputName, placeholder, button string) templ.Component {
+type FormParams struct {
+	PostURL     string
+	Label       string
+	InputName   string
+	PlaceHolder string
+	Button      string
+}
+
+func Form(p FormParams) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -28,9 +36,9 @@ func Form(postURL, label, inputName, placeholder, button string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(postURL)))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(p.PostURL)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 4, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 12, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -41,9 +49,9 @@ func Form(postURL, label, inputName, placeholder, button string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 6, Col: 10}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 14, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -54,9 +62,9 @@ func Form(postURL, label, inputName, placeholder, button string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(inputName)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(p.InputName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 9, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 17, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -67,9 +75,9 @@ func Form(postURL, label, inputName, placeholder, button string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(placeholder)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.PlaceHolder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 9, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 17, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -80,9 +88,9 @@ func Form(postURL, label, inputName, placeholder, button string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(button)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(p.Button)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 13, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\form.templ`, Line: 21, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

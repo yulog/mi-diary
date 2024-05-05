@@ -23,7 +23,7 @@ templ AddProfile(title string) {
 		@CardIsFull() {
 			<div class="content">
 				<h3>Add New Profile</h3>
-				@Form("/profiles", "Server URL", "server-url", "https://example.com", "Auth")
+				@Form(FormParams{PostURL: "/profiles", Label: "Server URL", InputName: "server-url", PlaceHolder: "https://example.com", Button: "Auth"})
 				<a href={ templ.URL("/") } class="button mt-5">Back</a>
 			</div>
 		}

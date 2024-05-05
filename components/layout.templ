@@ -29,7 +29,6 @@ templ BaseWithNav(title, profile string) {
 				</div>
 				<div class="navbar-end">
 					<a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="navbar-item">Home</a>
-					// <a href={ templ.URL(fmt.Sprintf("/profiles/%s/settings", profile)) } class="navbar-item">Settings</a>
 					<a href={ templ.URL("/manage") } class="navbar-item">Manage</a>
 					<a href={ templ.URL("/") } class="navbar-item">Profiles</a>
 				</div>

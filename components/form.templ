@@ -1,16 +1,24 @@
 package components
 
-templ Form(postURL, label, inputName, placeholder, button string) {
-	<form hx-post={ string(templ.URL(postURL)) } hx-swap="none">
+type FormParams struct {
+	PostURL     string
+	Label       string
+	InputName   string
+	PlaceHolder string
+	Button      string
+}
+
+templ Form(p FormParams) {
+	<form hx-post={ string(templ.URL(p.PostURL)) } hx-swap="none">
 		<label class="label">
-			{ label }
+			{ p.Label }
 			<div class="field has-addons">
 				<div class="control">
-					<input class="input" name={ inputName } type="text" placeholder={ placeholder }/>
+					<input class="input" name={ p.InputName } type="text" placeholder={ p.PlaceHolder }/>
 				</div>
 				<div class="control">
 					<button class="button is-link">
-						{ button }
+						{ p.Button }
 					</button>
 				</div>
 			</div>
