@@ -111,8 +111,6 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 		}
 		rows, _ = result.RowsAffected()
 		fmt.Println("insert:", rows)
-		// TODO: すべて取得するようにする際はinsert件数が0まで
-		// until(?)とかを付けて繰り返す？
 
 		_, err = tx.NewInsert().Model(&reactions).Ignore().Exec(ctx)
 		if err != nil {
