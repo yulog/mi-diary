@@ -2,6 +2,7 @@ package components
 
 import (
 	"github.com/yulog/mi-diary/model"
+	"strings"
 )
 
 type File struct {
@@ -44,7 +45,12 @@ templ fileList(host string, items []model.File) {
 		for _,file := range items {
 			<div class={ "cell", cell() }>
 				<div class="card">
-					@cardImage(file)
+					switch  {
+						case strings.HasPrefix(file.Type, "image/"):
+							@cardImage(file)
+						default:
+							@cardPlaceholder(file)
+					}
 					<button class="button is-text js-modal-trigger" data-target={ "modal-" + file.ID }>
 						…
 					</button>

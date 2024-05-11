@@ -74,6 +74,7 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 					Name:         fv.Name,
 					URL:          fv.URL,
 					ThumbnailURL: fv.ThumbnailURL,
+					Type:         fv.Type,
 					CreatedAt:    fv.CreatedAt,
 				}
 				files = append(files, f)

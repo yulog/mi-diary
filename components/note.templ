@@ -67,6 +67,17 @@ templ cardImage(file model.File) {
 	</div>
 }
 
+// TODO: imgに代替画像を入れる？
+templ cardPlaceholder(file model.File) {
+	<div class="card-image">
+		<a href={ templ.URL(file.URL) }>
+			<figure class="image">
+				<img src={ file.ThumbnailURL } alt={ file.Name } class="Thumbnail"/>
+			</figure>
+		</a>
+	</div>
+}
+
 templ noteContent(host string, note model.Note) {
 	<div class="media">
 		<div class="media-left">

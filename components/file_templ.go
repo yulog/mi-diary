@@ -12,6 +12,7 @@ import "bytes"
 
 import (
 	"github.com/yulog/mi-diary/model"
+	"strings"
 )
 
 type File struct {
@@ -190,9 +191,17 @@ func fileList(host string, items []model.File) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = cardImage(file).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			switch {
+			case strings.HasPrefix(file.Type, "image/"):
+				templ_7745c5c3_Err = cardImage(file).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			default:
+				templ_7745c5c3_Err = cardPlaceholder(file).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button class=\"button is-text js-modal-trigger\" data-target=\"")
 			if templ_7745c5c3_Err != nil {
@@ -201,7 +210,7 @@ func fileList(host string, items []model.File) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("modal-" + file.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\file.templ`, Line: 48, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\file.templ`, Line: 54, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +228,7 @@ func fileList(host string, items []model.File) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("modal-" + file.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\file.templ`, Line: 52, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components\file.templ`, Line: 58, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
