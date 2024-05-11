@@ -191,14 +191,16 @@ func count(ctx context.Context, db bun.IDB) error {
 		return err
 	}
 
-	_, err = db.NewUpdate().
-		Model(&hashtags).
-		OmitZero().
-		Column("count").
-		Bulk().
-		Exec(ctx)
-	if err != nil {
-		return err
+	if len(hashtags) > 0 {
+		_, err = db.NewUpdate().
+			Model(&hashtags).
+			OmitZero().
+			Column("count").
+			Bulk().
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
 	}
 
 	// ユーザーのカウント
