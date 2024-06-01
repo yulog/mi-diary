@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
 	"github.com/yulog/mi-diary/logic"
@@ -29,7 +31,15 @@ func (v *Validator) Validate(i interface{}) error {
 }
 
 func renderer(c echo.Context, cmp templ.Component) error {
-	return cmp.Render(c.Request().Context(), c.Response().Writer)
+	// https://github.com/a-h/templ/blob/067cc686cd1e44cd0d3b6669a52e24ef115ccc5a/examples/integration-echo/main.go#L17
+	buf := templ.GetBuffer()
+	defer templ.ReleaseBuffer(buf)
+
+	if err := cmp.Render(c.Request().Context(), buf); err != nil {
+		return err
+	}
+
+	return c.HTML(http.StatusOK, buf.String())
 }
 
 func page(c echo.Context, p *int) error {
