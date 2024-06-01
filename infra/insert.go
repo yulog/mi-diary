@@ -26,10 +26,9 @@ func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions)
 	if len(*r) == 0 {
 		return 0
 	}
-	db := infra.DB(profile)
 	// pp.Println(r)
 
-	return tx(ctx, db, r)
+	return tx(ctx, infra.DB(profile), r)
 }
 
 func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
@@ -274,9 +273,6 @@ func count(ctx context.Context, db bun.IDB) error {
 }
 
 func (infra *Infra) InsertEmoji(ctx context.Context, profile string, e *mi.Emoji) {
-	db := infra.DB(profile)
-	// pp.Println(r)
-
 	// TODO: emoji画像をローカルに保存する
 
 	r := model.Reaction{
@@ -285,7 +281,7 @@ func (infra *Infra) InsertEmoji(ctx context.Context, profile string, e *mi.Emoji
 	}
 	var s []model.Reaction
 	s = append(s, r)
-	_, err := db.NewUpdate().
+	_, err := infra.DB(profile).NewUpdate().
 		Model(&s).
 		OmitZero().
 		Column("image").
