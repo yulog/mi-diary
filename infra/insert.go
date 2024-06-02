@@ -158,6 +158,9 @@ func count(ctx context.Context, db bun.IDB) error {
 	var reactions []model.ReactionEmoji
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
+		Relation("Reaction", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.ColumnExpr("reaction.id as id")
+		}).
 		ColumnExpr("reaction_emoji_name as name").
 		ColumnExpr("count(*) as count").
 		Group("reaction_emoji_name").
