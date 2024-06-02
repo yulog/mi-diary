@@ -122,8 +122,9 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
+	res := l.repo.ReactionOne(ctx, j.Profile, j.ID)
 	emoji := l.getEmoji(ctx, j.Profile, j.ID)
-	l.repo.InsertEmoji(ctx, j.Profile, emoji)
+	l.repo.InsertEmoji(ctx, j.Profile, res.ID, emoji)
 
 	p, _ := l.repo.GetProgress()
 	l.repo.SetProgress(p+1, 1)
@@ -134,7 +135,7 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 
 	for _, v := range r {
 		emoji := l.getEmoji(ctx, j.Profile, v.Name)
-		l.repo.InsertEmoji(ctx, j.Profile, emoji)
+		l.repo.InsertEmoji(ctx, j.Profile, v.ID, emoji)
 
 		p, _ := l.repo.GetProgress()
 		l.repo.SetProgress(p+1, len(r))

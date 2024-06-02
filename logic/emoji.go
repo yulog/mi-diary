@@ -45,5 +45,6 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	l.repo.InsertEmoji(ctx, profile, emoji)
+	res := l.repo.ReactionOne(ctx, profile, name)
+	l.repo.InsertEmoji(ctx, profile, res.ID, emoji)
 }

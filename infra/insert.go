@@ -275,11 +275,11 @@ func count(ctx context.Context, db bun.IDB) error {
 	return err
 }
 
-func (infra *Infra) InsertEmoji(ctx context.Context, profile string, e *mi.Emoji) {
+func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji) {
 	// TODO: emoji画像をローカルに保存する
 
 	r := model.ReactionEmoji{
-		Name:  e.Name,
+		ID:    id,
 		Image: e.URL,
 	}
 	var s []model.ReactionEmoji

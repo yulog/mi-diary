@@ -18,6 +18,17 @@ func (infra *Infra) Reactions(ctx context.Context, profile string) []model.React
 	return reactions
 }
 
+func (infra *Infra) ReactionOne(ctx context.Context, profile, name string) model.ReactionEmoji {
+	var reaction model.ReactionEmoji
+	infra.DB(profile).
+		NewSelect().
+		Model(&reaction).
+		Where("name = ?", name).
+		Limit(1).
+		Scan(ctx)
+	return reaction
+}
+
 func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) []model.ReactionEmoji {
 	var reactions []model.ReactionEmoji
 	infra.DB(profile).
