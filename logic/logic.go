@@ -1,25 +1,14 @@
 package logic
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"math/rand/v2"
-	"net"
-	"net/url"
 	"regexp"
-	"time"
 
 	"github.com/a-h/templ"
-	"github.com/goccy/go-json"
-	"github.com/google/uuid"
-	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/infra"
-	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/util/pg"
-	mi "github.com/yulog/miutil"
-	"github.com/yulog/miutil/miauth"
 )
 
 type Logic struct {
@@ -28,15 +17,6 @@ type Logic struct {
 
 func New(r *infra.Infra) *Logic {
 	return &Logic{repo: r}
-}
-
-func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
-	var ps []string
-	for k := range l.repo.Config().Profiles {
-		ps = append(ps, k)
-	}
-
-	return cm.SelectProfile("Select profile...", ps)
 }
 
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
@@ -258,219 +238,4 @@ func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 		return cm.ManageStart("Manage")
 	}
 	return cm.ManageInit("Manage", ps)
-}
-
-func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
-	l.repo.SetJob(job)
-
-	return cm.Start("", "Get", job.Profile, job.Type.String(), job.ID)
-}
-
-func (l *Logic) JobProgressLogic(ctx context.Context) (int, bool, templ.Component) {
-	p, t := l.repo.GetProgress()
-
-	return p, l.repo.GetProgressDone(), cm.Progress(fmt.Sprintf("%d / %d", p, t))
-}
-
-func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
-	p, t := l.repo.GetProgress()
-	l.repo.SetProgress(0, 0)
-	l.repo.SetProgressDone(false)
-	var ps []string
-	for k := range l.repo.Config().Profiles {
-		ps = append(ps, k)
-	}
-
-	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), ps)
-}
-
-func (l *Logic) JobProcesser(ctx context.Context) {
-	for j := range l.repo.GetJob() {
-		switch j.Type {
-		case app.Reaction:
-			l.ReactionJob(ctx, j)
-		case app.ReactionFull:
-			l.ReactionFullJob(ctx, j)
-		case app.Emoji:
-			if j.ID != "" {
-				l.EmojiOneJob(ctx, j)
-			} else {
-				l.EmojiFullJob(ctx, j)
-			}
-		default:
-			for i := 0; i < 10; i++ {
-				p, _ := l.repo.GetProgress()
-				p, t := l.repo.SetProgress(p+10, 0)
-				fmt.Println(j, p, t)
-				time.Sleep(time.Second)
-			}
-		}
-		l.repo.SetProgressDone(true)
-	}
-}
-
-func (l *Logic) ReactionJob(ctx context.Context, j app.Job) {
-	var rid = j.ID
-	for {
-		gc, r := l.GetReactions(ctx, j.Profile, rid)
-		ac := l.repo.Insert(ctx, j.Profile, r)
-
-		p, t := l.repo.GetProgress()
-		l.repo.SetProgress(p+int(ac), t+gc)
-
-		fmt.Println("insert count:", ac)
-		if gc == 0 || ac == 0 {
-			break
-		}
-		rid = (*r)[gc-1].ID
-		time.Sleep(rand.N(time.Second))
-	}
-}
-
-func (l *Logic) ReactionFullJob(ctx context.Context, j app.Job) {
-	var rid = j.ID
-	for {
-		gc, r := l.GetReactions(ctx, j.Profile, rid)
-		ac := l.repo.Insert(ctx, j.Profile, r)
-
-		p, t := l.repo.GetProgress()
-		l.repo.SetProgress(p+int(ac), t+gc)
-
-		fmt.Println("get count:", gc)
-		if gc == 0 {
-			break
-		}
-		rid = (*r)[gc-1].ID
-		time.Sleep(rand.N(time.Second))
-	}
-}
-
-func (l *Logic) EmojiOneJob(ctx context.Context, j app.Job) {
-	emoji := l.GetEmoji(ctx, j.Profile, j.ID)
-	l.repo.InsertEmoji(ctx, j.Profile, emoji)
-
-	p, _ := l.repo.GetProgress()
-	l.repo.SetProgress(p+1, 1)
-}
-
-func (l *Logic) EmojiFullJob(ctx context.Context, j app.Job) {
-	r := l.repo.ReactionImageEmpty(ctx, j.Profile)
-
-	for _, v := range r {
-		emoji := l.GetEmoji(ctx, j.Profile, v.Name)
-		l.repo.InsertEmoji(ctx, j.Profile, emoji)
-
-		p, _ := l.repo.GetProgress()
-		l.repo.SetProgress(p+1, len(r))
-
-		time.Sleep(rand.N(time.Second))
-	}
-}
-
-func (l *Logic) GetReactions(ctx context.Context, profile, id string) (int, *mi.Reactions) {
-	body := map[string]any{
-		"i":      l.repo.Config().Profiles[profile].I,
-		"limit":  20,
-		"userId": l.repo.Config().Profiles[profile].UserId,
-	}
-	if id != "" {
-		body["untilId"] = id
-	}
-
-	// https://host.tld/api/users/reactions
-	// 却って分かりにくい気もする
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   l.repo.Config().Profiles[profile].Host,
-	}).
-		JoinPath("api", "users", "reactions").String()
-
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	r, err := mi.Post2[mi.Reactions](u, buf)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return len(*r), r
-}
-
-func (l *Logic) GetEmoji(ctx context.Context, profile, name string) *mi.Emoji {
-	body := map[string]any{
-		"name": name,
-	}
-
-	// https://host.tld/api/emoji
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   l.repo.Config().Profiles[profile].Host,
-	}).
-		JoinPath("api", "emoji").String()
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	emoji, err := mi.Post2[mi.Emoji](u, buf)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return emoji
-}
-
-func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
-
-	return cm.AddProfile("New Profile")
-}
-
-func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
-	u, _ := url.Parse(server)
-
-	conf := &miauth.AuthConfig{
-		Name: "mi-diary-app",
-		Callback: (&url.URL{
-			Scheme: "http",
-			Host:   net.JoinHostPort("localhost", l.repo.Config().Port),
-		}).
-			JoinPath("callback", u.Host).String(),
-		Permission: []string{"read:reactions"},
-		Host:       u.String(),
-	}
-	fmt.Println(conf.AuthCodeURL())
-
-	return conf.AuthCodeURL()
-}
-
-func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error {
-	id, err := uuid.Parse(sessionId)
-	if err != nil {
-		return err
-	}
-
-	conf := &miauth.AuthConfig{
-		SessionID: id,
-		Host: (&url.URL{
-			Scheme: "https",
-			Host:   host,
-		}).String(),
-	}
-	resp, err := conf.Exchange(ctx)
-	if err != nil {
-		return err
-	}
-
-	if resp.OK {
-		cfg := l.repo.Config()
-		cfg.Profiles[fmt.Sprintf("%s@%s", resp.User.Username, host)] = app.Profile{
-			I:        resp.Token,
-			UserId:   resp.User.ID,
-			UserName: resp.User.Username,
-			Host:     host,
-		}
-		app.ForceWriteConfig(cfg)
-
-		migrate.Do(l.repo)
-	}
-
-	return nil
 }
