@@ -14,9 +14,9 @@ type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
 	ID                string `bun:",pk"`
-	ReactionID        string
-	UserID            string // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
-	ReactionEmojiName string
+	ReactionID        string `bun:",notnull"`
+	UserID            string `bun:",notnull"` // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
+	ReactionEmojiName string `bun:",notnull"`
 	Text              string
 	CreatedAt         time.Time
 	User              User          `bun:"rel:belongs-to,join:user_id=id"`
@@ -39,7 +39,7 @@ type ReactionEmoji struct {
 	bun.BaseModel `bun:"table:reactions,alias:r"`
 
 	ID    int64  `bun:",pk,autoincrement"`
-	Name  string `bun:",unique"`
+	Name  string `bun:",unique,notnull"`
 	Image string
 	Count int64
 }
