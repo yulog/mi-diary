@@ -13,16 +13,16 @@ import (
 type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
-	ID           string `bun:",pk"`
-	ReactionID   string
-	UserID       string // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
-	ReactionName string
-	Text         string
-	CreatedAt    time.Time
-	User         User      `bun:"rel:belongs-to,join:user_id=id"`
-	Reaction     Reaction  `bun:"rel:belongs-to,join:reaction_name=name"`
-	Tags         []HashTag `bun:"m2m:note_to_tags,join:Note=HashTag"`
-	Files        []File    `bun:"m2m:note_to_files,join:Note=File"`
+	ID                string `bun:",pk"`
+	ReactionID        string
+	UserID            string // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
+	ReactionEmojiName string
+	Text              string
+	CreatedAt         time.Time
+	User              User          `bun:"rel:belongs-to,join:user_id=id"`
+	Reaction          ReactionEmoji `bun:"rel:belongs-to,join:reaction_emoji_name=name"`
+	Tags              []HashTag     `bun:"m2m:note_to_tags,join:Note=HashTag"`
+	Files             []File        `bun:"m2m:note_to_files,join:Note=File"`
 }
 
 type User struct {
@@ -35,10 +35,11 @@ type User struct {
 	Count       int64
 }
 
-type Reaction struct {
+type ReactionEmoji struct {
 	bun.BaseModel `bun:"table:reactions,alias:r"`
 
-	Name  string `bun:",pk"`
+	ID    int64  `bun:",pk,autoincrement"`
+	Name  string `bun:",unique"`
 	Image string
 	Count int64
 }

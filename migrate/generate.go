@@ -45,7 +45,7 @@ func GenerateSchema() {
 	models := []interface{}{
 		(*model.Note)(nil),
 		(*model.User)(nil),
-		(*model.Reaction)(nil),
+		(*model.ReactionEmoji)(nil),
 		(*model.HashTag)(nil),
 		(*model.NoteToTag)(nil),
 		(*model.File)(nil),

@@ -38,7 +38,7 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 		var (
 			users       []model.User
 			notes       []model.Note
-			reactions   []model.Reaction
+			reactions   []model.ReactionEmoji
 			noteToTags  []model.NoteToTag
 			files       []model.File
 			noteToFiles []model.NoteToFile
@@ -82,18 +82,18 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 			n := model.Note{
-				ID:           v.Note.ID,
-				ReactionID:   v.ID,
-				UserID:       v.Note.User.ID,
-				ReactionName: reactionName,
-				Text:         v.Note.Text,
-				CreatedAt:    v.Note.CreatedAt, // SQLite は日時をUTCで保持する
+				ID:                v.Note.ID,
+				ReactionID:        v.ID,
+				UserID:            v.Note.User.ID,
+				ReactionEmojiName: reactionName,
+				Text:              v.Note.Text,
+				CreatedAt:         v.Note.CreatedAt, // SQLite は日時をUTCで保持する
 			}
 			notes = append(notes, n)
 
-			r := model.Reaction{
-				Name:  reactionName,
-				Image: "",
+			r := model.ReactionEmoji{
+				Name: reactionName,
+				// Image: "",
 			}
 			reactions = append(reactions, r)
 		}
@@ -155,12 +155,12 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 
 func count(ctx context.Context, db bun.IDB) error {
 	// リアクションのカウント
-	var reactions []model.Reaction
+	var reactions []model.ReactionEmoji
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
-		ColumnExpr("reaction_name as name").
+		ColumnExpr("reaction_emoji_name as name").
 		ColumnExpr("count(*) as count").
-		Group("reaction_name").
+		Group("reaction_emoji_name").
 		Scan(ctx, &reactions)
 	if err != nil {
 		return err
@@ -275,11 +275,11 @@ func count(ctx context.Context, db bun.IDB) error {
 func (infra *Infra) InsertEmoji(ctx context.Context, profile string, e *mi.Emoji) {
 	// TODO: emoji画像をローカルに保存する
 
-	r := model.Reaction{
+	r := model.ReactionEmoji{
 		Name:  e.Name,
 		Image: e.URL,
 	}
-	var s []model.Reaction
+	var s []model.ReactionEmoji
 	s = append(s, r)
 	_, err := infra.DB(profile).NewUpdate().
 		Model(&s).

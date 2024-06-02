@@ -8,8 +8,8 @@ import (
 	"github.com/yulog/mi-diary/util/pg"
 )
 
-func (infra *Infra) Reactions(ctx context.Context, profile string) []model.Reaction {
-	var reactions []model.Reaction
+func (infra *Infra) Reactions(ctx context.Context, profile string) []model.ReactionEmoji {
+	var reactions []model.ReactionEmoji
 	infra.DB(profile).
 		NewSelect().
 		Model(&reactions).
@@ -18,8 +18,8 @@ func (infra *Infra) Reactions(ctx context.Context, profile string) []model.React
 	return reactions
 }
 
-func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) []model.Reaction {
-	var reactions []model.Reaction
+func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) []model.ReactionEmoji {
+	var reactions []model.ReactionEmoji
 	infra.DB(profile).
 		NewSelect().
 		Model(&reactions).
@@ -55,7 +55,7 @@ func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *
 		Model(&notes).
 		Relation("User").
 		Relation("Files").
-		Where("reaction_name = ?", name).
+		Where("reaction_emoji_name = ?", name).
 		Order("created_at DESC").
 		Limit(p.Limit()).
 		Offset(p.Offset()).

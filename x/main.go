@@ -55,7 +55,7 @@ func createTable() {
 	// Tableを作る
 	_, _ = db.NewCreateTable().Model((*model.Note)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*model.User)(nil)).Exec(ctx)
-	_, _ = db.NewCreateTable().Model((*model.Reaction)(nil)).Exec(ctx)
+	_, _ = db.NewCreateTable().Model((*model.ReactionEmoji)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*model.HashTag)(nil)).Exec(ctx)
 	_, _ = db.NewCreateTable().Model((*model.NoteToTag)(nil)).Exec(ctx)
 	// Insert
@@ -81,7 +81,7 @@ func createTable() {
 	var (
 		users      []model.User
 		notes      []model.Note
-		reactions  []model.Reaction
+		reactions  []model.ReactionEmoji
 		noteToTags []model.NoteToTag
 	)
 
@@ -104,13 +104,13 @@ func createTable() {
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 			n := model.Note{
-				ID:           v.Note.ID,
-				UserID:       v.Note.User.ID,
-				ReactionName: reactionName,
+				ID:                v.Note.ID,
+				UserID:            v.Note.User.ID,
+				ReactionEmojiName: reactionName,
 			}
 			notes = append(notes, n)
 
-			r := model.Reaction{
+			r := model.ReactionEmoji{
 				Name:  reactionName,
 				Image: "xxx",
 			}
