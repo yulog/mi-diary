@@ -121,9 +121,13 @@ func Upload() {
 	sh.Run("ghr", "-draft", "v"+VERSION, "goxz")
 }
 
-func GenMigrate() {
+func GenSchema() {
 	fmt.Println("Generate schema...")
 	migrate.GenerateSchema()
+}
+
+func GenMigrate() {
+	GenSchema()
 	fmt.Println("Generate diff...")
 	sh.Run("atlas", "migrate", "diff", "migration", "--dir", "file://migrate/migrations?format=golang-migrate", "--dev-url", "sqlite://file?mode=memory", "--to", "file://migrate/schema.sql")
 }
