@@ -2,6 +2,8 @@ package components
 
 import (
 	"fmt"
+
+	"github.com/yulog/mi-diary/app"
 )
 
 templ Initial(placeholder, button string, profiles []string) {
@@ -27,9 +29,10 @@ templ Initial(placeholder, button string, profiles []string) {
 							<p class="control">
 								<span class="select">
 									<select name="job-type">
-										<option value="1">reaction</option>
-										<option value="2">reaction(full scan)</option>
-										<option value="3">emoji</option>
+										<option value={ fmt.Sprintf("%d", int(app.Reaction)) }>reaction</option>
+										<option value={ fmt.Sprintf("%d", int(app.ReactionOne)) }>reaction(one)</option>
+										<option value={ fmt.Sprintf("%d", int(app.ReactionFull)) }>reaction(full scan)</option>
+										<option value={ fmt.Sprintf("%d", int(app.Emoji)) }>emoji</option>
 									</select>
 								</span>
 							</p>
@@ -129,8 +132,9 @@ templ Job(placeholder, button string, p string, profiles []string) {
 							<p class="control">
 								<span class="select">
 									<select name="job-type">
-										<option value="1">reaction</option>
-										<option value="3">emoji</option>
+										<option value={ fmt.Sprintf("%d", int(app.Reaction)) }>reaction</option>
+										<option value={ fmt.Sprintf("%d", int(app.ReactionOne)) }>reaction(one)</option>
+										<option value={ fmt.Sprintf("%d", int(app.Emoji)) }>emoji</option>
 									</select>
 								</span>
 							</p>

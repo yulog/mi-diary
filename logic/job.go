@@ -44,6 +44,8 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 		switch j.Type {
 		case app.Reaction:
 			l.reactionJob(ctx, j)
+		case app.ReactionOne:
+			l.reactionOneJob(ctx, j)
 		case app.ReactionFull:
 			l.reactionFullJob(ctx, j)
 		case app.Emoji:
@@ -68,6 +70,9 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 	var rid = j.ID
 	for {
 		gc, r := l.getReactions(ctx, j.Profile, rid)
+		if gc == 0 || r == nil {
+			break
+		}
 		ac := l.repo.Insert(ctx, j.Profile, r)
 
 		p, t := l.repo.GetProgress()
@@ -79,6 +84,22 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 		}
 		rid = (*r)[gc-1].ID
 		time.Sleep(rand.N(time.Second))
+	}
+}
+
+func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
+	gc, r := l.getReactionOne(ctx, j.Profile, j.ID)
+	if gc == 0 || r == nil {
+		return
+	}
+	ac := l.repo.Insert(ctx, j.Profile, r)
+
+	p, t := l.repo.GetProgress()
+	l.repo.SetProgress(p+int(ac), t+gc)
+
+	fmt.Println("insert count:", ac)
+	if gc == 0 || ac == 0 {
+		return
 	}
 }
 
@@ -146,6 +167,37 @@ func (l *Logic) getReactions(ctx context.Context, profile, id string) (int, *mi.
 	r, err := mi.Post2[mi.Reactions](u, buf)
 	if err != nil {
 		fmt.Println(err)
+		return 0, nil
+	}
+
+	return len(*r), r
+}
+
+func (l *Logic) getReactionOne(ctx context.Context, profile, id string) (int, *mi.Reactions) {
+	body := map[string]any{
+		"i":      l.repo.Config().Profiles[profile].I,
+		"limit":  1,
+		"userId": l.repo.Config().Profiles[profile].UserId,
+	}
+	if id != "" {
+		body["untilId"] = id
+	}
+
+	// https://host.tld/api/users/reactions
+	// 却って分かりにくい気もする
+	u := (&url.URL{
+		Scheme: "https",
+		Host:   l.repo.Config().Profiles[profile].Host,
+	}).
+		JoinPath("api", "users", "reactions").String()
+
+	buf := bytes.NewBuffer(nil)
+	json.NewEncoder(buf).Encode(body)
+
+	r, err := mi.Post2[mi.Reactions](u, buf)
+	if err != nil {
+		fmt.Println(err)
+		return 0, nil
 	}
 
 	return len(*r), r
