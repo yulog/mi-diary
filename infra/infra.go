@@ -23,8 +23,41 @@ func New(a *app.App) *Infra {
 	return &Infra{app: a}
 }
 
-func (infra *Infra) Config() *app.Config {
-	return &infra.app.Config
+// TODO: Config を直接返すのと個別に返すのとどちらが良い？
+// func (infra *Infra) Config() *app.Config {
+// 	return &infra.app.Config
+// }
+
+func (infra *Infra) SetConfig(key string, prof app.Profile) {
+	infra.app.Config.Profiles[key] = prof
+}
+
+func (infra *Infra) StoreConfig() error {
+	return app.ForceWriteConfig(&infra.app.Config)
+}
+
+func (infra *Infra) GetPort() string {
+	return infra.app.Config.Port
+}
+
+func (infra *Infra) GetProfile(key string) (app.Profile, error) {
+	v, ok := infra.app.Config.Profiles[key]
+	if !ok {
+		return app.Profile{}, fmt.Errorf("invalid profile: %s", key)
+	}
+	return v, nil
+}
+
+func (infra *Infra) GetProfileHost(key string) (string, error) {
+	v, ok := infra.app.Config.Profiles[key]
+	if !ok {
+		return "", fmt.Errorf("invalid profile: %s", key)
+	}
+	return v.Host, nil
+}
+
+func (infra *Infra) GetProfiles() *app.Profiles {
+	return &infra.app.Config.Profiles
 }
 
 func (infra *Infra) GetProgress() (int, int) {

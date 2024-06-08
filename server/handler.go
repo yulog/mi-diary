@@ -28,11 +28,11 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 	// エラーでなければ、DTOのメソッドでcomponentを作る
 
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	cm, err := srv.logic.HomeLogic(c.Request().Context(), profile)
+	com, err := srv.logic.HomeLogic(c.Request().Context(), profile)
 	if err != nil {
 		return err
 	}
-	return renderer(c, cm)
+	return renderer(c, com)
 }
 
 // ReactionsHandler は /reactions/:name のハンドラ
@@ -44,7 +44,12 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 		return err
 	}
 
-	return renderer(c, srv.logic.ReactionsLogic(c.Request().Context(), profile, name, p))
+	com, err := srv.logic.ReactionsLogic(c.Request().Context(), profile, name, p)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
 }
 
 // HashTagsHandler は /hashtags/:name のハンドラ
@@ -56,7 +61,12 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		return err
 	}
 
-	return renderer(c, srv.logic.HashTagsLogic(c.Request().Context(), profile, name, p))
+	com, err := srv.logic.HashTagsLogic(c.Request().Context(), profile, name, p)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
 }
 
 // UsersHandler は /users/:name のハンドラ
@@ -68,7 +78,12 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		return err
 	}
 
-	return renderer(c, srv.logic.UsersLogic(c.Request().Context(), profile, name, p))
+	com, err := srv.logic.UsersLogic(c.Request().Context(), profile, name, p)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
 }
 
 // FilesHandler は /files のハンドラ
@@ -117,7 +132,12 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 		return err
 	}
 
-	return renderer(c, srv.logic.ArchiveNotesLogic(c.Request().Context(), profile, d, p))
+	com, err := srv.logic.ArchiveNotesLogic(c.Request().Context(), profile, d, p)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
 }
 
 // ManageHandler は /manage のハンドラ
@@ -146,21 +166,21 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 
 // JobProgressHandler は /job/progress のハンドラ
 func (srv *Server) JobProgressHandler(c echo.Context) error {
-	_, d, cm := srv.logic.JobProgressLogic(c.Request().Context())
+	_, d, com := srv.logic.JobProgressLogic(c.Request().Context())
 
 	if d {
 		c.Response().Header().Set("hx-trigger", "done")
 	}
 
-	return renderer(c, cm)
+	return renderer(c, com)
 }
 
 // JobHandler は /job のハンドラ
 func (srv *Server) JobHandler(c echo.Context) error {
 	profile := c.Param("profile")
-	cm := srv.logic.JobLogic(c.Request().Context(), profile)
+	com := srv.logic.JobLogic(c.Request().Context(), profile)
 
-	return renderer(c, cm)
+	return renderer(c, com)
 }
 
 // NewProfilesHandler は /profiles のハンドラ

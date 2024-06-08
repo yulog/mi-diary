@@ -1,15 +1,12 @@
 package logic
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"math/rand/v2"
-	"net/url"
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/goccy/go-json"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	mi "github.com/yulog/miutil"
@@ -32,7 +29,7 @@ func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
 	l.repo.SetProgress(0, 0)
 	l.repo.SetProgressDone(false)
 	var ps []string
-	for k := range l.repo.Config().Profiles {
+	for k := range *l.repo.GetProfiles() {
 		ps = append(ps, k)
 	}
 
@@ -145,51 +142,19 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions) {
-	body := map[string]any{
-		"i":      l.repo.Config().Profiles[profile].I,
-		"limit":  limit,
-		"userId": l.repo.Config().Profiles[profile].UserId,
-	}
-	if id != "" {
-		body["untilId"] = id
-	}
-
-	// https://host.tld/api/users/reactions
-	// 却って分かりにくい気もする
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   l.repo.Config().Profiles[profile].Host,
-	}).
-		JoinPath("api", "users", "reactions").String()
-
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	r, err := mi.Post2[mi.Reactions](u, buf)
+	count, r, err := l.repo.GetUserReactions(profile, id, limit)
 	if err != nil {
+		// TODO: エラー処理
 		fmt.Println(err)
-		return 0, nil
 	}
 
-	return len(*r), r
+	return count, r
 }
 
 func (l *Logic) getEmoji(ctx context.Context, profile, name string) *mi.Emoji {
-	body := map[string]any{
-		"name": name,
-	}
-
-	// https://host.tld/api/emoji
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   l.repo.Config().Profiles[profile].Host,
-	}).
-		JoinPath("api", "emoji").String()
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	emoji, err := mi.Post2[mi.Emoji](u, buf)
+	emoji, err := l.repo.GetEmoji(profile, name)
 	if err != nil {
+		// TODO: エラー処理
 		fmt.Println(err)
 	}
 

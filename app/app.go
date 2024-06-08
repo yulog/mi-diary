@@ -17,8 +17,10 @@ type App struct {
 
 type Config struct {
 	Port     string
-	Profiles map[string]Profile
+	Profiles Profiles
 }
+
+type Profiles map[string]Profile
 
 type Profile struct {
 	I        string

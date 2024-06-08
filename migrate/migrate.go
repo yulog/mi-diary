@@ -21,7 +21,7 @@ func Do(infra *infra.Infra) {
 	}
 
 	// 各プロファイルのDBをマイグレーションする
-	for k := range infra.Config().Profiles {
+	for k := range *infra.GetProfiles() {
 		driver, err := sqlite3.WithInstance(infra.DB(k).DB, &sqlite3.Config{})
 		if err != nil {
 			panic(err)

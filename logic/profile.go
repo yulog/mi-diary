@@ -16,7 +16,7 @@ import (
 
 func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
 	var ps []string
-	for k := range l.repo.Config().Profiles {
+	for k := range *l.repo.GetProfiles() {
 		ps = append(ps, k)
 	}
 
@@ -35,7 +35,7 @@ func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
 		Name: "mi-diary-app",
 		Callback: (&url.URL{
 			Scheme: "http",
-			Host:   net.JoinHostPort("localhost", l.repo.Config().Port),
+			Host:   net.JoinHostPort("localhost", l.repo.GetPort()),
 		}).
 			JoinPath("callback", u.Host).String(),
 		Permission: []string{"read:reactions"},
@@ -65,14 +65,16 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 	}
 
 	if resp.OK {
-		cfg := l.repo.Config()
-		cfg.Profiles[fmt.Sprintf("%s@%s", resp.User.Username, host)] = app.Profile{
-			I:        resp.Token,
-			UserId:   resp.User.ID,
-			UserName: resp.User.Username,
-			Host:     host,
-		}
-		app.ForceWriteConfig(cfg)
+		l.repo.SetConfig(
+			fmt.Sprintf("%s@%s", resp.User.Username, host),
+			app.Profile{
+				I:        resp.Token,
+				UserId:   resp.User.ID,
+				UserName: resp.User.Username,
+				Host:     host,
+			},
+		)
+		l.repo.StoreConfig()
 
 		migrate.Do(l.repo)
 	}

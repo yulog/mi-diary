@@ -24,6 +24,10 @@ func NewEmoji(r *infra.Infra) EmojiLogic {
 }
 
 func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
+	host, err := l.repo.GetProfileHost(profile)
+	if err != nil {
+		return
+	}
 	body := map[string]any{
 		"name": name,
 	}
@@ -34,7 +38,7 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 	// u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
 	u := (&url.URL{
 		Scheme: "https",
-		Host:   l.repo.Config().Profiles[profile].Host,
+		Host:   host,
 	}).
 		JoinPath("api", "emoji").String()
 	buf := bytes.NewBuffer(nil)
