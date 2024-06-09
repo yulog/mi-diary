@@ -38,7 +38,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	}
 
 	return cm.IndexParams{
-		Title:     "Home",
+		Title:     "Home - " + profile,
 		Profile:   profile,
 		Reactions: r,
 		HashTags:  h,
