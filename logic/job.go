@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"time"
+	"unicode"
 
 	"github.com/a-h/templ"
 	"github.com/yulog/mi-diary/app"
@@ -139,6 +140,17 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 	}
 
 	for _, v := range r {
+		// unicode emojiならスキップしたい
+		symbol := false
+		for _, rune := range v.Name {
+			if unicode.IsSymbol(rune) {
+				symbol = true
+				break
+			}
+		}
+		if symbol {
+			continue
+		}
 		emoji := l.getEmoji(ctx, j.Profile, v.Name)
 		l.repo.InsertEmoji(ctx, j.Profile, v.ID, emoji)
 
