@@ -5,16 +5,24 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-css emoji() {
-	height: 24px;
+// css emoji() {
+// 	height: 24px;
+// }
+templ emojiStyle() {
+	<style type="text/css">
+		img.emoji {
+			height: 24px;
+		}
+	</style>
 }
 
 templ reaction(profile string, items []model.ReactionEmoji) {
+	@emojiStyle()
 	<div class="tags ml-5">
 		for _, item := range items {
 			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name)) } class="tag level-left">
 				if item.Image != "" {
-					<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", emoji() }/>
+					<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", "emoji" }/>
 				} else {
 					<span class="level-item">{ item.Name }</span>
 				}
@@ -22,4 +30,7 @@ templ reaction(profile string, items []model.ReactionEmoji) {
 			</a>
 		}
 	</div>
+	<script type="text/javascript">
+		twemoji.parse(document.body);
+	</script>
 }
