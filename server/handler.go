@@ -120,7 +120,11 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 func (srv *Server) ArchivesHandler(c echo.Context) error {
 	profile := c.Param("profile")
 
-	return renderer(c, srv.logic.ArchivesLogic(c.Request().Context(), profile))
+	com, err := srv.logic.ArchivesLogic(c.Request().Context(), profile)
+	if err != nil {
+		return err
+	}
+	return renderer(c, com)
 }
 
 // ArchiveNotesHandler は /archives/:date のハンドラ
@@ -193,7 +197,10 @@ func (srv *Server) NewProfilesHandler(c echo.Context) error {
 func (srv *Server) AddProfileHandler(c echo.Context) error {
 	server := c.FormValue("server-url")
 
-	authURL := srv.logic.AddProfileLogic(c.Request().Context(), server)
+	authURL, err := srv.logic.AddProfileLogic(c.Request().Context(), server)
+	if err != nil {
+		return err
+	}
 
 	c.Response().Header().Set("hx-redirect", authURL)
 
@@ -205,7 +212,10 @@ func (srv *Server) CallbackHandler(c echo.Context) error {
 	host := c.Param("host")
 	s := c.QueryParam("session")
 
-	srv.logic.CallbackLogic(c.Request().Context(), host, s)
+	err := srv.logic.CallbackLogic(c.Request().Context(), host, s)
+	if err != nil {
+		return err
+	}
 
 	return c.Redirect(http.StatusFound, "/")
 }

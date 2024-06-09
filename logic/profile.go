@@ -28,8 +28,11 @@ func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
 	return cm.AddProfile("New Profile")
 }
 
-func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
-	u, _ := url.Parse(server)
+func (l *Logic) AddProfileLogic(ctx context.Context, server string) (string, error) {
+	u, err := url.Parse(server)
+	if err != nil {
+		return "", err
+	}
 
 	conf := &miauth.AuthConfig{
 		Name: "mi-diary-app",
@@ -43,7 +46,7 @@ func (l *Logic) AddProfileLogic(ctx context.Context, server string) string {
 	}
 	fmt.Println(conf.AuthCodeURL())
 
-	return conf.AuthCodeURL()
+	return conf.AuthCodeURL(), nil
 }
 
 func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error {

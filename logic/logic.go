@@ -24,13 +24,25 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	if err != nil {
 		return nil, err
 	}
+	r, err := l.repo.Reactions(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
+	h, err := l.repo.HashTags(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
+	u, err := l.repo.Users(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
 
 	return cm.IndexParams{
 		Title:     "Home",
 		Profile:   profile,
-		Reactions: l.repo.Reactions(ctx, profile),
-		HashTags:  l.repo.HashTags(ctx, profile),
-		Users:     l.repo.Users(ctx, profile),
+		Reactions: r,
+		HashTags:  h,
+		Users:     u,
 	}.Index(), nil
 }
 
@@ -43,7 +55,10 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, page i
 	p := pg.New(0)
 	page = p.Page(page)
 
-	notes := l.repo.ReactionNotes(ctx, profile, name, p)
+	notes, err := l.repo.ReactionNotes(ctx, profile, name, p)
+	if err != nil {
+		return nil, err
+	}
 
 	hasNext := len(notes) >= p.Limit()
 
@@ -74,7 +89,10 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, page in
 	p := pg.New(0)
 	page = p.Page(page)
 
-	notes := l.repo.HashTagNotes(ctx, profile, name, p)
+	notes, err := l.repo.HashTagNotes(ctx, profile, name, p)
+	if err != nil {
+		return nil, err
+	}
 
 	hasNext := len(notes) >= p.Limit()
 
@@ -105,7 +123,10 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string, page int) 
 	p := pg.New(0)
 	page = p.Page(page)
 
-	notes := l.repo.UserNotes(ctx, profile, name, p)
+	notes, err := l.repo.UserNotes(ctx, profile, name, p)
+	if err != nil {
+		return nil, err
+	}
 
 	hasNext := len(notes) >= p.Limit()
 
@@ -141,7 +162,10 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ
 	p := pg.New(count)
 	page = p.Page(page)
 
-	files := l.repo.Files(ctx, profile, p)
+	files, err := l.repo.Files(ctx, profile, p)
+	if err != nil {
+		return nil, err
+	}
 	if len(files) == 0 {
 		return nil, fmt.Errorf("file not found")
 	}
@@ -180,7 +204,10 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	p := pg.New(count)
 	page = p.Page(page)
 
-	notes := l.repo.Notes(ctx, profile, p)
+	notes, err := l.repo.Notes(ctx, profile, p)
+	if err != nil {
+		return nil, err
+	}
 	if len(notes) == 0 {
 		return nil, fmt.Errorf("note not found")
 	}
@@ -207,12 +234,16 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) ArchivesLogic(ctx context.Context, profile string) templ.Component {
+func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Component, error) {
+	a, err := l.repo.Archives(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
 	return cm.ArchiveParams{
 		Title:   "Archives",
 		Profile: profile,
-		Items:   l.repo.Archives(ctx, profile),
-	}.Archive()
+		Items:   a,
+	}.Archive(), nil
 }
 
 var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
@@ -234,7 +265,10 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 	p := pg.New(0)
 	page = p.Page(page)
 
-	notes := l.repo.ArchiveNotes(ctx, profile, col, d, p)
+	notes, err := l.repo.ArchiveNotes(ctx, profile, col, d, p)
+	if err != nil {
+		return nil, err
+	}
 	title := fmt.Sprintf("%s - %d", d, page)
 
 	hasNext := len(notes) >= p.Limit()

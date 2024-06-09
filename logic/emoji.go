@@ -49,6 +49,10 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 		fmt.Println(err)
 	}
 	// fmt.Println(string(resp))
-	res := l.repo.ReactionOne(ctx, profile, name)
+	res, err := l.repo.ReactionOne(ctx, profile, name)
+	if err != nil {
+		// TODO: エラー処理
+		fmt.Println(err)
+	}
 	l.repo.InsertEmoji(ctx, profile, res.ID, emoji)
 }

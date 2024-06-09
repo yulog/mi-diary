@@ -119,7 +119,11 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
-	res := l.repo.ReactionOne(ctx, j.Profile, j.ID)
+	res, err := l.repo.ReactionOne(ctx, j.Profile, j.ID)
+	if err != nil {
+		// TODO: エラー処理
+		fmt.Println(err)
+	}
 	emoji := l.getEmoji(ctx, j.Profile, j.ID)
 	l.repo.InsertEmoji(ctx, j.Profile, res.ID, emoji)
 
@@ -128,7 +132,11 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
-	r := l.repo.ReactionImageEmpty(ctx, j.Profile)
+	r, err := l.repo.ReactionImageEmpty(ctx, j.Profile)
+	if err != nil {
+		// TODO: エラー処理
+		fmt.Println(err)
+	}
 
 	for _, v := range r {
 		emoji := l.getEmoji(ctx, j.Profile, v.Name)

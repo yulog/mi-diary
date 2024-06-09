@@ -8,60 +8,75 @@ import (
 	"github.com/yulog/mi-diary/util/pg"
 )
 
-func (infra *Infra) Reactions(ctx context.Context, profile string) []model.ReactionEmoji {
+func (infra *Infra) Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&reactions).
 		Order("count DESC").
 		Scan(ctx)
-	return reactions
+	if err != nil {
+		return nil, err
+	}
+	return reactions, nil
 }
 
-func (infra *Infra) ReactionOne(ctx context.Context, profile, name string) model.ReactionEmoji {
+func (infra *Infra) ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error) {
 	var reaction model.ReactionEmoji
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&reaction).
 		Where("name = ?", name).
 		Limit(1).
 		Scan(ctx)
-	return reaction
+	if err != nil {
+		return model.ReactionEmoji{}, err
+	}
+	return reaction, nil
 }
 
-func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) []model.ReactionEmoji {
+func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&reactions).
 		Where("image = ?", "").
 		Scan(ctx)
-	return reactions
+	if err != nil {
+		return nil, err
+	}
+	return reactions, nil
 }
 
-func (infra *Infra) HashTags(ctx context.Context, profile string) []model.HashTag {
+func (infra *Infra) HashTags(ctx context.Context, profile string) ([]model.HashTag, error) {
 	var tags []model.HashTag
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&tags).
 		Order("count DESC").
 		Scan(ctx)
-	return tags
+	if err != nil {
+		return nil, err
+	}
+	return tags, nil
 }
 
-func (infra *Infra) Users(ctx context.Context, profile string) []model.User {
+func (infra *Infra) Users(ctx context.Context, profile string) ([]model.User, error) {
 	var users []model.User
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&users).
 		Order("count DESC").
 		Scan(ctx)
-	return users
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
-func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
+func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -71,10 +86,13 @@ func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *
 		Limit(p.Limit()).
 		Offset(p.Offset()).
 		Scan(ctx)
-	return notes
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
 
-func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
+func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	// サブクエリを使う
 	// note idだけ必要
 	sq := infra.DB(profile).
@@ -90,7 +108,7 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *p
 		Offset(p.Offset())
 
 	var notes []model.Note
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -98,12 +116,15 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *p
 		Where("n.id IN (?)", sq). // サブクエリを使う
 		Order("created_at DESC").
 		Scan(ctx)
-	return notes
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
 
-func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p *pg.Pager) []model.Note {
+func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -113,7 +134,10 @@ func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p *pg.P
 		Limit(p.Limit()).
 		Offset(p.Offset()).
 		Scan(ctx)
-	return notes
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
 
 func (infra *Infra) FileCount(ctx context.Context, profile string) (int, error) {
@@ -123,9 +147,9 @@ func (infra *Infra) FileCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) []model.File {
+func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) ([]model.File, error) {
 	var files []model.File
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&files).
 		Relation("Notes", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -135,7 +159,10 @@ func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) []mo
 		Limit(p.Limit()).
 		Offset(p.Offset()).
 		Scan(ctx)
-	return files
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }
 
 func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) {
@@ -145,9 +172,9 @@ func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []model.Note {
+func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -156,12 +183,15 @@ func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) []mo
 		Limit(p.Limit()).
 		Offset(p.Offset()).
 		Scan(ctx)
-	return notes
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
 
-func (infra *Infra) Archives(ctx context.Context, profile string) []model.Month {
+func (infra *Infra) Archives(ctx context.Context, profile string) ([]model.Month, error) {
 	var archives []model.Month
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&archives).
 		Relation("Days", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -169,12 +199,15 @@ func (infra *Infra) Archives(ctx context.Context, profile string) []model.Month 
 		}).
 		Order("ym DESC").
 		Scan(ctx)
-	return archives
+	if err != nil {
+		return nil, err
+	}
+	return archives, nil
 }
 
-func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p *pg.Pager) []model.Note {
+func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	infra.DB(profile).
+	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -184,5 +217,8 @@ func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p 
 		Limit(p.Limit()).
 		Offset(p.Offset()).
 		Scan(ctx)
-	return notes
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
