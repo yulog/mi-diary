@@ -220,7 +220,12 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	if len(notes) == 0 {
 		return nil, fmt.Errorf("note not found")
 	}
-	// title := fmt.Sprint(page)
+	title := ""
+	if params.S != "" {
+		title = fmt.Sprintf("%s - %d", params.S, page)
+	} else {
+		title = fmt.Sprint(page)
+	}
 
 	hasNext := false
 	if params.S == "" {
@@ -231,7 +236,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	hasLast := p.Next() < p.Last()
 
 	n := cm.Note{
-		Title:   fmt.Sprint(page),
+		Title:   title,
 		Profile: profile,
 		Host:    host,
 		Items:   notes,

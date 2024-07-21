@@ -41,20 +41,3 @@ func renderer(c echo.Context, cmp templ.Component) error {
 
 	return c.HTML(http.StatusOK, buf.String())
 }
-
-// func page(c echo.Context, p *int) error {
-// 	if err := echo.QueryParamsBinder(c).
-// 		Int("page", p).
-// 		BindError(); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
-type Params struct {
-	Profile string `param:"profile"`
-	Name    string `param:"name"`
-	Date    string `param:"date"`
-	Page    int    `query:"page"`
-	S       string `query:"s"`
-}

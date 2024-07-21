@@ -32,10 +32,7 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 		"name": name,
 	}
 
-	// b, _ := json.Marshal(body)
-	// fmt.Println(string(b))
 	// https://host.tld/api/emoji
-	// u := fmt.Sprintf("https://%s/api/emoji", l.repo.Config().Profiles[profile].Host)
 	u := (&url.URL{
 		Scheme: "https",
 		Host:   host,
@@ -48,7 +45,7 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// fmt.Println(string(resp))
+
 	res, err := l.repo.ReactionOne(ctx, profile, name)
 	if err != nil {
 		// TODO: エラー処理

@@ -8,6 +8,19 @@ import (
 	"github.com/yulog/mi-diary/logic"
 )
 
+type Params struct {
+	Profile string `param:"profile"`
+	Name    string `param:"name"`
+	Date    string `param:"date"`
+	Page    int    `query:"page"`
+	S       string `query:"s"`
+}
+
+type Callback struct {
+	Host      string `param:"host"`
+	SessionID string `query:"session"`
+}
+
 type Job struct {
 	Profile string `form:"profile" validate:"required"`
 	Type    int    `form:"job-type" validate:"required"`
@@ -219,10 +232,12 @@ func (srv *Server) AddProfileHandler(c echo.Context) error {
 
 // CallbackHandler は /callback/:host のハンドラ
 func (srv *Server) CallbackHandler(c echo.Context) error {
-	host := c.Param("host")
-	s := c.QueryParam("session")
+	var callback Callback
+	if err := c.Bind(&callback); err != nil {
+		return err
+	}
 
-	err := srv.logic.CallbackLogic(c.Request().Context(), host, s)
+	err := srv.logic.CallbackLogic(c.Request().Context(), callback.Host, callback.SessionID)
 	if err != nil {
 		return err
 	}
