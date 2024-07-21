@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"github.com/google/go-querystring/query"
 )
 
 templ Head(title string) {
@@ -58,45 +59,56 @@ type Pages struct {
 	Last    int
 	HasNext bool
 	HasLast bool
+
+	QueryParams QueryParams
 }
 
-templ Pagination(title, profile string, p Pages) {
-	@BaseWithNav(title, profile) {
-		@pager(p)
-		<div class="block">
-			{ children... }
-		</div>
-		@pager(p)
-	}
+type QueryParams struct {
+	Page int    `url:"page"`
+	S    string `url:"s,omitempty"`
+}
+
+templ Pagination(p Pages) {
+	@pager(p)
+	<div class="block">
+		{ children... }
+	</div>
+	@pager(p)
+}
+
+func (q *QueryParams) getPageQuery(p int) templ.SafeURL {
+	q.Page = p
+	v, _ := query.Values(q)
+	return templ.URL("?" + v.Encode())
+}
+
+templ paginationLink(q QueryParams, num int) {
+	<li>
+		<a href={ q.getPageQuery(num) } class="pagination-link">
+			{ fmt.Sprintf("%d", num) }
+		</a>
+	</li>
 }
 
 templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
 		if p.Prev != 0 {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Prev)) } class="pagination-previous">Prev</a>
+			<a href={ p.QueryParams.getPageQuery(p.Prev) } class="pagination-previous">Prev</a>
 		} else {
 			<span class="pagination-previous is-disabled">Prev</span>
 		}
 		if p.HasNext {
-			<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Next)) } class="pagination-next">Next</a>
+			<a href={ p.QueryParams.getPageQuery(p.Next) } class="pagination-next">Next</a>
 		} else {
 			<span class="pagination-next is-disabled">Next</span>
 		}
 		<ul class="pagination-list">
 			if p.Current > 2 {
-				<li>
-					<a href={ templ.URL("?page=1") } class="pagination-link">
-						{ fmt.Sprint("1") }
-					</a>
-				</li>
+				@paginationLink(p.QueryParams, 1)
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
 			}
 			if p.Prev != 0 {
-				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Prev)) } class="pagination-link">
-						{ fmt.Sprintf("%d", p.Prev) }
-					</a>
-				</li>
+				@paginationLink(p.QueryParams, p.Prev)
 			}
 			<li>
 				<span class="pagination-link is-current">
@@ -104,19 +116,11 @@ templ pager(p Pages) {
 				</span>
 			</li>
 			if p.HasNext {
-				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Next)) } class="pagination-link">
-						{ fmt.Sprintf("%d", p.Next) }
-					</a>
-				</li>
+				@paginationLink(p.QueryParams, p.Next)
 			}
 			if p.HasLast {
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
-				<li>
-					<a href={ templ.URL(fmt.Sprintf("?page=%d", p.Last)) } class="pagination-link">
-						{ fmt.Sprintf("%d", p.Last) }
-					</a>
-				</li>
+				@paginationLink(p.QueryParams, p.Last)
 			}
 		</ul>
 	</nav>

@@ -19,6 +19,11 @@ func New(r *infra.Infra) *Logic {
 	return &Logic{repo: r}
 }
 
+type Params struct {
+	Page int
+	S    string
+}
+
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 	_, err := l.repo.GetProfile(profile)
 	if err != nil {
@@ -46,14 +51,14 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	}.Index(), nil
 }
 
-func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, page int) (templ.Component, error) {
+func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	p := pg.New(0)
-	page = p.Page(page)
+	page := p.Page(params.Page)
 
 	notes, err := l.repo.ReactionNotes(ctx, profile, name, p)
 	if err != nil {
@@ -80,14 +85,14 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, page i
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, page int) (templ.Component, error) {
+func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	p := pg.New(0)
-	page = p.Page(page)
+	page := p.Page(params.Page)
 
 	notes, err := l.repo.HashTagNotes(ctx, profile, name, p)
 	if err != nil {
@@ -114,14 +119,14 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, page in
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) UsersLogic(ctx context.Context, profile, name string, page int) (templ.Component, error) {
+func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	p := pg.New(0)
-	page = p.Page(page)
+	page := p.Page(params.Page)
 
 	notes, err := l.repo.UserNotes(ctx, profile, name, p)
 	if err != nil {
@@ -148,7 +153,7 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string, page int) 
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
+func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -160,7 +165,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ
 	}
 	fmt.Println(count)
 	p := pg.New(count)
-	page = p.Page(page)
+	page := p.Page(params.Page)
 
 	files, err := l.repo.Files(ctx, profile, p)
 	if err != nil {
@@ -191,20 +196,24 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, page int) (templ
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ.Component, error) {
+func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
-	count, err := l.repo.NoteCount(ctx, profile)
-	if err != nil {
-		return nil, err
+	count := 0
+	if params.S == "" {
+		count, err = l.repo.NoteCount(ctx, profile)
+		if err != nil {
+			return nil, err
+		}
 	}
-	p := pg.New(count)
-	page = p.Page(page)
 
-	notes, err := l.repo.Notes(ctx, profile, p)
+	p := pg.New(count)
+	page := p.Page(params.Page)
+
+	notes, err := l.repo.Notes(ctx, profile, params.S, p)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +222,12 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 	}
 	// title := fmt.Sprint(page)
 
-	hasNext := len(notes) >= p.Limit() && p.Next() <= p.Last()
+	hasNext := false
+	if params.S == "" {
+		hasNext = len(notes) >= p.Limit() && p.Next() <= p.Last()
+	} else {
+		hasNext = len(notes) >= p.Limit()
+	}
 	hasLast := p.Next() < p.Last()
 
 	n := cm.Note{
@@ -229,6 +243,10 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, page int) (templ
 		Last:    p.Last(),
 		HasNext: hasNext,
 		HasLast: hasLast,
+		QueryParams: cm.QueryParams{
+			Page: params.Page,
+			S:    params.S,
+		},
 	}
 
 	return n.WithPages(cp), nil
@@ -249,7 +267,7 @@ func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Compon
 var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
 var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
-func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page int) (templ.Component, error) {
+func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -263,7 +281,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, page i
 	}
 
 	p := pg.New(0)
-	page = p.Page(page)
+	page := p.Page(params.Page)
 
 	notes, err := l.repo.ArchiveNotes(ctx, profile, col, d, p)
 	if err != nil {

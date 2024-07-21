@@ -2,9 +2,8 @@ package components
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/yulog/mi-diary/model"
+	"time"
 )
 
 type Note struct {
@@ -52,8 +51,11 @@ templ (n Note) WithPage() {
 }
 
 templ (n Note) WithPages(p Pages) {
-	@Pagination(n.Title, n.Profile, p) {
-		@noteList(n.Host, n.Items)
+	@BaseWithNav(n.Title, n.Profile) {
+		@SearchBar(fmt.Sprintf("/profiles/%s/notes", n.Profile), p.QueryParams.S)
+		@Pagination(p) {
+			@noteList(n.Host, n.Items)
+		}
 	}
 }
 
@@ -108,12 +110,12 @@ templ noteContent(host string, note model.Note) {
 			}
 		</div>
 		<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.ID)) } target="_blank" class="has-text-grey is-underlined">
+			// SQLite は日時をUTCで保持する
 			{ note.ID } ({ note.CreatedAt.In(time.Local).Format(time.DateTime) })
 		</a>
 	</div>
 }
 
-// SQLite は日時をUTCで保持する
 templ noteList(host string, items []model.Note) {
 	@lightboxStyle()
 	<ul class="columns is-multiline">

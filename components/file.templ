@@ -32,8 +32,10 @@ templ (n File) WithPage() {
 }
 
 templ (n File) WithPages(p Pages) {
-	@Pagination(n.Title, n.Profile, p) {
-		@fileList(n.Host, n.Items)
+	@BaseWithNav(n.Title, n.Profile) {
+		@Pagination(p) {
+			@fileList(n.Host, n.Items)
+		}
 	}
 }
 

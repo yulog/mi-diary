@@ -172,17 +172,21 @@ func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Notes(ctx context.Context, profile string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	err := infra.DB(profile).
+	q := infra.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
 		Relation("Files").
 		Order("created_at DESC").
 		Limit(p.Limit()).
-		Offset(p.Offset()).
-		Scan(ctx)
+		Offset(p.Offset())
+
+	if s != "" {
+		q.Where("text like ?", "%"+s+"%")
+	}
+	err := q.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

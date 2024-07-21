@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/logic"
 )
 
 type Job struct {
@@ -37,14 +38,15 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 
 // ReactionsHandler は /reactions/:name のハンドラ
 func (srv *Server) ReactionsHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	name := c.Param("name")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+	}
 
-	com, err := srv.logic.ReactionsLogic(c.Request().Context(), profile, name, p)
+	com, err := srv.logic.ReactionsLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}
@@ -54,14 +56,15 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 
 // HashTagsHandler は /hashtags/:name のハンドラ
 func (srv *Server) HashTagsHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	name := c.Param("name")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+	}
 
-	com, err := srv.logic.HashTagsLogic(c.Request().Context(), profile, name, p)
+	com, err := srv.logic.HashTagsLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}
@@ -71,14 +74,15 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 
 // UsersHandler は /users/:name のハンドラ
 func (srv *Server) UsersHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	name := c.Param("name")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+	}
 
-	com, err := srv.logic.UsersLogic(c.Request().Context(), profile, name, p)
+	com, err := srv.logic.UsersLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}
@@ -88,13 +92,15 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 
 // FilesHandler は /files のハンドラ
 func (srv *Server) FilesHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+	}
 
-	com, err := srv.logic.FilesLogic(c.Request().Context(), profile, p)
+	com, err := srv.logic.FilesLogic(c.Request().Context(), params.Profile, params2)
 	if err != nil {
 		return err
 	}
@@ -103,13 +109,16 @@ func (srv *Server) FilesHandler(c echo.Context) error {
 
 // NotesHandler は /notes のハンドラ
 func (srv *Server) NotesHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+		S:    params.S,
+	}
 
-	com, err := srv.logic.NotesLogic(c.Request().Context(), profile, p)
+	com, err := srv.logic.NotesLogic(c.Request().Context(), params.Profile, params2)
 	if err != nil {
 		return err
 	}
@@ -129,14 +138,15 @@ func (srv *Server) ArchivesHandler(c echo.Context) error {
 
 // ArchiveNotesHandler は /archives/:date のハンドラ
 func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	d := c.Param("date")
-	var p int
-	if err := page(c, &p); err != nil {
+	var params Params
+	if err := c.Bind(&params); err != nil {
 		return err
 	}
+	params2 := logic.Params{
+		Page: params.Page,
+	}
 
-	com, err := srv.logic.ArchiveNotesLogic(c.Request().Context(), profile, d, p)
+	com, err := srv.logic.ArchiveNotesLogic(c.Request().Context(), params.Profile, params.Date, params2)
 	if err != nil {
 		return err
 	}
