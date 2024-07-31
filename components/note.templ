@@ -7,10 +7,11 @@ import (
 )
 
 type Note struct {
-	Title   string
-	Profile string
-	Host    string
-	Items   []model.Note
+	Title      string
+	Profile    string
+	Host       string
+	SearchPath string
+	Items      []model.Note
 }
 
 css grid() {
@@ -52,7 +53,7 @@ templ (n Note) WithPage() {
 
 templ (n Note) WithPages(p Pages) {
 	@BaseWithNav(n.Title, n.Profile) {
-		@SearchBar(fmt.Sprintf("/profiles/%s/notes", n.Profile), p.QueryParams.S)
+		@SearchBar(n.SearchPath, p.QueryParams.S)
 		@Pagination(p) {
 			@noteList(n.Host, n.Items)
 		}

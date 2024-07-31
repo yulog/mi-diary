@@ -236,10 +236,11 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	hasLast := p.Next() < p.Last()
 
 	n := cm.Note{
-		Title:   title,
-		Profile: profile,
-		Host:    host,
-		Items:   notes,
+		Title:      title,
+		Profile:    profile,
+		Host:       host,
+		SearchPath: fmt.Sprintf("/profiles/%s/notes", profile),
+		Items:      notes,
 	}
 	cp := cm.Pages{
 		Current: page,

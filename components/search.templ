@@ -2,15 +2,17 @@ package components
 
 templ SearchBar(path, s string) {
 	// if s != "" {
-	<div class="block">
-		<div class="field has-addons has-addons-centered">
-			<div class="control is-expanded">
-				<input name="s" class="input is-rounded is-primary" type="text" placeholder="Search" value={ s }/>
-			</div>
-			<div class="control">
-				<button hx-get={ path } hx-include="[name='s']" hx-target="body" hx-swap="outerHTML" hx-trigger="click, keyup[key=='Enter'] from:input[name='s']" hx-push-url="true" class="button is-rounded is-primary">Go</button>
+	if path != "" {
+		<div class="block">
+			<div class="field has-addons has-addons-centered">
+				<div class="control is-expanded">
+					<input name="s" class="input is-rounded is-primary" type="text" placeholder="Search" value={ s }/>
+				</div>
+				<div class="control">
+					<button hx-get={ path } hx-include="[name='s']" hx-target="body" hx-swap="outerHTML" hx-trigger="click, keyup[key=='Enter'] from:input[name='s']" hx-push-url="true" class="button is-rounded is-primary">Go</button>
+				</div>
 			</div>
 		</div>
-	</div>
+	}
 	// }
 }
