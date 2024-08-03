@@ -2,11 +2,22 @@ package infra
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/model"
 	"github.com/yulog/mi-diary/util/pg"
 )
+
+// addWhereLike
+//
+// https://bun.uptrace.dev/guide/query-where.html#querybuilder
+func addWhereLike(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
+	if s == "" {
+		return q
+	}
+	return q.Where("? like ?", bun.Ident(col), "%"+s+"%")
+}
 
 func (infra *Infra) Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
@@ -174,19 +185,19 @@ func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) 
 
 func (infra *Infra) Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
-	q := infra.DB(profile).
-		NewSelect().
+	// https://bun.uptrace.dev/guide/query-where.html#querybuilder
+	qb := infra.DB(profile).NewSelect().QueryBuilder()
+	qb = addWhereLike(qb, "text", s)
+	err := qb.
+		Unwrap().(*bun.SelectQuery).
 		Model(&notes).
 		Relation("User").
 		Relation("Files").
 		Order("created_at DESC").
 		Limit(p.Limit()).
-		Offset(p.Offset())
+		Offset(p.Offset()).
+		Scan(ctx)
 
-	if s != "" {
-		q.Where("text like ?", "%"+s+"%")
-	}
-	err := q.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -209,8 +220,17 @@ func (infra *Infra) Archives(ctx context.Context, profile string) ([]model.Month
 	return archives, nil
 }
 
-func (infra *Infra) ArchiveNotes(ctx context.Context, profile, col, d string, p *pg.Pager) ([]model.Note, error) {
+var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
+var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+
+func (infra *Infra) ArchiveNotes(ctx context.Context, profile, d string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
+	col := ""
+	if reym.MatchString(d) {
+		col = "strftime('%Y-%m', created_at, 'localtime')"
+	} else if reymd.MatchString(d) {
+		col = "strftime('%Y-%m-%d', created_at, 'localtime')"
+	}
 	err := infra.DB(profile).
 		NewSelect().
 		Model(&notes).

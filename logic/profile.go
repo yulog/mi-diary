@@ -67,20 +67,22 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 		return err
 	}
 
-	if resp.OK {
-		l.repo.SetConfig(
-			fmt.Sprintf("%s@%s", resp.User.Username, host),
-			app.Profile{
-				I:        resp.Token,
-				UserId:   resp.User.ID,
-				UserName: resp.User.Username,
-				Host:     host,
-			},
-		)
-		l.repo.StoreConfig()
-
-		migrate.Do(l.repo)
+	if !resp.OK {
+		return fmt.Errorf("failed to authenticate")
 	}
+
+	l.repo.SetConfig(
+		fmt.Sprintf("%s@%s", resp.User.Username, host),
+		app.Profile{
+			I:        resp.Token,
+			UserId:   resp.User.ID,
+			UserName: resp.User.Username,
+			Host:     host,
+		},
+	)
+	l.repo.StoreConfig()
+
+	migrate.Do(l.repo)
 
 	return nil
 }

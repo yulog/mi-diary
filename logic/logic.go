@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	"github.com/a-h/templ"
 	cm "github.com/yulog/mi-diary/components"
@@ -270,26 +269,16 @@ func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Compon
 	}.Archive(), nil
 }
 
-var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
-var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-
 func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (templ.Component, error) {
 	host, err := l.repo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
-	col := ""
-	if reym.MatchString(d) {
-		col = "strftime('%Y-%m', created_at, 'localtime')"
-	} else if reymd.MatchString(d) {
-		col = "strftime('%Y-%m-%d', created_at, 'localtime')"
-	}
-
 	p := pg.New(0)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.ArchiveNotes(ctx, profile, col, d, p)
+	notes, err := l.repo.ArchiveNotes(ctx, profile, d, p)
 	if err != nil {
 		return nil, err
 	}
