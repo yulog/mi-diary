@@ -134,7 +134,5 @@ func GenMigrate() {
 
 func Migrate() {
 	fmt.Println("Migration...")
-	app := app.New()
-	infra := infra.New(app)
-	migrate.Do(infra)
+	migrate.Do(infra.New(app.New()))
 }
