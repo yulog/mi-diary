@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/a-h/templ"
 	cm "github.com/yulog/mi-diary/components"
@@ -162,7 +163,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(count)
+	slog.Info("File count", slog.Int("count", count))
 	p := pg.New(count)
 	page := p.Page(params.Page)
 

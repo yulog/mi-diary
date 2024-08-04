@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 
@@ -44,7 +45,7 @@ func (l *Logic) AddProfileLogic(ctx context.Context, server string) (string, err
 		Permission: []string{"read:reactions"},
 		Host:       u.String(),
 	}
-	fmt.Println(conf.AuthCodeURL())
+	slog.Info(conf.AuthCodeURL())
 
 	return conf.AuthCodeURL(), nil
 }

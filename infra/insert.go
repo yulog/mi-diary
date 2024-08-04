@@ -3,7 +3,7 @@ package infra
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -31,7 +31,7 @@ func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions)
 	return tx(ctx, infra.DB(profile), r)
 }
 
-func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
+func tx(ctx context.Context, db bun.IDB, r *mi.Reactions) (rows int64) {
 	// まとめて追加する(トランザクション)
 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
@@ -61,7 +61,11 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 
 			for _, tv := range v.Note.Tags {
 				ht := model.HashTag{Text: tv}
-				_, _ = tx.NewInsert().Model(&ht).On("CONFLICT DO UPDATE").Exec(ctx)
+				err := insertHashTag(ctx, tx, &ht)
+				if err != nil {
+					return err
+				}
+				slog.Info("HashTag ID", slog.Int64("ID", ht.ID))
 				// pp.Println(ht.ID)
 				// id is scanned automatically
 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
@@ -93,47 +97,45 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 
 			r := model.ReactionEmoji{
 				Name: reactionName,
-				// Image: "",
 			}
 			reactions = append(reactions, r)
 		}
 
 		// 重複していたらアップデート
-		_, err := tx.NewInsert().Model(&users).On("CONFLICT DO UPDATE").Exec(ctx)
+		err := insertUsers(ctx, tx, &users)
 		if err != nil {
 			return err
 		}
 
 		// 重複していたら登録しない(エラーにしない)
-		result, err := tx.NewInsert().Model(&notes).Ignore().Exec(ctx)
+		rows, err = insertNotes(ctx, tx, &notes)
 		if err != nil {
 			return err
 		}
-		rows, _ = result.RowsAffected()
-		fmt.Println("insert:", rows)
+		slog.Info("Notes inserted", slog.Int64("count", rows))
 
-		_, err = tx.NewInsert().Model(&reactions).Ignore().Exec(ctx)
+		err = insertReactions(ctx, tx, &reactions)
 		if err != nil {
 			return err
 		}
 
 		// 0件の場合がある
 		if len(noteToTags) > 0 {
-			_, err = tx.NewInsert().Model(&noteToTags).Ignore().Exec(ctx)
+			err = insertNoteToTags(ctx, tx, &noteToTags)
 			if err != nil {
 				return err
 			}
 		}
 
 		if len(files) > 0 {
-			_, err = tx.NewInsert().Model(&files).On("CONFLICT DO UPDATE").Exec(ctx)
+			err = insertFiles(ctx, tx, &files)
 			if err != nil {
 				return err
 			}
 		}
 
 		if len(noteToFiles) > 0 {
-			_, err = tx.NewInsert().Model(&noteToFiles).Ignore().Exec(ctx)
+			err = insertNoteToFiles(ctx, tx, &noteToFiles)
 			if err != nil {
 				return err
 			}
@@ -147,14 +149,83 @@ func tx(ctx context.Context, db *bun.DB, r *mi.Reactions) (rows int64) {
 		return err
 	})
 	if err != nil {
-		fmt.Println(err)
+		slog.Error(err.Error())
 		panic(err)
 	}
 	return
 }
 
+func insertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error {
+	_, err := db.NewInsert().Model(hashtag).On("CONFLICT DO UPDATE").Exec(ctx)
+	return err
+}
+
+func insertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error {
+	_, err := db.NewInsert().Model(users).On("CONFLICT DO UPDATE").Exec(ctx)
+	return err
+}
+
+func insertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
+	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
+	rows, _ := result.RowsAffected()
+	return rows, err
+}
+
+func insertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error {
+	_, err := db.NewInsert().Model(reactions).Ignore().Exec(ctx)
+	return err
+}
+
+func insertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error {
+	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
+	return err
+}
+
+func insertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error {
+	_, err := db.NewInsert().Model(files).On("CONFLICT DO UPDATE").Exec(ctx)
+	return err
+}
+
+func insertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error {
+	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
+	return err
+}
+
 func count(ctx context.Context, db bun.IDB) error {
 	// リアクションのカウント
+	err := countReaction(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	// タグのカウント
+	err = countHashTag(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	// ユーザーのカウント
+	err = countUser(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	// 月別のカウント
+	err = countMonthly(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	// 日別のカウント
+	err = countDaily(ctx, db)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+// リアクションのカウント
+func countReaction(ctx context.Context, db bun.IDB) error {
 	var reactions []model.ReactionEmoji
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
@@ -178,10 +249,13 @@ func count(ctx context.Context, db bun.IDB) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	// タグのカウント
+// タグのカウント
+func countHashTag(ctx context.Context, db bun.IDB) error {
 	var hashtags []model.HashTag
-	err = db.NewSelect().
+	err := db.NewSelect().
 		Model((*model.NoteToTag)(nil)).
 		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Column("text")
@@ -205,10 +279,13 @@ func count(ctx context.Context, db bun.IDB) error {
 			return err
 		}
 	}
+	return nil
+}
 
-	// ユーザーのカウント
+// ユーザーのカウント
+func countUser(ctx context.Context, db bun.IDB) error {
 	var users []model.User
-	err = db.NewSelect().
+	err := db.NewSelect().
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Column("id", "name")
@@ -229,10 +306,13 @@ func count(ctx context.Context, db bun.IDB) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	// 月別のカウント
+// 月別のカウント
+func countMonthly(ctx context.Context, db bun.IDB) error {
 	var months []model.Month
-	err = db.NewSelect().
+	err := db.NewSelect().
 		Model((*model.Note)(nil)).
 		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym").
 		ColumnExpr("count(*) as count").
@@ -250,10 +330,13 @@ func count(ctx context.Context, db bun.IDB) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	// 日別のカウント
+// 日別のカウント
+func countDaily(ctx context.Context, db bun.IDB) error {
 	var days []model.Day
-	err = db.NewSelect().
+	err := db.NewSelect().
 		Model((*model.Note)(nil)).
 		ColumnExpr("strftime('%Y-%m-%d', created_at, 'localtime') as ymd").
 		ColumnExpr("strftime('%Y-%m', created_at, 'localtime') as ym").
@@ -272,7 +355,7 @@ func count(ctx context.Context, db bun.IDB) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji) {
@@ -291,7 +374,7 @@ func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e
 		Bulk().
 		Exec(ctx)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error(err.Error())
 		panic(err)
 	}
 }

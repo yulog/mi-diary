@@ -3,7 +3,7 @@ package logic
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"log/slog"
 	"net/url"
 
 	"github.com/goccy/go-json"
@@ -43,13 +43,13 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 
 	emoji, err := mi.Post2[mi.Emoji](u, buf)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 
 	res, err := l.repo.ReactionOne(ctx, profile, name)
 	if err != nil {
 		// TODO: エラー処理
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 	l.repo.InsertEmoji(ctx, profile, res.ID, emoji)
 }

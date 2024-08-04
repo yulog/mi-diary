@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"net"
+	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/logic"
@@ -18,6 +21,9 @@ const version = "0.0.3"
 var revision = "HEAD"
 
 func main() {
+	// logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	logger := slog.New(log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true}))
+	slog.SetDefault(logger)
 	app := app.New()
 	infra := infra.New(app)
 	logic := logic.New(infra)

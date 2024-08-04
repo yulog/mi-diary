@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"math/rand/v2"
 	"time"
 	"unicode"
@@ -53,6 +54,7 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 				l.emojiFullJob(ctx, j)
 			}
 		default:
+			// progressの動作確認用
 			for i := 0; i < 10; i++ {
 				p, _ := l.repo.GetProgress()
 				p, t := l.repo.SetProgress(p+10, 0)
@@ -73,10 +75,9 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 		}
 		ac := l.repo.Insert(ctx, j.Profile, r)
 
-		p, t := l.repo.GetProgress()
-		l.repo.SetProgress(p+int(ac), t+gc)
+		p, t := l.repo.UpdateProgress(int(ac), gc)
 
-		fmt.Println("insert count:", ac)
+		slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
 		if gc == 0 || ac == 0 {
 			break
 		}
@@ -92,10 +93,9 @@ func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
 	}
 	ac := l.repo.Insert(ctx, j.Profile, r)
 
-	p, t := l.repo.GetProgress()
-	l.repo.SetProgress(p+int(ac), t+gc)
+	p, t := l.repo.UpdateProgress(int(ac), gc)
 
-	fmt.Println("insert count:", ac)
+	slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
 	if gc == 0 || ac == 0 {
 		return
 	}
@@ -107,10 +107,9 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 		gc, r := l.getReactions(ctx, j.Profile, rid, 20)
 		ac := l.repo.Insert(ctx, j.Profile, r)
 
-		p, t := l.repo.GetProgress()
-		l.repo.SetProgress(p+int(ac), t+gc)
+		p, t := l.repo.UpdateProgress(int(ac), gc)
 
-		fmt.Println("get count:", gc)
+		slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
 		if gc == 0 {
 			break
 		}
@@ -123,20 +122,21 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 	res, err := l.repo.ReactionOne(ctx, j.Profile, j.ID)
 	if err != nil {
 		// TODO: エラー処理
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 	emoji := l.getEmoji(ctx, j.Profile, j.ID)
 	l.repo.InsertEmoji(ctx, j.Profile, res.ID, emoji)
 
 	p, _ := l.repo.GetProgress()
 	l.repo.SetProgress(p+1, 1)
+	slog.Info("emoji progress", slog.Int("progress", p+1), slog.Int("total", 1))
 }
 
 func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 	r, err := l.repo.ReactionImageEmpty(ctx, j.Profile)
 	if err != nil {
 		// TODO: エラー処理
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 
 	for _, v := range r {
@@ -156,6 +156,7 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 
 		p, _ := l.repo.GetProgress()
 		l.repo.SetProgress(p+1, len(r))
+		slog.Info("emoji progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
 
 		time.Sleep(rand.N(time.Second))
 	}
@@ -165,7 +166,7 @@ func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int)
 	count, r, err := l.repo.GetUserReactions(profile, id, limit)
 	if err != nil {
 		// TODO: エラー処理
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 
 	return count, r
@@ -175,7 +176,7 @@ func (l *Logic) getEmoji(ctx context.Context, profile, name string) *mi.Emoji {
 	emoji, err := l.repo.GetEmoji(profile, name)
 	if err != nil {
 		// TODO: エラー処理
-		fmt.Println(err)
+		slog.Error(err.Error())
 	}
 
 	return emoji

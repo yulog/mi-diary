@@ -16,6 +16,11 @@ func (infra *Infra) SetProgress(p, t int) (int, int) {
 	return p, t
 }
 
+func (infra *Infra) UpdateProgress(p, t int) (int, int) {
+	cp, ct := infra.GetProgress()
+	return infra.SetProgress(cp+p, ct+t)
+}
+
 func (infra *Infra) GetProgressDone() bool {
 	infra.app.Progress.RLock()
 	defer infra.app.Progress.RUnlock()

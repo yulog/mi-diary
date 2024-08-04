@@ -110,7 +110,7 @@ func loadConfig() Config {
 	return config
 }
 
-func ForceWriteConfig(cfg *Config) error {
+func (cfg *Config) ForceWriteConfig() error {
 	v := viper.NewWithOptions(viper.KeyDelimiter("::"))
 	v.SetConfigName("config")
 	v.SetConfigType("json")
