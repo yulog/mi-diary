@@ -27,6 +27,10 @@ type Job struct {
 	ID      string `form:"id"`
 }
 
+type Profiles struct {
+	ServerURL string `form:"server-url"`
+}
+
 // RootHandler は / のハンドラ
 func (srv *Server) RootHandler(c echo.Context) error {
 	return renderer(c, srv.logic.SelectProfileLogic(c.Request().Context()))
@@ -34,7 +38,10 @@ func (srv *Server) RootHandler(c echo.Context) error {
 
 // HomeHandler は /:profile のハンドラ
 func (srv *Server) HomeHandler(c echo.Context) error {
-	profile := c.Param("profile")
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
 
 	// TODO: logic の返り値をチェックして
 	// echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -42,7 +49,7 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 	// エラーでなければ、DTOのメソッドでcomponentを作る
 
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	com, err := srv.logic.HomeLogic(c.Request().Context(), profile)
+	com, err := srv.logic.HomeLogic(c.Request().Context(), params.Profile)
 	if err != nil {
 		return err
 	}
@@ -140,9 +147,12 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 
 // ArchivesHandler は /archives のハンドラ
 func (srv *Server) ArchivesHandler(c echo.Context) error {
-	profile := c.Param("profile")
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
 
-	com, err := srv.logic.ArchivesLogic(c.Request().Context(), profile)
+	com, err := srv.logic.ArchivesLogic(c.Request().Context(), params.Profile)
 	if err != nil {
 		return err
 	}
@@ -204,8 +214,11 @@ func (srv *Server) JobProgressHandler(c echo.Context) error {
 
 // JobHandler は /job のハンドラ
 func (srv *Server) JobHandler(c echo.Context) error {
-	profile := c.Param("profile")
-	com := srv.logic.JobLogic(c.Request().Context(), profile)
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
+	com := srv.logic.JobLogic(c.Request().Context(), params.Profile)
 
 	return renderer(c, com)
 }
@@ -218,9 +231,12 @@ func (srv *Server) NewProfilesHandler(c echo.Context) error {
 
 // AddProfileHandler は /profiles のハンドラ
 func (srv *Server) AddProfileHandler(c echo.Context) error {
-	server := c.FormValue("server-url")
+	var params Profiles
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
 
-	authURL, err := srv.logic.AddProfileLogic(c.Request().Context(), server)
+	authURL, err := srv.logic.AddProfileLogic(c.Request().Context(), params.ServerURL)
 	if err != nil {
 		return err
 	}
