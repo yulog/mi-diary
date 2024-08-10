@@ -75,11 +75,9 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: false,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last()},
 	}
 
 	return n.WithPages(cp), nil
@@ -109,11 +107,9 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params 
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: false,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last()},
 	}
 
 	return n.WithPages(cp), nil
@@ -143,11 +139,9 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Par
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: false,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last()},
 	}
 
 	return n.WithPages(cp), nil
@@ -164,6 +158,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 		return nil, err
 	}
 	slog.Info("File count", slog.Int("count", count))
+
 	p := pg.New(count)
 	page := p.Page(params.Page)
 
@@ -186,11 +181,9 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: hasLast,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last(), Has: hasLast},
 	}
 
 	return n.WithPages(cp), nil
@@ -244,11 +237,9 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: hasLast,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last(), Has: hasLast},
 		QueryParams: cm.QueryParams{
 			Page: params.Page,
 			S:    params.S,
@@ -295,11 +286,9 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 	}
 	cp := cm.Pages{
 		Current: page,
-		Prev:    p.Prev(),
-		Next:    p.Next(),
-		Last:    p.Last(),
-		HasNext: hasNext,
-		HasLast: false,
+		Prev:    cm.Page{Index: p.Prev()},
+		Next:    cm.Page{Index: p.Next(), Has: hasNext},
+		Last:    cm.Page{Index: p.Last()},
 	}
 
 	return n.WithPages(cp), nil

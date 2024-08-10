@@ -7,13 +7,16 @@ import (
 
 type Pages struct {
 	Current int
-	Prev    int
-	Next    int
-	Last    int
-	HasNext bool
-	HasLast bool
+	Prev    Page
+	Next    Page
+	Last    Page
 
 	QueryParams QueryParams
+}
+
+type Page struct {
+	Index int
+	Has   bool
 }
 
 type QueryParams struct {
@@ -45,13 +48,13 @@ templ paginationLink(q QueryParams, num int) {
 
 templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
-		if p.Prev != 0 {
-			<a href={ p.QueryParams.getPageQuery(p.Prev) } class="pagination-previous">Prev</a>
+		if p.Prev.Index != 0 {
+			<a href={ p.QueryParams.getPageQuery(p.Prev.Index) } class="pagination-previous">Prev</a>
 		} else {
 			<span class="pagination-previous is-disabled">Prev</span>
 		}
-		if p.HasNext {
-			<a href={ p.QueryParams.getPageQuery(p.Next) } class="pagination-next">Next</a>
+		if p.Next.Has {
+			<a href={ p.QueryParams.getPageQuery(p.Next.Index) } class="pagination-next">Next</a>
 		} else {
 			<span class="pagination-next is-disabled">Next</span>
 		}
@@ -60,20 +63,20 @@ templ pager(p Pages) {
 				@paginationLink(p.QueryParams, 1)
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
 			}
-			if p.Prev != 0 {
-				@paginationLink(p.QueryParams, p.Prev)
+			if p.Prev.Index != 0 {
+				@paginationLink(p.QueryParams, p.Prev.Index)
 			}
 			<li>
 				<span class="pagination-link is-current">
 					{ fmt.Sprintf("%d", p.Current) }
 				</span>
 			</li>
-			if p.HasNext {
-				@paginationLink(p.QueryParams, p.Next)
+			if p.Next.Has {
+				@paginationLink(p.QueryParams, p.Next.Index)
 			}
-			if p.HasLast {
+			if p.Last.Has {
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
-				@paginationLink(p.QueryParams, p.Last)
+				@paginationLink(p.QueryParams, p.Last.Index)
 			}
 		</ul>
 	</nav>

@@ -6,32 +6,28 @@ import (
 )
 
 type Pager struct {
-	page int
-	// Prev int
-	// Next int
+	page     int
 	lastOnce sync.Once
 	last     int
 
 	total int
 
-	limit  int
-	offset int
+	limit int
 }
 
 func New(total int) *Pager {
 	return &Pager{
-		// c: c,
-
 		total: total,
 		limit: 10,
 	}
 }
 
 func (p *Pager) Page(page int) int {
-	p.page = page
-	if p.page < 1 {
+	if page < 1 {
 		p.page = 1
+		return p.page
 	}
+	p.page = page
 	return p.page
 }
 
@@ -40,8 +36,7 @@ func (p *Pager) Limit() int {
 }
 
 func (p *Pager) Offset() int {
-	p.offset = p.limit * (p.page - 1)
-	return p.offset
+	return p.limit * (p.page - 1)
 }
 
 func (p *Pager) Last() int {

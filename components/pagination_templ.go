@@ -15,13 +15,16 @@ import (
 
 type Pages struct {
 	Current int
-	Prev    int
-	Next    int
-	Last    int
-	HasNext bool
-	HasLast bool
+	Prev    Page
+	Next    Page
+	Last    Page
 
 	QueryParams QueryParams
+}
+
+type Page struct {
+	Index int
+	Has   bool
 }
 
 type QueryParams struct {
@@ -111,7 +114,7 @@ func paginationLink(q QueryParams, num int) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", num))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 41, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 44, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -147,12 +150,12 @@ func pager(p Pages) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if p.Prev != 0 {
+		if p.Prev.Index != 0 {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 templ.SafeURL = p.QueryParams.getPageQuery(p.Prev)
+			var templ_7745c5c3_Var6 templ.SafeURL = p.QueryParams.getPageQuery(p.Prev.Index)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -167,12 +170,12 @@ func pager(p Pages) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if p.HasNext {
+		if p.Next.Has {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 templ.SafeURL = p.QueryParams.getPageQuery(p.Next)
+			var templ_7745c5c3_Var7 templ.SafeURL = p.QueryParams.getPageQuery(p.Next.Index)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -201,8 +204,8 @@ func pager(p Pages) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if p.Prev != 0 {
-			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Prev).Render(ctx, templ_7745c5c3_Buffer)
+		if p.Prev.Index != 0 {
+			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Prev.Index).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -214,7 +217,7 @@ func pager(p Pages) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", p.Current))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 68, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 71, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -224,18 +227,18 @@ func pager(p Pages) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if p.HasNext {
-			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Next).Render(ctx, templ_7745c5c3_Buffer)
+		if p.Next.Has {
+			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Next.Index).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if p.HasLast {
+		if p.Last.Has {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><span class=\"pagination-ellipsis\">&hellip;</span></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Last).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Last.Index).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
