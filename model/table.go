@@ -61,7 +61,7 @@ type NoteToTag struct {
 }
 
 type File struct {
-	// bun.BaseModel `bun:"table:files,alias:f"`
+	bun.BaseModel `bun:"table:files,alias:f"`
 
 	ID           string `bun:",pk"`
 	Name         string
