@@ -77,14 +77,6 @@ func New() *App {
 func loadConfig() Config {
 	cfg := &Config{
 		Port: "1323",
-		Profiles: map[string]Profile{
-			"default": {
-				I:        "",
-				UserId:   "",
-				UserName: "",
-				Host:     "",
-			},
-		},
 	}
 	v := viper.NewWithOptions(viper.KeyDelimiter("::"))
 	v.SetConfigName("config")
