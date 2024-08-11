@@ -11,7 +11,7 @@ import (
 
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
-	"github.com/yulog/mi-diary/migrate"
+	"github.com/yulog/mi-diary/logic"
 )
 
 // Default target to run when none is specified
@@ -123,7 +123,13 @@ func Upload() {
 
 func GenSchema() {
 	fmt.Println("Generate schema...")
-	migrate.GenerateSchema()
+	app := app.New()
+	l := logic.New().
+		WithRepo(infra.New(app)).
+		WithJobRepo(infra.NewJobInfra(app)).
+		WithConfigRepo(infra.NewConfigInfra(app)).
+		Build()
+	l.GenerateSchema()
 }
 
 func GenMigrate() {
@@ -134,5 +140,11 @@ func GenMigrate() {
 
 func Migrate() {
 	fmt.Println("Migration...")
-	migrate.Do(infra.New(app.New()))
+	app := app.New()
+	l := logic.New().
+		WithRepo(infra.New(app)).
+		WithJobRepo(infra.NewJobInfra(app)).
+		WithConfigRepo(infra.NewConfigInfra(app)).
+		Build()
+	l.Migrate()
 }

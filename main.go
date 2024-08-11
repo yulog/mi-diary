@@ -25,11 +25,14 @@ func main() {
 	logger := slog.New(log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true}))
 	slog.SetDefault(logger)
 	app := app.New()
-	infra := infra.New(app)
-	logic := logic.New(infra)
+	logic := logic.New().
+		WithRepo(infra.New(app)).
+		WithJobRepo(infra.NewJobInfra(app)).
+		WithConfigRepo(infra.NewConfigInfra(app)).
+		Build()
 	srv := server.New(logic)
 
-	migrate.Do(infra)
+	logic.Migrate()
 
 	e := srv.NewRouter()
 

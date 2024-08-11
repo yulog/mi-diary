@@ -6,17 +6,98 @@ import (
 	"log/slog"
 
 	"github.com/a-h/templ"
+	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/infra"
+	"github.com/yulog/mi-diary/model"
 	"github.com/yulog/mi-diary/util/pg"
+	mi "github.com/yulog/miutil"
 )
 
-type Logic struct {
-	repo *infra.Infra
+type Repositorier interface {
+	Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
+	ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
+	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
+	HashTags(ctx context.Context, profile string) ([]model.HashTag, error)
+	Users(ctx context.Context, profile string) ([]model.User, error)
+	Files(ctx context.Context, profile string, p *pg.Pager) ([]model.File, error)
+	Archives(ctx context.Context, profile string) ([]model.Month, error)
+
+	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
+	ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
+	HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
+	UserNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
+	ArchiveNotes(ctx context.Context, profile, d string, p *pg.Pager) ([]model.Note, error)
+
+	FileCount(ctx context.Context, profile string) (int, error)
+	NoteCount(ctx context.Context, profile string) (int, error)
+
+	Insert(ctx context.Context, profile string, r *mi.Reactions) int64
+	InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
+
+	GenerateSchema(profile string)
+	Migrate(profile string)
+
+	GetUserReactions(prof app.Profile, id string, limit int) (int, *mi.Reactions, error)
+	GetEmoji(prof app.Profile, name string) (*mi.Emoji, error)
 }
 
-func New(r *infra.Infra) *Logic {
-	return &Logic{repo: r}
+type JobRepositorier interface {
+	GetJob() chan app.Job
+	SetJob(j app.Job)
+
+	GetProgress() (int, int)
+	SetProgress(p, t int) (int, int)
+	UpdateProgress(p, t int) (int, int)
+	GetProgressDone() bool
+	SetProgressDone(d bool) bool
+}
+
+type ConfigRepositorier interface {
+	SetConfig(key string, prof app.Profile)
+	StoreConfig() error
+	GetProfiles() *app.Profiles
+	GetProfile(key string) (app.Profile, error)
+	GetProfileHost(key string) (string, error)
+	GetPort() string
+}
+
+type Logic struct {
+	Repo       Repositorier
+	JobRepo    JobRepositorier
+	ConfigRepo ConfigRepositorier
+}
+
+type Dependency struct {
+	repo       Repositorier
+	jobRepo    JobRepositorier
+	configRepo ConfigRepositorier
+}
+
+func New() *Dependency {
+	return &Dependency{}
+}
+
+func (d *Dependency) WithRepo(repo Repositorier) *Dependency {
+	d.repo = repo
+	return d
+}
+
+func (d *Dependency) WithJobRepo(repo JobRepositorier) *Dependency {
+	d.jobRepo = repo
+	return d
+}
+
+func (d *Dependency) WithConfigRepo(repo ConfigRepositorier) *Dependency {
+	d.configRepo = repo
+	return d
+}
+
+func (d *Dependency) Build() *Logic {
+	return &Logic{
+		Repo:       d.repo,
+		JobRepo:    d.jobRepo,
+		ConfigRepo: d.configRepo,
+	}
 }
 
 type Params struct {
@@ -25,19 +106,19 @@ type Params struct {
 }
 
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
-	_, err := l.repo.GetProfile(profile)
+	_, err := l.ConfigRepo.GetProfile(profile)
 	if err != nil {
 		return nil, err
 	}
-	r, err := l.repo.Reactions(ctx, profile)
+	r, err := l.Repo.Reactions(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
-	h, err := l.repo.HashTags(ctx, profile)
+	h, err := l.Repo.HashTags(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
-	u, err := l.repo.Users(ctx, profile)
+	u, err := l.Repo.Users(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +133,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 }
 
 func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +141,7 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params
 	p := pg.New(0)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.ReactionNotes(ctx, profile, name, p)
+	notes, err := l.Repo.ReactionNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +165,7 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params
 }
 
 func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +173,7 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params 
 	p := pg.New(0)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.HashTagNotes(ctx, profile, name, p)
+	notes, err := l.Repo.HashTagNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +197,7 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params 
 }
 
 func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +205,7 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Par
 	p := pg.New(0)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.UserNotes(ctx, profile, name, p)
+	notes, err := l.Repo.UserNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -148,12 +229,12 @@ func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Par
 }
 
 func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
-	count, err := l.repo.FileCount(ctx, profile)
+	count, err := l.Repo.FileCount(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +243,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 	p := pg.New(count)
 	page := p.Page(params.Page)
 
-	files, err := l.repo.Files(ctx, profile, p)
+	files, err := l.Repo.Files(ctx, profile, p)
 	if err != nil {
 		return nil, err
 	}
@@ -190,14 +271,14 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 }
 
 func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	count := 0
 	if params.S == "" {
-		count, err = l.repo.NoteCount(ctx, profile)
+		count, err = l.Repo.NoteCount(ctx, profile)
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +287,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	p := pg.New(count)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.Notes(ctx, profile, params.S, p)
+	notes, err := l.Repo.Notes(ctx, profile, params.S, p)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +331,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 }
 
 func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Component, error) {
-	a, err := l.repo.Archives(ctx, profile)
+	a, err := l.Repo.Archives(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +343,7 @@ func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Compon
 }
 
 func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (templ.Component, error) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +351,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 	p := pg.New(0)
 	page := p.Page(params.Page)
 
-	notes, err := l.repo.ArchiveNotes(ctx, profile, d, p)
+	notes, err := l.Repo.ArchiveNotes(ctx, profile, d, p)
 	if err != nil {
 		return nil, err
 	}
@@ -294,15 +375,15 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
-	p, _ := l.repo.GetProgress()
-	var ps []string
-	for k := range *l.repo.GetProfiles() {
-		ps = append(ps, k)
+func (l *Logic) GenerateSchema() {
+	for k := range *l.ConfigRepo.GetProfiles() {
+		l.Repo.GenerateSchema(k)
+		break // schemaの生成は1つだけやれば良さそう
 	}
-	// TODO: 進行中の判定これで良いの？
-	if p > 0 {
-		return cm.ManageStart("Manage")
+}
+
+func (l *Logic) Migrate() {
+	for k := range *l.ConfigRepo.GetProfiles() {
+		l.Repo.Migrate(k)
 	}
-	return cm.ManageInit("Manage", ps)
 }

@@ -11,13 +11,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/miutil/miauth"
 )
 
 func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
 	var ps []string
-	for k := range *l.repo.GetProfiles() {
+	for k := range *l.ConfigRepo.GetProfiles() {
 		ps = append(ps, k)
 	}
 
@@ -39,7 +38,7 @@ func (l *Logic) AddProfileLogic(ctx context.Context, server string) (string, err
 		Name: "mi-diary-app",
 		Callback: (&url.URL{
 			Scheme: "http",
-			Host:   net.JoinHostPort("localhost", l.repo.GetPort()),
+			Host:   net.JoinHostPort("localhost", l.ConfigRepo.GetPort()),
 		}).
 			JoinPath("callback", u.Host).String(),
 		Permission: []string{"read:reactions"},
@@ -72,7 +71,7 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 		return fmt.Errorf("failed to authenticate")
 	}
 
-	l.repo.SetConfig(
+	l.ConfigRepo.SetConfig(
 		fmt.Sprintf("%s@%s", resp.User.Username, host),
 		app.Profile{
 			I:        resp.Token,
@@ -81,9 +80,9 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 			Host:     host,
 		},
 	)
-	l.repo.StoreConfig()
+	l.ConfigRepo.StoreConfig()
 
-	migrate.Do(l.repo)
+	l.Migrate()
 
 	return nil
 }

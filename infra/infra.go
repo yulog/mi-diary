@@ -10,6 +10,7 @@ import (
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/model"
 )
 
@@ -26,6 +27,14 @@ func New(a *app.App) *Infra {
 func (infra *Infra) DB(profile string) *bun.DB {
 	v, _ := infra.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)
+}
+
+func (infra *Infra) GenerateSchema(profile string) {
+	migrate.GenerateSchema(infra.DB(profile))
+}
+
+func (infra *Infra) Migrate(profile string) {
+	migrate.Do(infra.DB(profile).DB)
 }
 
 func connect(profile string) *bun.DB {

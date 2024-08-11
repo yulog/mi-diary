@@ -5,15 +5,11 @@ import (
 	"net/url"
 
 	"github.com/goccy/go-json"
+	"github.com/yulog/mi-diary/app"
 	mi "github.com/yulog/miutil"
 )
 
-func (infra *Infra) GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error) {
-	prof, err := infra.GetProfile(profile)
-	if err != nil {
-		return 0, &mi.Reactions{}, err
-	}
-
+func (infra *Infra) GetUserReactions(prof app.Profile, id string, limit int) (int, *mi.Reactions, error) {
 	body := map[string]any{
 		"i":      prof.I,
 		"limit":  limit,
@@ -42,12 +38,7 @@ func (infra *Infra) GetUserReactions(profile, id string, limit int) (int, *mi.Re
 	return len(*r), r, nil
 }
 
-func (infra *Infra) GetEmoji(profile, name string) (*mi.Emoji, error) {
-	prof, err := infra.GetProfile(profile)
-	if err != nil {
-		return &mi.Emoji{}, err
-	}
-
+func (infra *Infra) GetEmoji(prof app.Profile, name string) (*mi.Emoji, error) {
 	body := map[string]any{
 		"name": name,
 	}

@@ -16,7 +16,8 @@ type EmojiLogic interface {
 }
 
 type emojiLogic struct {
-	repo *infra.Infra
+	repo       *infra.Infra
+	configRepo *infra.ConfigInfra
 }
 
 func NewEmoji(r *infra.Infra) EmojiLogic {
@@ -24,7 +25,7 @@ func NewEmoji(r *infra.Infra) EmojiLogic {
 }
 
 func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
-	host, err := l.repo.GetProfileHost(profile)
+	host, err := l.configRepo.GetProfileHost(profile)
 	if err != nil {
 		return
 	}
