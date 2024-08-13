@@ -63,13 +63,15 @@ type NoteToTag struct {
 type File struct {
 	bun.BaseModel `bun:"table:files,alias:f"`
 
-	ID           string `bun:",pk"`
-	Name         string
-	URL          string
-	ThumbnailURL string
-	Type         string
-	CreatedAt    time.Time
-	Notes        []Note `bun:"m2m:note_to_files,join:File=Note"`
+	ID            string `bun:",pk"`
+	Name          string
+	URL           string
+	ThumbnailURL  string
+	Type          string
+	DominantColor string
+	GroupColor    string
+	CreatedAt     time.Time
+	Notes         []Note `bun:"m2m:note_to_files,join:File=Note"`
 }
 
 type NoteToFile struct {

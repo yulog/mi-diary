@@ -1,5 +1,11 @@
 package components
 
+import (
+	"github.com/cenkalti/dominantcolor"
+	"github.com/google/go-querystring/query"
+	"github.com/yulog/mi-diary/color"
+)
+
 templ SearchBar(path, s string) {
 	// if s != "" {
 	if path != "" {
@@ -15,4 +21,75 @@ templ SearchBar(path, s string) {
 		</div>
 	}
 	// }
+}
+
+func getColorQuery(color string) templ.SafeURL {
+	q := QueryParams{
+		Page:  1,
+		Color: color,
+	}
+	v, _ := query.Values(q)
+	return templ.URL("?" + v.Encode())
+}
+
+templ FileFilterBar(path string, currentColor string) {
+	if path != "" {
+		<style type="text/css">
+			span.color-palette {
+				border-radius: .25rem;
+				min-height: 1.5rem;
+				min-width: 1.5rem;
+			}
+		</style>
+		<div class="block">
+			<div class="field has-addons has-addons-centered">
+				<div class="buttons">
+					@PaletteClearButton("")
+					for _,color := range color.DefinedColors {
+						@PaletteButton(dominantcolor.Hex(*color), currentColor)
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ PaletteClearButton(currentColor string) {
+	<a href={ getColorQuery("") } class="button">
+		<span class="icon is-small">
+			<span class={ "color-palette", PaletteClearClass() }></span>
+		</span>
+	</a>
+}
+
+templ PaletteButton(color, currentColor string) {
+	if color == currentColor {
+		<a class="button is-static">
+			<span class="icon is-small">
+				<span class={ "color-palette", PaletteClass(color) }></span>
+			</span>
+		</a>
+	} else {
+		<a href={ getColorQuery(color) } class="button">
+			<span class="icon is-small">
+				<span class={ "color-palette", PaletteClass(color) }></span>
+			</span>
+		</a>
+	}
+}
+
+css PaletteClass(color string) {
+	background-color: { color };
+}
+
+// https://ics.media/entry/18966/
+
+css PaletteClearClass() {
+	background-image: conic-gradient(
+    hsl(0, 100%, 50%) 0,
+    hsl(90, 100%, 50%) 90deg,
+    hsl(180, 100%, 50%) 180deg,
+    hsl(270, 100%, 50%) 270deg,
+    hsl(360, 100%, 50%) 360deg
+  );
 }

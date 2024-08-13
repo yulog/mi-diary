@@ -19,7 +19,8 @@ type Repositorier interface {
 	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 	HashTags(ctx context.Context, profile string) ([]model.HashTag, error)
 	Users(ctx context.Context, profile string) ([]model.User, error)
-	Files(ctx context.Context, profile string, p *pg.Pager) ([]model.File, error)
+	Files(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error)
+	FilesByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
@@ -33,6 +34,7 @@ type Repositorier interface {
 
 	Insert(ctx context.Context, profile string, r *mi.Reactions) int64
 	InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
+	InsertColor(ctx context.Context, profile, id, c1, c2 string)
 
 	GenerateSchema(profile string)
 	Migrate(profile string)
@@ -101,8 +103,9 @@ func (d *Dependency) Build() *Logic {
 }
 
 type Params struct {
-	Page int
-	S    string
+	Page  int
+	S     string
+	Color string
 }
 
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
@@ -234,37 +237,54 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 		return nil, err
 	}
 
-	count, err := l.Repo.FileCount(ctx, profile)
-	if err != nil {
-		return nil, err
+	count := 0
+	if params.Color == "" {
+		count, err = l.Repo.FileCount(ctx, profile)
+		if err != nil {
+			return nil, err
+		}
+		slog.Info("File count", slog.Int("count", count))
 	}
-	slog.Info("File count", slog.Int("count", count))
 
 	p := pg.New(count)
 	page := p.Page(params.Page)
+	slog.Info("page count", slog.Int("count", page))
 
-	files, err := l.Repo.Files(ctx, profile, p)
+	files, err := l.Repo.Files(ctx, profile, params.Color, p)
 	if err != nil {
 		return nil, err
 	}
+	slog.Info("File result count", slog.Int("count", len(files)))
 	if len(files) == 0 {
 		return nil, fmt.Errorf("file not found")
 	}
 
-	hasNext := len(files) >= p.Limit() && p.Next() <= p.Last()
+	hasNext := false
+	if params.Color == "" {
+		hasNext = len(files) >= p.Limit() && p.Next() <= p.Last()
+	} else {
+		hasNext = len(files) >= p.Limit()
+	}
+	slog.Info("has next", slog.Bool("bool", hasNext))
 	hasLast := p.Next() < p.Last()
+	slog.Info("has last", slog.Bool("bool", hasLast))
 
 	n := cm.File{
-		Title:   fmt.Sprint(page),
-		Profile: profile,
-		Host:    host,
-		Items:   files,
+		Title:          fmt.Sprint(page),
+		Profile:        profile,
+		Host:           host,
+		FileFilterPath: fmt.Sprintf("/profiles/%s/files", profile),
+		Items:          files,
 	}
 	cp := cm.Pages{
 		Current: page,
 		Prev:    cm.Page{Index: p.Prev()},
 		Next:    cm.Page{Index: p.Next(), Has: hasNext},
 		Last:    cm.Page{Index: p.Last(), Has: hasLast},
+		QueryParams: cm.QueryParams{
+			Page:  params.Page,
+			Color: params.Color,
+		},
 	}
 
 	return n.WithPages(cp), nil

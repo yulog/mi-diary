@@ -5,11 +5,18 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/color"
+	_ "image/jpeg"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/yulog/mi-diary/app"
+	icolor "github.com/yulog/mi-diary/color"
 	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
@@ -18,9 +25,34 @@ import (
 	"github.com/uptrace/bun"
 
 	"github.com/k0kubun/pp/v3"
+
+	"github.com/cenkalti/dominantcolor"
+	"github.com/mattn/go-ciede2000"
 )
 
 func main() {
+	resp, _ := http.Get("")
+	defer resp.Body.Close()
+
+	img, _, err := image.Decode(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	red := &color.RGBA{204, 0, 0, 255}
+	green := &color.RGBA{0, 204, 0, 255}
+	bluegreen := &color.RGBA{3, 192, 198, 255}
+	blue := &color.RGBA{0, 0, 255, 255}
+	diff := ciede2000.Diff(dominantcolor.Find(img), green)
+	fmt.Println(diff)
+	fmt.Println(ciede2000.Diff(dominantcolor.Find(img), red))
+	fmt.Println(ciede2000.Diff(dominantcolor.Find(img), bluegreen))
+	fmt.Println(ciede2000.Diff(dominantcolor.Find(img), blue))
+	fmt.Println(dominantcolor.Hex(dominantcolor.Find(img)))
+	hex, hex2, err := icolor.Color("")
+	fmt.Println(hex, hex2)
+}
+
+func miauthexp() {
 	u, _ := url.Parse("https://misskey.io")
 	conf := &miauth.AuthConfig{
 		Name:       "mi-diary-test",

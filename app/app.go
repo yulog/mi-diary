@@ -36,6 +36,7 @@ const (
 	ReactionOne
 	ReactionFull
 	Emoji
+	Color
 )
 
 func (j JobType) String() string {
@@ -48,6 +49,8 @@ func (j JobType) String() string {
 		return "reaction(full scan)"
 	case Emoji:
 		return "emoji"
+	case Color:
+		return "color"
 	default:
 		return "unkown"
 	}

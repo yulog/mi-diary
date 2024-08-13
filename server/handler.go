@@ -13,6 +13,7 @@ type Params struct {
 	Date    string `param:"date"`
 	Page    int    `query:"page"`
 	S       string `query:"s"`
+	Color   string `query:"color"`
 }
 
 type Callback struct {
@@ -116,7 +117,8 @@ func (srv *Server) FilesHandler(c echo.Context) error {
 		return err
 	}
 	params2 := logic.Params{
-		Page: params.Page,
+		Page:  params.Page,
+		Color: params.Color,
 	}
 
 	com, err := srv.logic.FilesLogic(c.Request().Context(), params.Profile, params2)

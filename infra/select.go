@@ -19,6 +19,13 @@ func addWhereLike(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
 	return q.Where("? like ?", bun.Ident(col), "%"+s+"%")
 }
 
+func addWhere(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
+	if s == "" {
+		return q
+	}
+	return q.Where("? = ?", bun.Ident(col), s)
+}
+
 func (infra *Infra) Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
 	err := infra.DB(profile).
@@ -158,10 +165,12 @@ func (infra *Infra) FileCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) ([]model.File, error) {
+func (infra *Infra) Files(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error) {
 	var files []model.File
-	err := infra.DB(profile).
-		NewSelect().
+	qb := infra.DB(profile).NewSelect().QueryBuilder()
+	qb = addWhere(qb, "f.group_color", c)
+	err := qb.
+		Unwrap().(*bun.SelectQuery).
 		Model(&files).
 		Relation("Notes", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Relation("User")
@@ -169,6 +178,27 @@ func (infra *Infra) Files(ctx context.Context, profile string, p *pg.Pager) ([]m
 		Order("created_at DESC").
 		Limit(p.Limit()).
 		Offset(p.Offset()).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}
+
+func (infra *Infra) FilesByNoteID(ctx context.Context, profile, id string) ([]model.File, error) {
+	// サブクエリを使う
+	// note idだけ必要
+	sq := infra.DB(profile).
+		NewSelect().
+		Model((*model.NoteToFile)(nil)).
+		Column("file_id").
+		Where("note_id = ?", id)
+
+	var files []model.File
+	err := infra.DB(profile).
+		NewSelect().
+		Model(&files).
+		Where("f.id IN (?)", sq). // サブクエリを使う
 		Scan(ctx)
 	if err != nil {
 		return nil, err

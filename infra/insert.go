@@ -378,3 +378,24 @@ func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e
 		panic(err)
 	}
 }
+
+func (infra *Infra) InsertColor(ctx context.Context, profile, id, c1, c2 string) {
+	r := model.File{
+		ID:            id,
+		DominantColor: c1,
+		GroupColor:    c2,
+	}
+	var s []model.File
+	s = append(s, r)
+	_, err := infra.DB(profile).NewUpdate().
+		Model(&s).
+		OmitZero().
+		Column("dominant_color").
+		Column("group_color").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+}

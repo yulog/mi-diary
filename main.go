@@ -10,7 +10,6 @@ import (
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/server"
 )
 

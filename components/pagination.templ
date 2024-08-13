@@ -20,8 +20,9 @@ type Page struct {
 }
 
 type QueryParams struct {
-	Page int    `url:"page"`
-	S    string `url:"s,omitempty"`
+	Page  int    `url:"page"`
+	S     string `url:"s,omitempty"`
+	Color string `url:"color,omitempty"`
 }
 
 templ Pagination(p Pages) {

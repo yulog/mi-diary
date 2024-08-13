@@ -6,10 +6,11 @@ import (
 )
 
 type File struct {
-	Title   string
-	Profile string
-	Host    string
-	Items   []model.File
+	Title          string
+	Profile        string
+	Host           string
+	FileFilterPath string
+	Items          []model.File
 }
 
 templ modalButtonStyle() {
@@ -33,6 +34,7 @@ templ (n File) WithPage() {
 
 templ (n File) WithPages(p Pages) {
 	@BaseWithNav(n.Title, n.Profile) {
+		@FileFilterBar(n.FileFilterPath, p.QueryParams.Color)
 		@Pagination(p) {
 			@fileList(n.Host, n.Items)
 		}
