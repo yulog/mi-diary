@@ -81,7 +81,7 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 			if j.ID != "" {
 				l.colorOneJob(ctx, j)
 			} else {
-				// TODO: 全件
+				l.colorFullJob(ctx, j)
 			}
 		default:
 			// progressの動作確認用
@@ -201,21 +201,50 @@ func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
 
 	for _, v := range r {
 		if strings.HasPrefix(v.Type, "image") {
-			c1, c2, err := color.Color(v.ThumbnailURL)
-			if err != nil {
-				// TODO: エラー処理
-				slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-				continue
-			}
-			slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-			l.Repo.InsertColor(ctx, j.Profile, v.ID, c1, c2)
-
-			p, _ := l.JobRepo.GetProgress()
-			l.JobRepo.SetProgress(p+1, len(r))
-			slog.Info("color progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
-
-			time.Sleep(rand.N(5 * time.Second))
+			continue
 		}
+		c1, c2, err := color.Color(v.ThumbnailURL)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			continue
+		}
+		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		l.Repo.InsertColor(ctx, j.Profile, v.ID, c1, c2)
+
+		p, _ := l.JobRepo.GetProgress()
+		l.JobRepo.SetProgress(p+1, len(r))
+		slog.Info("color progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
+
+		time.Sleep(rand.N(5 * time.Second))
+	}
+}
+
+func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
+	r, err := l.Repo.FilesColorEmpty(ctx, j.Profile)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+
+	for _, v := range r {
+		if !strings.HasPrefix(v.Type, "image") {
+			continue
+		}
+		c1, c2, err := color.Color(v.ThumbnailURL)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			continue
+		}
+		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		l.Repo.InsertColor(ctx, j.Profile, v.ID, c1, c2)
+
+		p, _ := l.JobRepo.GetProgress()
+		l.JobRepo.SetProgress(p+1, len(r))
+		slog.Info("color progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
+
+		time.Sleep(rand.N(5 * time.Second))
 	}
 }
 

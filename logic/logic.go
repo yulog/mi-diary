@@ -21,6 +21,7 @@ type Repositorier interface {
 	Users(ctx context.Context, profile string) ([]model.User, error)
 	Files(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error)
 	FilesByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
+	FilesColorEmpty(ctx context.Context, profile string) ([]model.File, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)

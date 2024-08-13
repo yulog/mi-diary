@@ -206,6 +206,20 @@ func (infra *Infra) FilesByNoteID(ctx context.Context, profile, id string) ([]mo
 	return files, nil
 }
 
+func (infra *Infra) FilesColorEmpty(ctx context.Context, profile string) ([]model.File, error) {
+	var files []model.File
+	err := infra.DB(profile).
+		NewSelect().
+		Model(&files).
+		Where("group_color = ?", "").
+		WhereOr("group_color is null").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}
+
 func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) {
 	return infra.DB(profile).
 		NewSelect().
