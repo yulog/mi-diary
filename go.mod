@@ -54,6 +54,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
+	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
@@ -69,6 +70,7 @@ require (
 )
 
 require (
+	github.com/cenkalti/dominantcolor v1.0.3
 	github.com/charmbracelet/log v0.4.0
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/goccy/go-json v0.10.3
@@ -76,6 +78,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/magefile/mage v1.15.0
+	github.com/mattn/go-ciede2000 v0.0.0-20170301095244-782e8c62fec3
 	github.com/spf13/viper v1.19.0
 	github.com/sqldef/sqldef v0.16.15
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
