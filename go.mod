@@ -1,6 +1,8 @@
 module github.com/yulog/mi-diary
 
-go 1.22.0
+go 1.23
+
+toolchain go1.23.0
 
 require (
 	github.com/a-h/templ v0.2.747
@@ -8,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/uptrace/bun v1.2.1
+	golang.org/x/image v0.18.0
 	modernc.org/sqlite v1.32.0
 )
 
@@ -54,7 +57,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
-	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
