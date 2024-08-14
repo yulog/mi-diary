@@ -28,6 +28,7 @@ func main() {
 		WithRepo(infra.New(app)).
 		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).
+		WithMisskeyAPIRepo(infra.NewMisskeyAPI(app)).
 		Build()
 	srv := server.New(logic)
 

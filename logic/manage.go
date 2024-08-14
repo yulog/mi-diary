@@ -91,7 +91,11 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 	var rid = j.ID
 	for {
-		gc, r := l.getReactions(ctx, j.Profile, rid, 20)
+		gc, r, err := l.getReactions(ctx, j.Profile, rid, 20)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
 		if gc == 0 || r == nil {
 			break
 		}
@@ -109,7 +113,11 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
-	gc, r := l.getReactions(ctx, j.Profile, j.ID, 1)
+	gc, r, err := l.getReactions(ctx, j.Profile, j.ID, 1)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
 	if gc == 0 || r == nil {
 		return
 	}
@@ -126,7 +134,11 @@ func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
 func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 	var rid = j.ID
 	for {
-		gc, r := l.getReactions(ctx, j.Profile, rid, 20)
+		gc, r, err := l.getReactions(ctx, j.Profile, rid, 20)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
 		ac := l.Repo.Insert(ctx, j.Profile, r)
 
 		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
@@ -146,7 +158,11 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
-	emoji := l.getEmoji(ctx, j.Profile, j.ID)
+	emoji, err := l.getEmoji(ctx, j.Profile, j.ID)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
 	l.Repo.InsertEmoji(ctx, j.Profile, res.ID, emoji)
 
 	p, _ := l.JobRepo.GetProgress()
@@ -173,7 +189,11 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 		if symbol {
 			continue
 		}
-		emoji := l.getEmoji(ctx, j.Profile, v.Name)
+		emoji, err := l.getEmoji(ctx, j.Profile, v.Name)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
 		l.Repo.InsertEmoji(ctx, j.Profile, v.ID, emoji)
 
 		p, _ := l.JobRepo.GetProgress()
@@ -227,6 +247,7 @@ func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
 		if err != nil {
 			// TODO: エラー処理
 			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			// TODO: エラーだったとき、次回の処理対象にならないようにする
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
@@ -240,30 +261,20 @@ func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
 	}
 }
 
-func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions) {
-	prof, err := l.ConfigRepo.GetProfile(profile)
+func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions, error) {
+	count, r, err := l.MisskeyAPIRepo.GetUserReactions(profile, id, limit)
 	if err != nil {
-		return 0, &mi.Reactions{}
-	}
-	count, r, err := l.Repo.GetUserReactions(prof, id, limit)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
+		return 0, &mi.Reactions{}, err
 	}
 
-	return count, r
+	return count, r, nil
 }
 
-func (l *Logic) getEmoji(ctx context.Context, profile, name string) *mi.Emoji {
-	prof, err := l.ConfigRepo.GetProfile(profile)
+func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, error) {
+	emoji, err := l.MisskeyAPIRepo.GetEmoji(profile, name)
 	if err != nil {
-		return &mi.Emoji{}
-	}
-	emoji, err := l.Repo.GetEmoji(prof, name)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
+		return &mi.Emoji{}, err
 	}
 
-	return emoji
+	return emoji, nil
 }

@@ -39,9 +39,6 @@ type Repositorier interface {
 
 	GenerateSchema(profile string)
 	Migrate(profile string)
-
-	GetUserReactions(prof app.Profile, id string, limit int) (int, *mi.Reactions, error)
-	GetEmoji(prof app.Profile, name string) (*mi.Emoji, error)
 }
 
 type JobRepositorier interface {
@@ -66,16 +63,23 @@ type ConfigRepositorier interface {
 	GetPort() string
 }
 
+type MisskeyAPIRepositorier interface {
+	GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error)
+	GetEmoji(profile, name string) (*mi.Emoji, error)
+}
+
 type Logic struct {
-	Repo       Repositorier
-	JobRepo    JobRepositorier
-	ConfigRepo ConfigRepositorier
+	Repo           Repositorier
+	JobRepo        JobRepositorier
+	ConfigRepo     ConfigRepositorier
+	MisskeyAPIRepo MisskeyAPIRepositorier
 }
 
 type Dependency struct {
-	repo       Repositorier
-	jobRepo    JobRepositorier
-	configRepo ConfigRepositorier
+	repo           Repositorier
+	jobRepo        JobRepositorier
+	configRepo     ConfigRepositorier
+	misskeyAPIRepo MisskeyAPIRepositorier
 }
 
 func New() *Dependency {
@@ -97,11 +101,17 @@ func (d *Dependency) WithConfigRepo(repo ConfigRepositorier) *Dependency {
 	return d
 }
 
+func (d *Dependency) WithMisskeyAPIRepo(repo MisskeyAPIRepositorier) *Dependency {
+	d.misskeyAPIRepo = repo
+	return d
+}
+
 func (d *Dependency) Build() *Logic {
 	return &Logic{
-		Repo:       d.repo,
-		JobRepo:    d.jobRepo,
-		ConfigRepo: d.configRepo,
+		Repo:           d.repo,
+		JobRepo:        d.jobRepo,
+		ConfigRepo:     d.configRepo,
+		MisskeyAPIRepo: d.misskeyAPIRepo,
 	}
 }
 

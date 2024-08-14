@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"fmt"
 	"maps"
 	"slices"
 
@@ -35,11 +34,7 @@ func (infra *ConfigInfra) GetPort() string {
 }
 
 func (infra *ConfigInfra) GetProfile(key string) (app.Profile, error) {
-	v, ok := infra.app.Config.Profiles[key]
-	if !ok {
-		return app.Profile{}, fmt.Errorf("invalid profile: %s", key)
-	}
-	return v, nil
+	return infra.app.Config.Profiles.Get(key)
 }
 
 func (infra *ConfigInfra) GetProfileHost(key string) (string, error) {

@@ -29,6 +29,14 @@ type Profile struct {
 	Host     string
 }
 
+func (p Profiles) Get(key string) (Profile, error) {
+	v, ok := p[key]
+	if !ok {
+		return Profile{}, fmt.Errorf("invalid profile: %s", key)
+	}
+	return v, nil
+}
+
 type JobType int
 
 const (

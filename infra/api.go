@@ -6,10 +6,23 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/logic"
 	mi "github.com/yulog/miutil"
 )
 
-func (infra *Infra) GetUserReactions(prof app.Profile, id string, limit int) (int, *mi.Reactions, error) {
+type MisskeyAPI struct {
+	app *app.App
+}
+
+func NewMisskeyAPI(a *app.App) logic.MisskeyAPIRepositorier {
+	return &MisskeyAPI{app: a}
+}
+
+func (infra *MisskeyAPI) GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error) {
+	prof, err := infra.app.Config.Profiles.Get(profile)
+	if err != nil {
+		return 0, &mi.Reactions{}, err
+	}
 	body := map[string]any{
 		"i":      prof.I,
 		"limit":  limit,
@@ -38,7 +51,11 @@ func (infra *Infra) GetUserReactions(prof app.Profile, id string, limit int) (in
 	return len(*r), r, nil
 }
 
-func (infra *Infra) GetEmoji(prof app.Profile, name string) (*mi.Emoji, error) {
+func (infra *MisskeyAPI) GetEmoji(profile, name string) (*mi.Emoji, error) {
+	prof, err := infra.app.Config.Profiles.Get(profile)
+	if err != nil {
+		return &mi.Emoji{}, err
+	}
 	body := map[string]any{
 		"name": name,
 	}
