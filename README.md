@@ -1,5 +1,10 @@
 # mi-diary
 
+[![][mit-badge]][mit]
+![GitHub go.mod Go version][go-version-badge]
+[![GitHub Tag][tag-badge]][tag-url]
+[![GitHub Release][release-badge]][release-url]
+
 Misskey のリアクションの履歴を記録して振り返るツール。  
 (ローカルで動く Misskey 版 favolog 的なものを目指す)
 
@@ -46,3 +51,11 @@ MIT
 ## Author
 
 yulog
+
+[mit]:            http://opensource.org/licenses/MIT
+[mit-badge]:      https://img.shields.io/badge/License-MIT-yellow.svg
+[go-version-badge]:https://img.shields.io/github/go-mod/go-version/yulog/mi-diary
+[tag-badge]:https://img.shields.io/github/v/tag/yulog/mi-diary
+[release-badge]:https://img.shields.io/github/v/release/yulog/mi-diary
+[tag-url]:https://github.com/yulog/mi-diary/tags
+[release-url]:https://github.com/yulog/mi-diary/releases
