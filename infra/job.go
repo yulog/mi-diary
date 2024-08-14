@@ -1,12 +1,15 @@
 package infra
 
-import "github.com/yulog/mi-diary/app"
+import (
+	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/logic"
+)
 
 type JobInfra struct {
 	app *app.App
 }
 
-func NewJobInfra(a *app.App) *JobInfra {
+func NewJobInfra(a *app.App) logic.JobRepositorier {
 	return &JobInfra{app: a}
 }
 

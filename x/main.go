@@ -15,9 +15,7 @@ import (
 
 	_ "golang.org/x/image/webp"
 
-	"github.com/yulog/mi-diary/app"
 	icolor "github.com/yulog/mi-diary/color"
-	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
 	"github.com/yulog/miutil/miauth"
@@ -64,9 +62,10 @@ func miauthexp() {
 }
 
 func createTable() {
-	app := app.New()
-	infra := infra.New(app)
-	db := infra.DB("")
+	// app := app.New()
+	// infra := infra.New(app)
+	// db := infra.DB("")
+	db := bun.DB{}
 
 	ctx := context.Background()
 

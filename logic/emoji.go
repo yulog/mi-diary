@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/goccy/go-json"
-	"github.com/yulog/mi-diary/infra"
 	mi "github.com/yulog/miutil"
 )
 
@@ -16,11 +15,11 @@ type EmojiLogic interface {
 }
 
 type emojiLogic struct {
-	repo       *infra.Infra
-	configRepo *infra.ConfigInfra
+	repo       Repositorier
+	configRepo ConfigRepositorier
 }
 
-func NewEmoji(r *infra.Infra) EmojiLogic {
+func NewEmoji(r Repositorier) EmojiLogic {
 	return &emojiLogic{repo: r}
 }
 

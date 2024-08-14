@@ -10,6 +10,7 @@ import (
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/migrate"
 	"github.com/yulog/mi-diary/model"
 )
@@ -20,7 +21,7 @@ type Infra struct {
 	db sync.Map // TODO:  sync.Onceの代わりになるのか？
 }
 
-func New(a *app.App) *Infra {
+func New(a *app.App) logic.Repositorier {
 	return &Infra{app: a}
 }
 
