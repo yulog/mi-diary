@@ -59,6 +59,8 @@ type ConfigRepositorier interface {
 	SetConfig(key string, prof app.Profile)
 	StoreConfig() error
 	GetProfiles() *app.Profiles
+	GetProfilesSorted(yield func(k string, v app.Profile) bool)
+	GetProfilesSortedKey() []string
 	GetProfile(key string) (app.Profile, error)
 	GetProfileHost(key string) (string, error)
 	GetPort() string
@@ -128,7 +130,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	}
 
 	return cm.IndexParams{
-		Title:     "Home - " + profile,
+		Title:     profile,
 		Profile:   profile,
 		Reactions: r,
 		HashTags:  h,

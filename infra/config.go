@@ -2,6 +2,8 @@ package infra
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/yulog/mi-diary/app"
 )
@@ -49,4 +51,18 @@ func (infra *ConfigInfra) GetProfileHost(key string) (string, error) {
 
 func (infra *ConfigInfra) GetProfiles() *app.Profiles {
 	return &infra.app.Config.Profiles
+}
+
+// range over funcでSortしたmapを使える
+// 使う予定はない
+func (infra *ConfigInfra) GetProfilesSorted(yield func(k string, v app.Profile) bool) {
+	for _, k := range slices.Sorted(maps.Keys(infra.app.Config.Profiles)) {
+		if !yield(k, infra.app.Config.Profiles[k]) {
+			return
+		}
+	}
+}
+
+func (infra *ConfigInfra) GetProfilesSortedKey() []string {
+	return slices.Sorted(maps.Keys(infra.app.Config.Profiles))
 }

@@ -15,12 +15,7 @@ import (
 )
 
 func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
-	var ps []string
-	for k := range *l.ConfigRepo.GetProfiles() {
-		ps = append(ps, k)
-	}
-
-	return cm.SelectProfile("Select profile...", ps)
+	return cm.SelectProfile("Select profile...", l.ConfigRepo.GetProfilesSortedKey())
 }
 
 func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {

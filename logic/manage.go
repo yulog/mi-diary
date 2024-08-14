@@ -27,15 +27,11 @@ import (
 
 func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 	p, _ := l.JobRepo.GetProgress()
-	var ps []string
-	for k := range *l.ConfigRepo.GetProfiles() {
-		ps = append(ps, k)
-	}
 	// TODO: 進行中の判定これで良いの？
 	if p > 0 {
 		return cm.ManageStart("Manage")
 	}
-	return cm.ManageInit("Manage", ps)
+	return cm.ManageInit("Manage", l.ConfigRepo.GetProfilesSortedKey())
 }
 
 func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
@@ -54,12 +50,8 @@ func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
 	p, t := l.JobRepo.GetProgress()
 	l.JobRepo.SetProgress(0, 0)
 	l.JobRepo.SetProgressDone(false)
-	var ps []string
-	for k := range *l.ConfigRepo.GetProfiles() {
-		ps = append(ps, k)
-	}
 
-	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), ps)
+	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), l.ConfigRepo.GetProfilesSortedKey())
 }
 
 func (l *Logic) JobProcesser(ctx context.Context) {
