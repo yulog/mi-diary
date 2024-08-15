@@ -101,10 +101,9 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 		if gc == 0 || r == nil {
 			break
 		}
-		// ac := l.Repo.Insert(ctx, j.Profile, r)
-		var rows int64
-		ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
-		slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
+
+		ac := l.InsertReactionTx(ctx, j.Profile, r)
+		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
 
 		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -126,10 +125,9 @@ func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
 	if gc == 0 || r == nil {
 		return
 	}
-	// ac := l.Repo.Insert(ctx, j.Profile, r)
-	var rows int64
-	ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
-	slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
+
+	ac := l.InsertReactionTx(ctx, j.Profile, r)
+	slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
 
 	p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -147,10 +145,9 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 			// TODO: エラー処理
 			slog.Error(err.Error())
 		}
-		// ac := l.Repo.Insert(ctx, j.Profile, r)
-		var rows int64
-		ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
-		slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
+
+		ac := l.InsertReactionTx(ctx, j.Profile, r)
+		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
 
 		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -163,11 +160,11 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 	}
 }
 
-func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reactions, rowsp *int64) int64 {
+func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reactions) (rows int64) {
 	if len(*r) == 0 {
 		return 0
 	}
-	var rows int64
+
 	l.Repo.RunInTx(ctx, profile, func(ctx context.Context, tx bun.Tx) error {
 		// JSONの中身をモデルへ移す
 		var (
@@ -248,8 +245,6 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 			return err
 		}
 		slog.Info("Notes inserted", slog.Int64("count", rows))
-		*rowsp = rows
-		slog.Info("Notes inserted(pointer)", slog.Int64("count", *rowsp))
 
 		err = l.Repo.InsertReactions(ctx, tx, &reactions)
 		if err != nil {

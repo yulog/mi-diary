@@ -34,10 +34,10 @@ type Repositorier interface {
 	FileCount(ctx context.Context, profile string) (int, error)
 	NoteCount(ctx context.Context, profile string) (int, error)
 
-	// Insert(ctx context.Context, profile string, r *mi.Reactions) int64
 	InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
 	InsertColor(ctx context.Context, profile, id, c1, c2 string)
 
+	// TODO: bunに依存しているのは良いのか
 	InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
 	InsertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
