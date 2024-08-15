@@ -4,194 +4,323 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
-	"os"
-	"strings"
 
-	"github.com/goccy/go-json"
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
 )
 
-func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
-	// JSON読み込み
-	f, _ := os.ReadFile("users_reactions.json")
-	var r mi.Reactions
-	json.Unmarshal(f, &r)
+// func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
+// 	// JSON読み込み
+// 	f, _ := os.ReadFile("users_reactions.json")
+// 	var r mi.Reactions
+// 	json.Unmarshal(f, &r)
 
-	infra.Insert(ctx, profile, &r)
-}
+// 	infra.Insert(ctx, profile, &r)
+// }
 
-func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) int64 {
-	if len(*r) == 0 {
-		return 0
-	}
-	// pp.Println(r)
-
-	return tx(ctx, infra.DB(profile), r)
-}
-
-func tx(ctx context.Context, db bun.IDB, r *mi.Reactions) (rows int64) {
-	// まとめて追加する(トランザクション)
-	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
-		// JSONの中身をモデルへ移す
-		var (
-			users       []model.User
-			notes       []model.Note
-			reactions   []model.ReactionEmoji
-			noteToTags  []model.NoteToTag
-			files       []model.File
-			noteToFiles []model.NoteToFile
-		)
-
-		for _, v := range *r {
-			var dn string
-			if v.Note.User.Name == nil {
-				dn = v.Note.User.Username
-			} else {
-				dn = v.Note.User.Name.(string)
-			}
-			u := model.User{
-				ID:          v.Note.User.ID,
-				Name:        v.Note.User.Username,
-				DisplayName: dn,
-				AvatarURL:   v.Note.User.AvatarURL,
-			}
-			users = append(users, u)
-
-			for _, tv := range v.Note.Tags {
-				ht := model.HashTag{Text: tv}
-				err := insertHashTag(ctx, tx, &ht)
-				if err != nil {
-					return err
-				}
-				slog.Info("HashTag ID", slog.Int64("ID", ht.ID))
-				// pp.Println(ht.ID)
-				// id is scanned automatically
-				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
-			}
-
-			for _, fv := range v.Note.Files {
-				f := model.File{
-					ID:           fv.ID,
-					Name:         fv.Name,
-					URL:          fv.URL,
-					ThumbnailURL: fv.ThumbnailURL,
-					Type:         fv.Type,
-					CreatedAt:    fv.CreatedAt,
-				}
-				files = append(files, f)
-				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
-			}
-
-			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
-			n := model.Note{
-				ID:                v.Note.ID,
-				ReactionID:        v.ID,
-				UserID:            v.Note.User.ID,
-				ReactionEmojiName: reactionName,
-				Text:              v.Note.Text,
-				CreatedAt:         v.Note.CreatedAt, // SQLite は日時をUTCで保持する
-			}
-			notes = append(notes, n)
-
-			r := model.ReactionEmoji{
-				Name: reactionName,
-			}
-			reactions = append(reactions, r)
-		}
-
-		// 重複していたらアップデート
-		err := insertUsers(ctx, tx, &users)
-		if err != nil {
-			return err
-		}
-
-		// 重複していたら登録しない(エラーにしない)
-		rows, err = insertNotes(ctx, tx, &notes)
-		if err != nil {
-			return err
-		}
-		slog.Info("Notes inserted", slog.Int64("count", rows))
-
-		err = insertReactions(ctx, tx, &reactions)
-		if err != nil {
-			return err
-		}
-
-		// 0件の場合がある
-		if len(noteToTags) > 0 {
-			err = insertNoteToTags(ctx, tx, &noteToTags)
-			if err != nil {
-				return err
-			}
-		}
-
-		if len(files) > 0 {
-			err = insertFiles(ctx, tx, &files)
-			if err != nil {
-				return err
-			}
-		}
-
-		if len(noteToFiles) > 0 {
-			err = insertNoteToFiles(ctx, tx, &noteToFiles)
-			if err != nil {
-				return err
-			}
-		}
-
-		err = count(ctx, tx)
-		// TODO: あってもなくても変わらない vs 統一感
-		if err != nil {
-			return err
-		}
-		return err
-	})
+func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context, tx bun.Tx) error) {
+	err := infra.DB(profile).RunInTx(ctx, &sql.TxOptions{}, fn)
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
-	return
 }
 
-func insertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error {
+// func test(r *mi.Reactions, rowsp *int64) func(ctx context.Context, tx bun.Tx) error {
+// 	return func(ctx context.Context, tx bun.Tx) error {
+// 		// JSONの中身をモデルへ移す
+// 		var (
+// 			users       []model.User
+// 			notes       []model.Note
+// 			reactions   []model.ReactionEmoji
+// 			noteToTags  []model.NoteToTag
+// 			files       []model.File
+// 			noteToFiles []model.NoteToFile
+// 		)
+
+// 		for _, v := range *r {
+// 			var dn string
+// 			if v.Note.User.Name == nil {
+// 				dn = v.Note.User.Username
+// 			} else {
+// 				dn = v.Note.User.Name.(string)
+// 			}
+// 			u := model.User{
+// 				ID:          v.Note.User.ID,
+// 				Name:        v.Note.User.Username,
+// 				DisplayName: dn,
+// 				AvatarURL:   v.Note.User.AvatarURL,
+// 			}
+// 			users = append(users, u)
+
+// 			for _, tv := range v.Note.Tags {
+// 				ht := model.HashTag{Text: tv}
+// 				err := insertHashTag(ctx, tx, &ht)
+// 				if err != nil {
+// 					return err
+// 				}
+// 				slog.Info("HashTag ID", slog.Int64("ID", ht.ID))
+// 				// pp.Println(ht.ID)
+// 				// id is scanned automatically
+// 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+// 			}
+
+// 			for _, fv := range v.Note.Files {
+// 				f := model.File{
+// 					ID:           fv.ID,
+// 					Name:         fv.Name,
+// 					URL:          fv.URL,
+// 					ThumbnailURL: fv.ThumbnailURL,
+// 					Type:         fv.Type,
+// 					CreatedAt:    fv.CreatedAt,
+// 				}
+// 				files = append(files, f)
+// 				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
+// 			}
+
+// 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
+// 			n := model.Note{
+// 				ID:                v.Note.ID,
+// 				ReactionID:        v.ID,
+// 				UserID:            v.Note.User.ID,
+// 				ReactionEmojiName: reactionName,
+// 				Text:              v.Note.Text,
+// 				CreatedAt:         v.Note.CreatedAt, // SQLite は日時をUTCで保持する
+// 			}
+// 			notes = append(notes, n)
+
+// 			r := model.ReactionEmoji{
+// 				Name: reactionName,
+// 			}
+// 			reactions = append(reactions, r)
+// 		}
+
+// 		// 重複していたらアップデート
+// 		err := insertUsers(ctx, tx, &users)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// 重複していたら登録しない(エラーにしない)
+// 		rows, err := insertNotes(ctx, tx, &notes)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		slog.Info("Notes inserted", slog.Int64("count", rows))
+// 		*rowsp = rows
+// 		slog.Info("Notes inserted(pointer)", slog.Int64("count", *rowsp))
+
+// 		err = insertReactions(ctx, tx, &reactions)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// 0件の場合がある
+// 		if len(noteToTags) > 0 {
+// 			err = insertNoteToTags(ctx, tx, &noteToTags)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		if len(files) > 0 {
+// 			err = insertFiles(ctx, tx, &files)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		if len(noteToFiles) > 0 {
+// 			err = insertNoteToFiles(ctx, tx, &noteToFiles)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		err = count(ctx, tx)
+// 		// TODO: あってもなくても変わらない vs 統一感
+// 		if err != nil {
+// 			return err
+// 		}
+// 		return err
+// 	}
+// }
+
+// func (infra *Infra) Insert(ctx context.Context, profile string, r *mi.Reactions) int64 {
+// 	if len(*r) == 0 {
+// 		return 0
+// 	}
+// 	// pp.Println(r)
+// 	var rows int64
+// 	infra.RunInTx(ctx, profile, test(r, &rows))
+// 	slog.Info("Notes inserted(caller)", slog.Int64("count", rows))
+
+// 	// return tx(ctx, infra.DB(profile), r)
+// 	return rows
+// }
+
+// func tx(ctx context.Context, db bun.IDB, r *mi.Reactions) (rows int64) {
+// 	// まとめて追加する(トランザクション)
+// 	err := db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+// 		// JSONの中身をモデルへ移す
+// 		var (
+// 			users       []model.User
+// 			notes       []model.Note
+// 			reactions   []model.ReactionEmoji
+// 			noteToTags  []model.NoteToTag
+// 			files       []model.File
+// 			noteToFiles []model.NoteToFile
+// 		)
+
+// 		for _, v := range *r {
+// 			var dn string
+// 			if v.Note.User.Name == nil {
+// 				dn = v.Note.User.Username
+// 			} else {
+// 				dn = v.Note.User.Name.(string)
+// 			}
+// 			u := model.User{
+// 				ID:          v.Note.User.ID,
+// 				Name:        v.Note.User.Username,
+// 				DisplayName: dn,
+// 				AvatarURL:   v.Note.User.AvatarURL,
+// 			}
+// 			users = append(users, u)
+
+// 			for _, tv := range v.Note.Tags {
+// 				ht := model.HashTag{Text: tv}
+// 				err := insertHashTag(ctx, tx, &ht)
+// 				if err != nil {
+// 					return err
+// 				}
+// 				slog.Info("HashTag ID", slog.Int64("ID", ht.ID))
+// 				// pp.Println(ht.ID)
+// 				// id is scanned automatically
+// 				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+// 			}
+
+// 			for _, fv := range v.Note.Files {
+// 				f := model.File{
+// 					ID:           fv.ID,
+// 					Name:         fv.Name,
+// 					URL:          fv.URL,
+// 					ThumbnailURL: fv.ThumbnailURL,
+// 					Type:         fv.Type,
+// 					CreatedAt:    fv.CreatedAt,
+// 				}
+// 				files = append(files, f)
+// 				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
+// 			}
+
+// 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
+// 			n := model.Note{
+// 				ID:                v.Note.ID,
+// 				ReactionID:        v.ID,
+// 				UserID:            v.Note.User.ID,
+// 				ReactionEmojiName: reactionName,
+// 				Text:              v.Note.Text,
+// 				CreatedAt:         v.Note.CreatedAt, // SQLite は日時をUTCで保持する
+// 			}
+// 			notes = append(notes, n)
+
+// 			r := model.ReactionEmoji{
+// 				Name: reactionName,
+// 			}
+// 			reactions = append(reactions, r)
+// 		}
+
+// 		// 重複していたらアップデート
+// 		err := insertUsers(ctx, tx, &users)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// 重複していたら登録しない(エラーにしない)
+// 		rows, err = insertNotes(ctx, tx, &notes)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		slog.Info("Notes inserted", slog.Int64("count", rows))
+
+// 		err = insertReactions(ctx, tx, &reactions)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// 0件の場合がある
+// 		if len(noteToTags) > 0 {
+// 			err = insertNoteToTags(ctx, tx, &noteToTags)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		if len(files) > 0 {
+// 			err = insertFiles(ctx, tx, &files)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		if len(noteToFiles) > 0 {
+// 			err = insertNoteToFiles(ctx, tx, &noteToFiles)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+
+// 		err = count(ctx, tx)
+// 		// TODO: あってもなくても変わらない vs 統一感
+// 		if err != nil {
+// 			return err
+// 		}
+// 		return err
+// 	})
+// 	if err != nil {
+// 		slog.Error(err.Error())
+// 		panic(err)
+// 	}
+// 	return
+// }
+
+func (infra *Infra) InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error {
 	_, err := db.NewInsert().Model(hashtag).On("CONFLICT DO UPDATE").Exec(ctx)
 	return err
 }
 
-func insertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error {
+func (infra *Infra) InsertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error {
 	_, err := db.NewInsert().Model(users).On("CONFLICT DO UPDATE").Exec(ctx)
 	return err
 }
 
-func insertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
+func (infra *Infra) InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()
 	return rows, err
 }
 
-func insertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error {
+func (infra *Infra) InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error {
 	_, err := db.NewInsert().Model(reactions).Ignore().Exec(ctx)
 	return err
 }
 
-func insertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error {
+func (infra *Infra) InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error {
 	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
 	return err
 }
 
-func insertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error {
+func (infra *Infra) InsertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error {
 	_, err := db.NewInsert().Model(files).On("CONFLICT DO UPDATE").Exec(ctx)
 	return err
 }
 
-func insertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error {
+func (infra *Infra) InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error {
 	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
 	return err
 }
 
-func count(ctx context.Context, db bun.IDB) error {
+func (infra *Infra) Count(ctx context.Context, db bun.IDB) error {
 	// リアクションのカウント
 	err := countReaction(ctx, db)
 	if err != nil {

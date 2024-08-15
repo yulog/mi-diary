@@ -10,9 +10,11 @@ import (
 	"unicode"
 
 	"github.com/a-h/templ"
+	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/color"
 	cm "github.com/yulog/mi-diary/components"
+	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
 )
 
@@ -99,7 +101,10 @@ func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
 		if gc == 0 || r == nil {
 			break
 		}
-		ac := l.Repo.Insert(ctx, j.Profile, r)
+		// ac := l.Repo.Insert(ctx, j.Profile, r)
+		var rows int64
+		ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
+		slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
 
 		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -121,7 +126,10 @@ func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
 	if gc == 0 || r == nil {
 		return
 	}
-	ac := l.Repo.Insert(ctx, j.Profile, r)
+	// ac := l.Repo.Insert(ctx, j.Profile, r)
+	var rows int64
+	ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
+	slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
 
 	p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -139,7 +147,10 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 			// TODO: エラー処理
 			slog.Error(err.Error())
 		}
-		ac := l.Repo.Insert(ctx, j.Profile, r)
+		// ac := l.Repo.Insert(ctx, j.Profile, r)
+		var rows int64
+		ac := l.InsertReactionTx(ctx, j.Profile, r, &rows)
+		slog.Info("Notes inserted(caller)", slog.Int64("count(p)", rows), slog.Int64("count", rows))
 
 		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
 
@@ -150,6 +161,131 @@ func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
 		rid = (*r)[gc-1].ID
 		time.Sleep(rand.N(time.Second))
 	}
+}
+
+func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reactions, rowsp *int64) int64 {
+	if len(*r) == 0 {
+		return 0
+	}
+	var rows int64
+	l.Repo.RunInTx(ctx, profile, func(ctx context.Context, tx bun.Tx) error {
+		// JSONの中身をモデルへ移す
+		var (
+			users       []model.User
+			notes       []model.Note
+			reactions   []model.ReactionEmoji
+			noteToTags  []model.NoteToTag
+			files       []model.File
+			noteToFiles []model.NoteToFile
+		)
+
+		for _, v := range *r {
+			var dn string
+			if v.Note.User.Name == nil {
+				dn = v.Note.User.Username
+			} else {
+				dn = v.Note.User.Name.(string)
+			}
+			u := model.User{
+				ID:          v.Note.User.ID,
+				Name:        v.Note.User.Username,
+				DisplayName: dn,
+				AvatarURL:   v.Note.User.AvatarURL,
+			}
+			users = append(users, u)
+
+			for _, tv := range v.Note.Tags {
+				ht := model.HashTag{Text: tv}
+				err := l.Repo.InsertHashTag(ctx, tx, &ht)
+				if err != nil {
+					return err
+				}
+				slog.Info("HashTag ID", slog.Int64("ID", ht.ID))
+				// pp.Println(ht.ID)
+				// id is scanned automatically
+				noteToTags = append(noteToTags, model.NoteToTag{NoteID: v.Note.ID, HashTagID: ht.ID})
+			}
+
+			for _, fv := range v.Note.Files {
+				f := model.File{
+					ID:           fv.ID,
+					Name:         fv.Name,
+					URL:          fv.URL,
+					ThumbnailURL: fv.ThumbnailURL,
+					Type:         fv.Type,
+					CreatedAt:    fv.CreatedAt,
+				}
+				files = append(files, f)
+				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
+			}
+
+			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
+			n := model.Note{
+				ID:                v.Note.ID,
+				ReactionID:        v.ID,
+				UserID:            v.Note.User.ID,
+				ReactionEmojiName: reactionName,
+				Text:              v.Note.Text,
+				CreatedAt:         v.Note.CreatedAt, // SQLite は日時をUTCで保持する
+			}
+			notes = append(notes, n)
+
+			r := model.ReactionEmoji{
+				Name: reactionName,
+			}
+			reactions = append(reactions, r)
+		}
+
+		// 重複していたらアップデート
+		err := l.Repo.InsertUsers(ctx, tx, &users)
+		if err != nil {
+			return err
+		}
+
+		// 重複していたら登録しない(エラーにしない)
+		rows, err = l.Repo.InsertNotes(ctx, tx, &notes)
+		if err != nil {
+			return err
+		}
+		slog.Info("Notes inserted", slog.Int64("count", rows))
+		*rowsp = rows
+		slog.Info("Notes inserted(pointer)", slog.Int64("count", *rowsp))
+
+		err = l.Repo.InsertReactions(ctx, tx, &reactions)
+		if err != nil {
+			return err
+		}
+
+		// 0件の場合がある
+		if len(noteToTags) > 0 {
+			err = l.Repo.InsertNoteToTags(ctx, tx, &noteToTags)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(files) > 0 {
+			err = l.Repo.InsertFiles(ctx, tx, &files)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(noteToFiles) > 0 {
+			err = l.Repo.InsertNoteToFiles(ctx, tx, &noteToFiles)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = l.Repo.Count(ctx, tx)
+		// TODO: あってもなくても変わらない vs 統一感
+		if err != nil {
+			return err
+		}
+		return err
+	})
+	return rows
 }
 
 func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {

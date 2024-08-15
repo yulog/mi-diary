@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/a-h/templ"
+	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/model"
@@ -33,9 +34,20 @@ type Repositorier interface {
 	FileCount(ctx context.Context, profile string) (int, error)
 	NoteCount(ctx context.Context, profile string) (int, error)
 
-	Insert(ctx context.Context, profile string, r *mi.Reactions) int64
+	// Insert(ctx context.Context, profile string, r *mi.Reactions) int64
 	InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
 	InsertColor(ctx context.Context, profile, id, c1, c2 string)
+
+	InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
+	InsertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error
+	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
+	InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
+	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
+	InsertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error
+	InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error
+	Count(ctx context.Context, db bun.IDB) error
+
+	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context, tx bun.Tx) error)
 
 	GenerateSchema(profile string)
 	Migrate(profile string)
