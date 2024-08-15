@@ -53,11 +53,6 @@ func (infra *Infra) InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags
 	return err
 }
 
-func (infra *Infra) InsertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error {
-	_, err := db.NewInsert().Model(files).On("CONFLICT DO UPDATE").Exec(ctx)
-	return err
-}
-
 func (infra *Infra) InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error {
 	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
 	return err
@@ -230,7 +225,7 @@ func countDaily(ctx context.Context, db bun.IDB) error {
 	return nil
 }
 
-func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji) {
+func (infra *Infra) UpdateEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji) {
 	// TODO: emoji画像をローカルに保存する
 
 	r := model.ReactionEmoji{
@@ -251,7 +246,7 @@ func (infra *Infra) InsertEmoji(ctx context.Context, profile string, id int64, e
 	}
 }
 
-func (infra *Infra) InsertColor(ctx context.Context, profile, id, c1, c2 string) {
+func (infra *Infra) UpdateColor(ctx context.Context, profile, id, c1, c2 string) {
 	r := model.File{
 		ID:            id,
 		DominantColor: c1,

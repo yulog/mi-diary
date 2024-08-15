@@ -51,5 +51,5 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
-	l.repo.InsertEmoji(ctx, profile, res.ID, emoji)
+	l.repo.UpdateEmoji(ctx, profile, res.ID, emoji)
 }

@@ -260,7 +260,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 
 		if len(files) > 0 {
-			err = l.Repo.InsertFiles(ctx, tx, &files)
+			err = l.FileRepo.Insert(ctx, tx, &files)
 			if err != nil {
 				return err
 			}
@@ -294,7 +294,7 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
-	l.Repo.InsertEmoji(ctx, j.Profile, res.ID, emoji)
+	l.Repo.UpdateEmoji(ctx, j.Profile, res.ID, emoji)
 
 	p, _ := l.JobRepo.GetProgress()
 	l.JobRepo.SetProgress(p+1, 1)
@@ -325,7 +325,7 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 			// TODO: エラー処理
 			slog.Error(err.Error())
 		}
-		l.Repo.InsertEmoji(ctx, j.Profile, v.ID, emoji)
+		l.Repo.UpdateEmoji(ctx, j.Profile, v.ID, emoji)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))
@@ -336,7 +336,7 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
-	r, err := l.Repo.FilesByNoteID(ctx, j.Profile, j.ID)
+	r, err := l.FileRepo.GetByNoteID(ctx, j.Profile, j.ID)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
@@ -353,7 +353,7 @@ func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.Repo.InsertColor(ctx, j.Profile, v.ID, c1, c2)
+		l.Repo.UpdateColor(ctx, j.Profile, v.ID, c1, c2)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))
@@ -364,11 +364,15 @@ func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
-	r, err := l.Repo.FilesColorEmpty(ctx, j.Profile)
+	r, err := l.FileRepo.GetByEmptyColor(ctx, j.Profile)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
+
+	p, _ := l.JobRepo.GetProgress()
+	l.JobRepo.SetProgress(p, len(r))
+	slog.Info("color progress", slog.Int("progress", p), slog.Int("total", len(r)))
 
 	for _, v := range r {
 		if !strings.HasPrefix(v.Type, "image") {
@@ -382,7 +386,7 @@ func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.Repo.InsertColor(ctx, j.Profile, v.ID, c1, c2)
+		l.Repo.UpdateColor(ctx, j.Profile, v.ID, c1, c2)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))

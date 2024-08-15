@@ -20,9 +20,6 @@ type Repositorier interface {
 	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 	HashTags(ctx context.Context, profile string) ([]model.HashTag, error)
 	Users(ctx context.Context, profile string) ([]model.User, error)
-	Files(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error)
-	FilesByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
-	FilesColorEmpty(ctx context.Context, profile string) ([]model.File, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
@@ -31,11 +28,10 @@ type Repositorier interface {
 	UserNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
 	ArchiveNotes(ctx context.Context, profile, d string, p *pg.Pager) ([]model.Note, error)
 
-	FileCount(ctx context.Context, profile string) (int, error)
 	NoteCount(ctx context.Context, profile string) (int, error)
 
-	InsertEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
-	InsertColor(ctx context.Context, profile, id, c1, c2 string)
+	UpdateEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
+	UpdateColor(ctx context.Context, profile, id, c1, c2 string)
 
 	// TODO: bunに依存しているのは良いのか
 	InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
@@ -43,7 +39,6 @@ type Repositorier interface {
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
 	InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
 	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
-	InsertFiles(ctx context.Context, db bun.IDB, files *[]model.File) error
 	InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error
 	Count(ctx context.Context, db bun.IDB) error
 
@@ -51,6 +46,19 @@ type Repositorier interface {
 
 	GenerateSchema(profile string)
 	Migrate(profile string)
+
+	// TOOD: これは良いのか
+	NewFileInfra() FileRepositorier
+}
+
+type FileRepositorier interface {
+	Get(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error)
+	GetByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
+	GetByEmptyColor(ctx context.Context, profile string) ([]model.File, error)
+
+	Count(ctx context.Context, profile string) (int, error)
+
+	Insert(ctx context.Context, db bun.IDB, files *[]model.File) error
 }
 
 type JobRepositorier interface {
@@ -82,6 +90,7 @@ type MisskeyAPIRepositorier interface {
 
 type Logic struct {
 	Repo           Repositorier
+	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
 	MisskeyAPIRepo MisskeyAPIRepositorier
@@ -89,6 +98,7 @@ type Logic struct {
 
 type Dependency struct {
 	repo           Repositorier
+	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
 	misskeyAPIRepo MisskeyAPIRepositorier
@@ -100,6 +110,17 @@ func New() *Dependency {
 
 func (d *Dependency) WithRepo(repo Repositorier) *Dependency {
 	d.repo = repo
+	return d
+}
+
+func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
+	d.fileRepo = repo
+	return d
+}
+
+// TODO: WithFileRepoの後に使う必要がある。WithRepoはやめて、Newの引数にする？
+func (d *Dependency) WithFileRepoUsingRepo() *Dependency {
+	d.fileRepo = d.repo.NewFileInfra()
 	return d
 }
 
@@ -121,6 +142,7 @@ func (d *Dependency) WithMisskeyAPIRepo(repo MisskeyAPIRepositorier) *Dependency
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:           d.repo,
+		FileRepo:       d.fileRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
 		MisskeyAPIRepo: d.misskeyAPIRepo,
@@ -264,7 +286,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 
 	count := 0
 	if params.Color == "" {
-		count, err = l.Repo.FileCount(ctx, profile)
+		count, err = l.FileRepo.Count(ctx, profile)
 		if err != nil {
 			return nil, err
 		}
@@ -275,7 +297,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 	page := p.Page(params.Page)
 	slog.Info("page count", slog.Int("count", page))
 
-	files, err := l.Repo.Files(ctx, profile, params.Color, p)
+	files, err := l.FileRepo.Get(ctx, profile, params.Color, p)
 	if err != nil {
 		return nil, err
 	}
