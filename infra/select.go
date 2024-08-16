@@ -26,46 +26,6 @@ func addWhere(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
 	return q.Where("? = ?", bun.Ident(col), s)
 }
 
-func (infra *Infra) Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
-	var reactions []model.ReactionEmoji
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&reactions).
-		Order("count DESC").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return reactions, nil
-}
-
-func (infra *Infra) ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error) {
-	var reaction model.ReactionEmoji
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&reaction).
-		Where("name = ?", name).
-		Limit(1).
-		Scan(ctx)
-	if err != nil {
-		return model.ReactionEmoji{}, err
-	}
-	return reaction, nil
-}
-
-func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
-	var reactions []model.ReactionEmoji
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&reactions).
-		Where("image = ?", "").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return reactions, nil
-}
-
 func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
 	err := infra.DB(profile).

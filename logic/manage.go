@@ -246,7 +246,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 		slog.Info("Notes inserted", slog.Int64("count", rows))
 
-		err = l.Repo.InsertReactions(ctx, tx, &reactions)
+		err = l.EmojiRepo.Insert(ctx, tx, &reactions)
 		if err != nil {
 			return err
 		}
@@ -284,7 +284,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 }
 
 func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
-	res, err := l.Repo.ReactionOne(ctx, j.Profile, j.ID)
+	res, err := l.EmojiRepo.GetByName(ctx, j.Profile, j.ID)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
@@ -294,7 +294,7 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
-	l.Repo.UpdateEmoji(ctx, j.Profile, res.ID, emoji)
+	l.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, res.ID, emoji)
 
 	p, _ := l.JobRepo.GetProgress()
 	l.JobRepo.SetProgress(p+1, 1)
@@ -302,7 +302,7 @@ func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
-	r, err := l.Repo.ReactionImageEmpty(ctx, j.Profile)
+	r, err := l.EmojiRepo.GetByEmptyImage(ctx, j.Profile)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
@@ -325,7 +325,7 @@ func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
 			// TODO: エラー処理
 			slog.Error(err.Error())
 		}
-		l.Repo.UpdateEmoji(ctx, j.Profile, v.ID, emoji)
+		l.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, emoji)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))

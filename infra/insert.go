@@ -7,7 +7,6 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/model"
-	mi "github.com/yulog/miutil"
 )
 
 // func (infra *Infra) InsertFromFile(ctx context.Context, profile string) {
@@ -31,11 +30,6 @@ func (infra *Infra) InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()
 	return rows, err
-}
-
-func (infra *Infra) InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error {
-	_, err := db.NewInsert().Model(reactions).Ignore().Exec(ctx)
-	return err
 }
 
 func (infra *Infra) InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error {
@@ -213,25 +207,4 @@ func countDaily(ctx context.Context, db bun.IDB) error {
 		return err
 	}
 	return nil
-}
-
-func (infra *Infra) UpdateEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji) {
-	// TODO: emoji画像をローカルに保存する
-
-	r := model.ReactionEmoji{
-		ID:    id,
-		Image: e.URL,
-	}
-	var s []model.ReactionEmoji
-	s = append(s, r)
-	_, err := infra.DB(profile).NewUpdate().
-		Model(&s).
-		OmitZero().
-		Column("image").
-		Bulk().
-		Exec(ctx)
-	if err != nil {
-		slog.Error(err.Error())
-		panic(err)
-	}
 }

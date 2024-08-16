@@ -16,6 +16,7 @@ type EmojiLogic interface {
 
 type emojiLogic struct {
 	repo       Repositorier
+	emojiRepo  EmojiRepositorier
 	configRepo ConfigRepositorier
 }
 
@@ -46,10 +47,10 @@ func (l emojiLogic) GetOne(ctx context.Context, profile, name string) {
 		slog.Error(err.Error())
 	}
 
-	res, err := l.repo.ReactionOne(ctx, profile, name)
+	res, err := l.emojiRepo.GetByName(ctx, profile, name)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
 	}
-	l.repo.UpdateEmoji(ctx, profile, res.ID, emoji)
+	l.emojiRepo.UpdateByPKWithImage(ctx, profile, res.ID, emoji)
 }

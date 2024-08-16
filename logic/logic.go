@@ -15,9 +15,6 @@ import (
 )
 
 type Repositorier interface {
-	Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
-	ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
-	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
@@ -28,11 +25,8 @@ type Repositorier interface {
 
 	NoteCount(ctx context.Context, profile string) (int, error)
 
-	UpdateEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
-
 	// TODO: bunに依存しているのは良いのか
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
-	InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
 	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
 	InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error
 	Count(ctx context.Context, db bun.IDB) error
@@ -45,6 +39,7 @@ type Repositorier interface {
 	// TOOD: これは良いのか
 	NewUserInfra() UserRepositorier
 	NewHashTagInfra() HashTagRepositorier
+	NewEmojiInfra() EmojiRepositorier
 	NewFileInfra() FileRepositorier
 }
 
@@ -58,6 +53,16 @@ type HashTagRepositorier interface {
 	Get(ctx context.Context, profile string) ([]model.HashTag, error)
 
 	Insert(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
+}
+
+type EmojiRepositorier interface {
+	Get(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
+	GetByName(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
+	GetByEmptyImage(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
+
+	Insert(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
+
+	UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji)
 }
 
 type FileRepositorier interface {
@@ -104,6 +109,7 @@ type Logic struct {
 	Repo           Repositorier
 	UserRepo       UserRepositorier
 	HashTagRepo    HashTagRepositorier
+	EmojiRepo      EmojiRepositorier
 	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
@@ -114,6 +120,7 @@ type Dependency struct {
 	repo           Repositorier
 	userRepo       UserRepositorier
 	hashTagRepo    HashTagRepositorier
+	emojiRepo      EmojiRepositorier
 	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
@@ -139,6 +146,11 @@ func (d *Dependency) WithHashTagRepo(repo HashTagRepositorier) *Dependency {
 	return d
 }
 
+func (d *Dependency) WithEmojiRepo(repo EmojiRepositorier) *Dependency {
+	d.emojiRepo = repo
+	return d
+}
+
 func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
 	d.fileRepo = repo
 	return d
@@ -151,6 +163,11 @@ func (d *Dependency) WithUserRepoUsingRepo() *Dependency {
 
 func (d *Dependency) WithHashTagRepoUsingRepo() *Dependency {
 	d.hashTagRepo = d.repo.NewHashTagInfra()
+	return d
+}
+
+func (d *Dependency) WithEmojiRepoUsingRepo() *Dependency {
+	d.emojiRepo = d.repo.NewEmojiInfra()
 	return d
 }
 
@@ -180,6 +197,7 @@ func (d *Dependency) Build() *Logic {
 		Repo:           d.repo,
 		UserRepo:       d.userRepo,
 		HashTagRepo:    d.hashTagRepo,
+		EmojiRepo:      d.emojiRepo,
 		FileRepo:       d.fileRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
@@ -198,7 +216,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	if err != nil {
 		return nil, err
 	}
-	r, err := l.Repo.Reactions(ctx, profile)
+	r, err := l.EmojiRepo.Get(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
