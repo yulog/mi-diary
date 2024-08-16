@@ -234,7 +234,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 
 		// 重複していたらアップデート
-		err := l.Repo.InsertUsers(ctx, tx, &users)
+		err := l.UserRepo.Insert(ctx, tx, &users)
 		if err != nil {
 			return err
 		}

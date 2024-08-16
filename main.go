@@ -29,6 +29,7 @@ func main() {
 		WithRepo(infra.New(app)).
 		// WithRepo(inf).
 		// WithFileRepo(inf.NewFileInfra()).
+		WithUserRepoUsingRepo().
 		WithFileRepoUsingRepo().
 		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).

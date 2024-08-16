@@ -79,19 +79,6 @@ func (infra *Infra) HashTags(ctx context.Context, profile string) ([]model.HashT
 	return tags, nil
 }
 
-func (infra *Infra) Users(ctx context.Context, profile string) ([]model.User, error) {
-	var users []model.User
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&users).
-		Order("count DESC").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-
 func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
 	err := infra.DB(profile).

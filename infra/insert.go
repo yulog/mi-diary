@@ -32,11 +32,6 @@ func (infra *Infra) InsertHashTag(ctx context.Context, db bun.IDB, hashtag *mode
 	return err
 }
 
-func (infra *Infra) InsertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error {
-	_, err := db.NewInsert().Model(users).On("CONFLICT DO UPDATE").Exec(ctx)
-	return err
-}
-
 func (infra *Infra) InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()

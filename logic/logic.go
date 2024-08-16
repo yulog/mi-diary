@@ -19,7 +19,6 @@ type Repositorier interface {
 	ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
 	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 	HashTags(ctx context.Context, profile string) ([]model.HashTag, error)
-	Users(ctx context.Context, profile string) ([]model.User, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
@@ -35,7 +34,6 @@ type Repositorier interface {
 
 	// TODO: bunに依存しているのは良いのか
 	InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
-	InsertUsers(ctx context.Context, db bun.IDB, users *[]model.User) error
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
 	InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
 	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
@@ -48,7 +46,14 @@ type Repositorier interface {
 	Migrate(profile string)
 
 	// TOOD: これは良いのか
+	NewUserInfra() UserRepositorier
 	NewFileInfra() FileRepositorier
+}
+
+type UserRepositorier interface {
+	Get(ctx context.Context, profile string) ([]model.User, error)
+
+	Insert(ctx context.Context, db bun.IDB, users *[]model.User) error
 }
 
 type FileRepositorier interface {
@@ -75,6 +80,7 @@ type JobRepositorier interface {
 type ConfigRepositorier interface {
 	SetConfig(key string, prof app.Profile)
 	StoreConfig() error
+
 	GetProfiles() *app.Profiles
 	GetProfilesSorted(yield func(k string, v app.Profile) bool)
 	GetProfilesSortedKey() []string
@@ -90,6 +96,7 @@ type MisskeyAPIRepositorier interface {
 
 type Logic struct {
 	Repo           Repositorier
+	UserRepo       UserRepositorier
 	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
@@ -98,6 +105,7 @@ type Logic struct {
 
 type Dependency struct {
 	repo           Repositorier
+	userRepo       UserRepositorier
 	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
@@ -113,8 +121,18 @@ func (d *Dependency) WithRepo(repo Repositorier) *Dependency {
 	return d
 }
 
+func (d *Dependency) WithUserRepo(repo UserRepositorier) *Dependency {
+	d.userRepo = repo
+	return d
+}
+
 func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
 	d.fileRepo = repo
+	return d
+}
+
+func (d *Dependency) WithUserRepoUsingRepo() *Dependency {
+	d.userRepo = d.repo.NewUserInfra()
 	return d
 }
 
@@ -142,6 +160,7 @@ func (d *Dependency) WithMisskeyAPIRepo(repo MisskeyAPIRepositorier) *Dependency
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:           d.repo,
+		UserRepo:       d.userRepo,
 		FileRepo:       d.fileRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
@@ -168,7 +187,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	if err != nil {
 		return nil, err
 	}
-	u, err := l.Repo.Users(ctx, profile)
+	u, err := l.UserRepo.Get(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
