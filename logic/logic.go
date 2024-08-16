@@ -29,7 +29,6 @@ type Repositorier interface {
 	NoteCount(ctx context.Context, profile string) (int, error)
 
 	UpdateEmoji(ctx context.Context, profile string, id int64, e *mi.Emoji)
-	UpdateColor(ctx context.Context, profile, id, c1, c2 string)
 
 	// TODO: bunに依存しているのは良いのか
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
@@ -69,6 +68,8 @@ type FileRepositorier interface {
 	Count(ctx context.Context, profile string) (int, error)
 
 	Insert(ctx context.Context, db bun.IDB, files *[]model.File) error
+
+	UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string)
 }
 
 type JobRepositorier interface {

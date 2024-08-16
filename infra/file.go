@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/logic"
@@ -85,4 +86,25 @@ func (fi *FileInfra) Insert(ctx context.Context, db bun.IDB, files *[]model.File
 		On("CONFLICT DO UPDATE").
 		Exec(ctx)
 	return err
+}
+
+func (fi *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string) {
+	r := model.File{
+		ID:            id,
+		DominantColor: c1,
+		GroupColor:    c2,
+	}
+	var s []model.File
+	s = append(s, r)
+	_, err := fi.infra.DB(profile).NewUpdate().
+		Model(&s).
+		OmitZero().
+		Column("dominant_color").
+		Column("group_color").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
 }

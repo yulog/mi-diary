@@ -353,7 +353,7 @@ func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.Repo.UpdateColor(ctx, j.Profile, v.ID, c1, c2)
+		l.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))
@@ -386,7 +386,7 @@ func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.Repo.UpdateColor(ctx, j.Profile, v.ID, c1, c2)
+		l.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
 
 		p, _ := l.JobRepo.GetProgress()
 		l.JobRepo.SetProgress(p+1, len(r))
