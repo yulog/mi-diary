@@ -30,6 +30,7 @@ func main() {
 		// WithRepo(inf).
 		// WithFileRepo(inf.NewFileInfra()).
 		WithUserRepoUsingRepo().
+		WithHashTagRepoUsingRepo().
 		WithFileRepoUsingRepo().
 		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).

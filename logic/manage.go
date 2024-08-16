@@ -193,7 +193,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 
 			for _, tv := range v.Note.Tags {
 				ht := model.HashTag{Text: tv}
-				err := l.Repo.InsertHashTag(ctx, tx, &ht)
+				err := l.HashTagRepo.Insert(ctx, tx, &ht)
 				if err != nil {
 					return err
 				}

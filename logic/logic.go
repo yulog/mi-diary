@@ -18,7 +18,6 @@ type Repositorier interface {
 	Reactions(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 	ReactionOne(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
 	ReactionImageEmpty(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
-	HashTags(ctx context.Context, profile string) ([]model.HashTag, error)
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
 	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
@@ -33,7 +32,6 @@ type Repositorier interface {
 	UpdateColor(ctx context.Context, profile, id, c1, c2 string)
 
 	// TODO: bunに依存しているのは良いのか
-	InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
 	InsertReactions(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
 	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
@@ -47,6 +45,7 @@ type Repositorier interface {
 
 	// TOOD: これは良いのか
 	NewUserInfra() UserRepositorier
+	NewHashTagInfra() HashTagRepositorier
 	NewFileInfra() FileRepositorier
 }
 
@@ -54,6 +53,12 @@ type UserRepositorier interface {
 	Get(ctx context.Context, profile string) ([]model.User, error)
 
 	Insert(ctx context.Context, db bun.IDB, users *[]model.User) error
+}
+
+type HashTagRepositorier interface {
+	Get(ctx context.Context, profile string) ([]model.HashTag, error)
+
+	Insert(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
 }
 
 type FileRepositorier interface {
@@ -97,6 +102,7 @@ type MisskeyAPIRepositorier interface {
 type Logic struct {
 	Repo           Repositorier
 	UserRepo       UserRepositorier
+	HashTagRepo    HashTagRepositorier
 	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
@@ -106,6 +112,7 @@ type Logic struct {
 type Dependency struct {
 	repo           Repositorier
 	userRepo       UserRepositorier
+	hashTagRepo    HashTagRepositorier
 	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
@@ -126,6 +133,11 @@ func (d *Dependency) WithUserRepo(repo UserRepositorier) *Dependency {
 	return d
 }
 
+func (d *Dependency) WithHashTagRepo(repo HashTagRepositorier) *Dependency {
+	d.hashTagRepo = repo
+	return d
+}
+
 func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
 	d.fileRepo = repo
 	return d
@@ -133,6 +145,11 @@ func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
 
 func (d *Dependency) WithUserRepoUsingRepo() *Dependency {
 	d.userRepo = d.repo.NewUserInfra()
+	return d
+}
+
+func (d *Dependency) WithHashTagRepoUsingRepo() *Dependency {
+	d.hashTagRepo = d.repo.NewHashTagInfra()
 	return d
 }
 
@@ -161,6 +178,7 @@ func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:           d.repo,
 		UserRepo:       d.userRepo,
+		HashTagRepo:    d.hashTagRepo,
 		FileRepo:       d.fileRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
@@ -183,7 +201,7 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	if err != nil {
 		return nil, err
 	}
-	h, err := l.Repo.HashTags(ctx, profile)
+	h, err := l.HashTagRepo.Get(ctx, profile)
 	if err != nil {
 		return nil, err
 	}

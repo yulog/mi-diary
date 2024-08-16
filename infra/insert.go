@@ -27,11 +27,6 @@ func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx con
 	}
 }
 
-func (infra *Infra) InsertHashTag(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error {
-	_, err := db.NewInsert().Model(hashtag).On("CONFLICT DO UPDATE").Exec(ctx)
-	return err
-}
-
 func (infra *Infra) InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()

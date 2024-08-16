@@ -66,19 +66,6 @@ func (infra *Infra) ReactionImageEmpty(ctx context.Context, profile string) ([]m
 	return reactions, nil
 }
 
-func (infra *Infra) HashTags(ctx context.Context, profile string) ([]model.HashTag, error) {
-	var tags []model.HashTag
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&tags).
-		Order("count DESC").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
-}
-
 func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
 	var notes []model.Note
 	err := infra.DB(profile).
