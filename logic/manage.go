@@ -343,7 +343,7 @@ func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
 	}
 
 	for _, v := range r {
-		if strings.HasPrefix(v.Type, "image") {
+		if !strings.HasPrefix(v.Type, "image") {
 			continue
 		}
 		c1, c2, err := color.Color(v.ThumbnailURL)
