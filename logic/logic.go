@@ -36,7 +36,7 @@ type Repositorier interface {
 	GenerateSchema(profile string)
 	Migrate(profile string)
 
-	// TOOD: これは良いのか
+	// TODO: これは良いのか
 	NewUserInfra() UserRepositorier
 	NewHashTagInfra() HashTagRepositorier
 	NewEmojiInfra() EmojiRepositorier
