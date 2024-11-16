@@ -27,7 +27,7 @@ templ (p IndexParams) Index() {
 				}
 				@CardIsFull() {
 					<h3>Users</h3>
-					@user(p.Profile, p.Users)
+					<div hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true", p.Profile) } hx-trigger="load"></div>
 				}
 				@CardFrame() {
 					@CardContent() {

@@ -224,18 +224,25 @@ func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component,
 	if err != nil {
 		return nil, err
 	}
-	u, err := l.UserRepo.Get(ctx, profile)
-	if err != nil {
-		return nil, err
-	}
 
 	return cm.IndexParams{
 		Title:     profile,
 		Profile:   profile,
 		Reactions: r,
 		HashTags:  h,
-		Users:     u,
 	}.Index(), nil
+}
+
+func (l *Logic) UsersLogic(ctx context.Context, profile string, partial bool) (templ.Component, error) {
+	_, err := l.ConfigRepo.GetProfile(profile)
+	if err != nil {
+		return nil, err
+	}
+	u, err := l.UserRepo.Get(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
+	return cm.Users(profile, u), nil
 }
 
 func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
@@ -302,7 +309,7 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params 
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) UsersLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err

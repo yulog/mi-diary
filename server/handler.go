@@ -14,6 +14,7 @@ type Params struct {
 	Page    int    `query:"page"`
 	S       string `query:"s"`
 	Color   string `query:"color"`
+	Partial bool   `query:"partial"`
 }
 
 type Callback struct {
@@ -92,8 +93,23 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 	return renderer(c, com)
 }
 
-// UsersHandler は /users/:name のハンドラ
+// UsersHandler は /users のハンドラ
 func (srv *Server) UsersHandler(c echo.Context) error {
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
+
+	com, err := srv.logic.UsersLogic(c.Request().Context(), params.Profile, params.Partial)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
+}
+
+// UserHandler は /users/:name のハンドラ
+func (srv *Server) UserHandler(c echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -102,7 +118,7 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		Page: params.Page,
 	}
 
-	com, err := srv.logic.UsersLogic(c.Request().Context(), params.Profile, params.Name, params2)
+	com, err := srv.logic.UserLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}

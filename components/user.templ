@@ -5,7 +5,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-templ user(profile string, items []model.User) {
+templ Users(profile string, items []model.User) {
 	<div class="tags ml-5">
 		for _, item := range items {
 			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/users/%s", profile, item.Name)) } class="tag">
