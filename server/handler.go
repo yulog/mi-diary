@@ -15,6 +15,7 @@ type Params struct {
 	S       string `query:"s"`
 	Color   string `query:"color"`
 	Partial bool   `query:"partial"`
+	SortBy  string `query:"sort"`
 }
 
 type Callback struct {
@@ -100,7 +101,7 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 		return err
 	}
 
-	com, err := srv.logic.UsersLogic(c.Request().Context(), params.Profile, params.Partial)
+	com, err := srv.logic.UsersLogic(c.Request().Context(), params.Profile, params.Partial, params.SortBy)
 	if err != nil {
 		return err
 	}

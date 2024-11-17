@@ -2,8 +2,10 @@ package infra
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/uptrace/bun"
+	"github.com/yulog/mi-diary/internal/common"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/model"
 )
@@ -16,12 +18,12 @@ func (i *Infra) NewUserInfra() logic.UserRepositorier {
 	return &UserInfra{infra: i}
 }
 
-func (ui *UserInfra) Get(ctx context.Context, profile string) ([]model.User, error) {
+func (ui *UserInfra) Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error) {
 	var users []model.User
 	err := ui.infra.DB(profile).
 		NewSelect().
 		Model(&users).
-		Order("count DESC").
+		Order(fmt.Sprintf("%s %s", op.SortBy, op.SortOrder)).
 		Scan(ctx)
 	if err != nil {
 		return nil, err

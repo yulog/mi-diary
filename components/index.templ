@@ -26,8 +26,41 @@ templ (p IndexParams) Index() {
 					@hashTag(p.Profile, p.HashTags)
 				}
 				@CardIsFull() {
-					<h3>Users</h3>
-					<div hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true", p.Profile) } hx-trigger="load"></div>
+					<div class="level">
+						<h3>Users</h3>
+						<div class="buttons has-addons is-right">
+							<button
+								id="sort-count"
+								hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile) }
+								hx-target="#user-list"
+								hx-swap="outerHTML"
+								class="button is-rounded is-primary is-selected is-outlined"
+								_="on click
+            					   add .is-primary .is-selected .is-outlined to me
+            					   remove .is-primary .is-selected .is-outlined from #sort-name"
+							>
+								Count
+							</button>
+							<button
+								id="sort-name"
+								hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=name", p.Profile) }
+								hx-target="#user-list"
+								hx-swap="outerHTML"
+								class="button is-rounded"
+								_="on click
+            					   add .is-primary .is-selected .is-outlined to me
+            					   remove .is-primary .is-selected .is-outlined from #sort-count"
+							>
+								Name
+							</button>
+						</div>
+					</div>
+					<div
+						id="user-list"
+						hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile) }
+						hx-trigger="load"
+						hx-swap="outerHTML"
+					></div>
 				}
 				@CardFrame() {
 					@CardContent() {
