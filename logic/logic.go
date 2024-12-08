@@ -283,7 +283,7 @@ func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params
 	return n.WithPages(cp), nil
 }
 
-func (l *Logic) HashTagsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err

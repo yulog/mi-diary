@@ -86,7 +86,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 		Page: params.Page,
 	}
 
-	com, err := srv.logic.HashTagsLogic(c.Request().Context(), params.Profile, params.Name, params2)
+	com, err := srv.logic.HashTagNotesLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}
