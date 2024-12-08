@@ -5,7 +5,7 @@ import (
 	"github.com/yulog/mi-diary/model"
 )
 
-templ hashTag(profile string, items []model.HashTag) {
+templ HashTags(profile string, items []model.HashTag) {
 	<div class="tags ml-5">
 		for _, item := range items {
 			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/hashtags/%s", profile, item.Text)) } class="tag">

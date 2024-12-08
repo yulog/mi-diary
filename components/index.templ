@@ -23,7 +23,12 @@ templ (p IndexParams) Index() {
 				}
 				@CardIsFull() {
 					<h3>HashTags</h3>
-					@hashTag(p.Profile, p.HashTags)
+					<div
+						id="hashtag-list"
+						hx-get={ fmt.Sprintf("/profiles/%s/hashtags?partial=true&sort=count", p.Profile) }
+						hx-trigger="load"
+						hx-swap="outerHTML"
+					></div>
 				}
 				@CardIsFull() {
 					<div class="level">

@@ -76,6 +76,21 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 	return renderer(c, com)
 }
 
+// HashTagsHandler は /hashtags のハンドラ
+func (srv *Server) HashTagsHandler(c echo.Context) error {
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
+
+	com, err := srv.logic.HashTagsLogic(c.Request().Context(), params.Profile)
+	if err != nil {
+		return err
+	}
+
+	return renderer(c, com)
+}
+
 // HashTagHandler は /hashtags/:name のハンドラ
 func (srv *Server) HashTagHandler(c echo.Context) error {
 	var params Params
