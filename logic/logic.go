@@ -241,7 +241,7 @@ func (l *Logic) HashTagsLogic(ctx context.Context, profile string) (templ.Compon
 	return cm.HashTags(profile, h), nil
 }
 
-func (l *Logic) ReactionsLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err

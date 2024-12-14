@@ -27,7 +27,7 @@ func (srv *Server) NewRouter() *echo.Echo {
 
 	profile := profiles.Group("/:profile")
 	profile.GET("", srv.HomeHandler)
-	profile.GET("/reactions/:name", srv.ReactionsHandler)
+	profile.GET("/reactions/:name", srv.ReactionHandler)
 	profile.GET("/hashtags", srv.HashTagsHandler)
 	profile.GET("/hashtags/:name", srv.HashTagHandler)
 	profile.GET("/users", srv.UsersHandler)

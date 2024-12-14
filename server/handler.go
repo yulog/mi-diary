@@ -58,8 +58,8 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 	return renderer(c, com)
 }
 
-// ReactionsHandler は /reactions/:name のハンドラ
-func (srv *Server) ReactionsHandler(c echo.Context) error {
+// ReactionHandler は /reactions/:name のハンドラ
+func (srv *Server) ReactionHandler(c echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -68,7 +68,7 @@ func (srv *Server) ReactionsHandler(c echo.Context) error {
 		Page: params.Page,
 	}
 
-	com, err := srv.logic.ReactionsLogic(c.Request().Context(), params.Profile, params.Name, params2)
+	com, err := srv.logic.ReactionNotesLogic(c.Request().Context(), params.Profile, params.Name, params2)
 	if err != nil {
 		return err
 	}
