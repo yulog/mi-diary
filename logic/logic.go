@@ -220,13 +220,13 @@ func (c ItemLimitHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool 
 	return c.ItemCount >= p.Limit()
 }
 
-type ItemLimitLastHasNextPageChecker struct {
-	ItemCount int
-}
+// type ItemLimitLastHasNextPageChecker struct {
+// 	ItemCount int
+// }
 
-func (c ItemLimitLastHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
-	return c.ItemCount >= p.Limit() && p.CurrentPage+1 <= p.TotalPages()
-}
+// func (c ItemLimitLastHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
+// 	return c.ItemCount >= p.Limit() && p.CurrentPage+1 <= p.TotalPages()
+// }
 
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 	_, err := l.ConfigRepo.GetProfile(profile)
@@ -416,9 +416,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 		return nil, fmt.Errorf("file not found")
 	}
 
-	if params.Color == "" {
-		p.NextChecker = ItemLimitLastHasNextPageChecker{ItemCount: len(files)}
-	} else {
+	if params.Color != "" {
 		p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(files)}
 	}
 	slog.Info("has next", slog.Bool("bool", p.HasNextPage()))
@@ -432,7 +430,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 		slog.Info(err.Error())
 	}
 
-	hasLast := next < p.TotalPages() && p.CurrentPage < p.TotalPages()
+	hasLast := p.CurrentPage+1 < p.TotalPages()
 	slog.Info("has last", slog.Bool("bool", hasLast))
 
 	n := cm.File{
@@ -485,14 +483,9 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	title := ""
 	if params.S != "" {
 		title = fmt.Sprintf("%s - %d", params.S, p.CurrentPage)
+		p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 	} else {
 		title = fmt.Sprint(p.CurrentPage)
-	}
-
-	if params.S == "" {
-		p.NextChecker = ItemLimitLastHasNextPageChecker{ItemCount: len(notes)}
-	} else {
-		p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 	}
 
 	next, err := p.NextPage()
@@ -504,7 +497,8 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 		slog.Info(err.Error())
 	}
 
-	hasLast := next < p.TotalPages() && p.CurrentPage < p.TotalPages()
+	hasLast := p.CurrentPage+1 < p.TotalPages()
+	// slog.Info("has last", slog.Bool("hasLast", hasLast), slog.Int("next", next), slog.Int("total", p.TotalPages()), slog.Int("current", p.CurrentPage))
 
 	n := cm.Note{
 		Title:      title,

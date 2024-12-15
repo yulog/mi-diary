@@ -49,7 +49,7 @@ templ paginationLink(q QueryParams, num int) {
 
 templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
-		if p.Prev.Index != 0 {
+		if p.Prev.Has {
 			<a href={ p.QueryParams.getPageQuery(p.Prev.Index) } class="pagination-previous">Prev</a>
 		} else {
 			<span class="pagination-previous is-disabled">Prev</span>
@@ -64,7 +64,7 @@ templ pager(p Pages) {
 				@paginationLink(p.QueryParams, 1)
 				<li><span class="pagination-ellipsis">&hellip;</span></li>
 			}
-			if p.Prev.Index != 0 {
+			if p.Prev.Has {
 				@paginationLink(p.QueryParams, p.Prev.Index)
 			}
 			<li>

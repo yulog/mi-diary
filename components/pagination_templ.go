@@ -160,7 +160,7 @@ func pager(p Pages) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if p.Prev.Index != 0 {
+		if p.Prev.Has {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -214,7 +214,7 @@ func pager(p Pages) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if p.Prev.Index != 0 {
+		if p.Prev.Has {
 			templ_7745c5c3_Err = paginationLink(p.QueryParams, p.Prev.Index).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
