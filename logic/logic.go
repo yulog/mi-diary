@@ -11,18 +11,18 @@ import (
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/internal/common"
 	"github.com/yulog/mi-diary/model"
-	"github.com/yulog/mi-diary/util/pg"
+	"github.com/yulog/mi-diary/util/pagination"
 	mi "github.com/yulog/miutil"
 )
 
 type Repositorier interface {
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
-	Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error)
-	ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
-	HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
-	UserNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error)
-	ArchiveNotes(ctx context.Context, profile, d string, p *pg.Pager) ([]model.Note, error)
+	Notes(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error)
+	ReactionNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	HashTagNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	UserNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	ArchiveNotes(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
 
 	NoteCount(ctx context.Context, profile string) (int, error)
 
@@ -67,7 +67,7 @@ type EmojiRepositorier interface {
 }
 
 type FileRepositorier interface {
-	Get(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error)
+	Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error)
 	GetByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
 	GetByEmptyColor(ctx context.Context, profile string) ([]model.File, error)
 
@@ -212,6 +212,22 @@ type Params struct {
 	Color string
 }
 
+type ItemLimitHasNextPageChecker struct {
+	ItemCount int
+}
+
+func (c ItemLimitHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
+	return c.ItemCount >= p.Limit()
+}
+
+type ItemLimitLastHasNextPageChecker struct {
+	ItemCount int
+}
+
+func (c ItemLimitLastHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
+	return c.ItemCount >= p.Limit() && p.CurrentPage+1 <= p.TotalPages()
+}
+
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 	_, err := l.ConfigRepo.GetProfile(profile)
 	if err != nil {
@@ -247,15 +263,26 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 		return nil, err
 	}
 
-	p := pg.New(0)
-	page := p.Page(params.Page)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 
 	notes, err := l.Repo.ReactionNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
 
-	hasNext := len(notes) >= p.Limit()
+	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
 
 	n := cm.Note{
 		Title:   name,
@@ -264,10 +291,10 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 		Items:   notes,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last()},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages()},
 	}
 
 	return n.WithPages(cp), nil
@@ -279,15 +306,26 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 		return nil, err
 	}
 
-	p := pg.New(0)
-	page := p.Page(params.Page)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 
 	notes, err := l.Repo.HashTagNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
 
-	hasNext := len(notes) >= p.Limit()
+	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
 
 	n := cm.Note{
 		Title:   name,
@@ -296,10 +334,10 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 		Items:   notes,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last()},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages()},
 	}
 
 	return n.WithPages(cp), nil
@@ -311,27 +349,38 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Para
 		return nil, err
 	}
 
-	p := pg.New(0)
-	page := p.Page(params.Page)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 
 	notes, err := l.Repo.UserNotes(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
 
-	hasNext := len(notes) >= p.Limit()
+	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
 
 	n := cm.Note{
-		Title:   fmt.Sprintf("%s - %d", name, page),
+		Title:   fmt.Sprintf("%s - %d", name, p.CurrentPage),
 		Profile: profile,
 		Host:    host,
 		Items:   notes,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last()},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages()},
 	}
 
 	return n.WithPages(cp), nil
@@ -352,41 +401,52 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 		slog.Info("File count", slog.Int("count", count))
 	}
 
-	p := pg.New(count)
-	page := p.Page(params.Page)
-	slog.Info("page count", slog.Int("count", page))
+	p, err := pagination.New(params.Page, 10, count, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	slog.Info("page count", slog.Int("count", p.CurrentPage))
 
 	files, err := l.FileRepo.Get(ctx, profile, params.Color, p)
 	if err != nil {
 		return nil, err
 	}
-	slog.Info("File result count", slog.Int("count", len(files)))
+	slog.Info("file result count", slog.Int("count", len(files)))
 	if len(files) == 0 {
 		return nil, fmt.Errorf("file not found")
 	}
 
-	hasNext := false
 	if params.Color == "" {
-		hasNext = len(files) >= p.Limit() && p.Next() <= p.Last()
+		p.NextChecker = ItemLimitLastHasNextPageChecker{ItemCount: len(files)}
 	} else {
-		hasNext = len(files) >= p.Limit()
+		p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(files)}
 	}
-	slog.Info("has next", slog.Bool("bool", hasNext))
-	hasLast := p.Next() < p.Last()
+	slog.Info("has next", slog.Bool("bool", p.HasNextPage()))
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+
+	hasLast := next < p.TotalPages() && p.CurrentPage < p.TotalPages()
 	slog.Info("has last", slog.Bool("bool", hasLast))
 
 	n := cm.File{
-		Title:          fmt.Sprint(page),
+		Title:          fmt.Sprint(p.CurrentPage),
 		Profile:        profile,
 		Host:           host,
 		FileFilterPath: fmt.Sprintf("/profiles/%s/files", profile),
 		Items:          files,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last(), Has: hasLast},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages(), Has: hasLast},
 		QueryParams: cm.QueryParams{
 			Page:  params.Page,
 			Color: params.Color,
@@ -410,8 +470,10 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 		}
 	}
 
-	p := pg.New(count)
-	page := p.Page(params.Page)
+	p, err := pagination.New(params.Page, 10, count, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 
 	notes, err := l.Repo.Notes(ctx, profile, params.S, p)
 	if err != nil {
@@ -422,18 +484,27 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	}
 	title := ""
 	if params.S != "" {
-		title = fmt.Sprintf("%s - %d", params.S, page)
+		title = fmt.Sprintf("%s - %d", params.S, p.CurrentPage)
 	} else {
-		title = fmt.Sprint(page)
+		title = fmt.Sprint(p.CurrentPage)
 	}
 
-	hasNext := false
 	if params.S == "" {
-		hasNext = len(notes) >= p.Limit() && p.Next() <= p.Last()
+		p.NextChecker = ItemLimitLastHasNextPageChecker{ItemCount: len(notes)}
 	} else {
-		hasNext = len(notes) >= p.Limit()
+		p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 	}
-	hasLast := p.Next() < p.Last()
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+
+	hasLast := next < p.TotalPages() && p.CurrentPage < p.TotalPages()
 
 	n := cm.Note{
 		Title:      title,
@@ -443,10 +514,10 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 		Items:      notes,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last(), Has: hasLast},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages(), Has: hasLast},
 		QueryParams: cm.QueryParams{
 			Page: params.Page,
 			S:    params.S,
@@ -474,28 +545,39 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 		return nil, err
 	}
 
-	p := pg.New(0)
-	page := p.Page(params.Page)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	// slog.Info("perPage", slog.Int("perPage", p2.Limit()))
 
 	notes, err := l.Repo.ArchiveNotes(ctx, profile, d, p)
 	if err != nil {
 		return nil, err
 	}
-	title := fmt.Sprintf("%s - %d", d, page)
 
-	hasNext := len(notes) >= p.Limit()
+	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
+
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
 
 	n := cm.Note{
-		Title:   title,
+		Title:   fmt.Sprintf("%s - %d", d, p.CurrentPage),
 		Profile: profile,
 		Host:    host,
 		Items:   notes,
 	}
 	cp := cm.Pages{
-		Current: page,
-		Prev:    cm.Page{Index: p.Prev()},
-		Next:    cm.Page{Index: p.Next(), Has: hasNext},
-		Last:    cm.Page{Index: p.Last()},
+		Current: p.CurrentPage,
+		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
+		Last:    cm.Page{Index: p.TotalPages()},
 	}
 
 	return n.WithPages(cp), nil

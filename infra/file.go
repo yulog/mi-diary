@@ -7,7 +7,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/model"
-	"github.com/yulog/mi-diary/util/pg"
+	"github.com/yulog/mi-diary/util/pagination"
 )
 
 type FileInfra struct {
@@ -18,7 +18,7 @@ func (i *Infra) NewFileInfra() logic.FileRepositorier {
 	return &FileInfra{infra: i}
 }
 
-func (fi *FileInfra) Get(ctx context.Context, profile, c string, p *pg.Pager) ([]model.File, error) {
+func (fi *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error) {
 	var files []model.File
 	qb := fi.infra.DB(profile).NewSelect().QueryBuilder()
 	qb = addWhere(qb, "f.group_color", c)

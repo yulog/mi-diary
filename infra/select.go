@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/model"
-	"github.com/yulog/mi-diary/util/pg"
+	"github.com/yulog/mi-diary/util/pagination"
 )
 
 // addWhereLike
@@ -26,7 +26,7 @@ func addWhere(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
 	return q.Where("? = ?", bun.Ident(col), s)
 }
 
-func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
 	err := infra.DB(profile).
 		NewSelect().
@@ -44,7 +44,7 @@ func (infra *Infra) ReactionNotes(ctx context.Context, profile, name string, p *
 	return notes, nil
 }
 
-func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	// サブクエリを使う
 	// note idだけ必要
 	sq := infra.DB(profile).
@@ -74,7 +74,7 @@ func (infra *Infra) HashTagNotes(ctx context.Context, profile, name string, p *p
 	return notes, nil
 }
 
-func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) UserNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
 	err := infra.DB(profile).
 		NewSelect().
@@ -99,7 +99,7 @@ func (infra *Infra) NoteCount(ctx context.Context, profile string) (int, error) 
 		Count(ctx)
 }
 
-func (infra *Infra) Notes(ctx context.Context, profile, s string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) Notes(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
 	// https://bun.uptrace.dev/guide/query-where.html#querybuilder
 	qb := infra.DB(profile).NewSelect().QueryBuilder()
@@ -139,7 +139,7 @@ func (infra *Infra) Archives(ctx context.Context, profile string) ([]model.Month
 var reym = regexp.MustCompile(`^\d{4}-\d{2}$`)
 var reymd = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
-func (infra *Infra) ArchiveNotes(ctx context.Context, profile, d string, p *pg.Pager) ([]model.Note, error) {
+func (infra *Infra) ArchiveNotes(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
 	col := ""
 	if reym.MatchString(d) {
