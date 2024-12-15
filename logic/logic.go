@@ -220,14 +220,6 @@ func (c ItemLimitHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool 
 	return c.ItemCount >= p.Limit()
 }
 
-// type ItemLimitLastHasNextPageChecker struct {
-// 	ItemCount int
-// }
-
-// func (c ItemLimitLastHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
-// 	return c.ItemCount >= p.Limit() && p.CurrentPage+1 <= p.TotalPages()
-// }
-
 func (l *Logic) HomeLogic(ctx context.Context, profile string) (templ.Component, error) {
 	_, err := l.ConfigRepo.GetProfile(profile)
 	if err != nil {
