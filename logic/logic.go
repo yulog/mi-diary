@@ -9,7 +9,6 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/internal/common"
 	"github.com/yulog/mi-diary/model"
 	"github.com/yulog/mi-diary/util/pagination"
 	mi "github.com/yulog/miutil"
@@ -42,12 +41,6 @@ type Repositorier interface {
 	NewHashTagInfra() HashTagRepositorier
 	NewEmojiInfra() EmojiRepositorier
 	NewFileInfra() FileRepositorier
-}
-
-type UserRepositorier interface {
-	Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error)
-
-	Insert(ctx context.Context, db bun.IDB, users *[]model.User) error
 }
 
 type HashTagRepositorier interface {
