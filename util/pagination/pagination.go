@@ -19,8 +19,7 @@ type Paging interface {
 }
 
 type Pagination struct {
-	CurrentPage int
-	// TotalPages  int
+	CurrentPage     int
 	PerPage         int // 1ページあたりの項目数
 	TotalItems      int
 	NextChecker     NextPageChecker     // 次ページ判定ロジック
