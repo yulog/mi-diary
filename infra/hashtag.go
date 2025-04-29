@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 
-	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/model"
 )
@@ -29,7 +28,11 @@ func (hi *HashTagInfra) Get(ctx context.Context, profile string) ([]model.HashTa
 	return tags, nil
 }
 
-func (hi *HashTagInfra) Insert(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error {
+func (hi *HashTagInfra) Insert(ctx context.Context, profile string, hashtag *model.HashTag) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = hi.infra.DB(profile)
+	}
 	_, err := db.NewInsert().
 		Model(hashtag).
 		On("CONFLICT DO UPDATE").

@@ -18,31 +18,60 @@ import (
 // 	infra.Insert(ctx, profile, &r)
 // }
 
-func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context, tx bun.Tx) error) {
-	err := infra.DB(profile).RunInTx(ctx, &sql.TxOptions{}, fn)
+type txKey struct{}
+
+func txFromContext(ctx context.Context) (bun.IDB, bool) {
+	tx, ok := ctx.Value(txKey{}).(bun.IDB)
+	return tx, ok
+}
+
+func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error) {
+	err := infra.DB(profile).RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+		ctx = context.WithValue(ctx, txKey{}, tx)
+		if err := fn(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
 }
 
-func (infra *Infra) InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error) {
+func (infra *Infra) InsertNotes(ctx context.Context, profile string, notes *[]model.Note) (int64, error) {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = infra.DB(profile)
+	}
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()
 	return rows, err
 }
 
-func (infra *Infra) InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error {
+func (infra *Infra) InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = infra.DB(profile)
+	}
 	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
 	return err
 }
 
-func (infra *Infra) InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error {
+func (infra *Infra) InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = infra.DB(profile)
+	}
 	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
 	return err
 }
 
-func (infra *Infra) Count(ctx context.Context, db bun.IDB) error {
+func (infra *Infra) Count(ctx context.Context, profile string) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = infra.DB(profile)
+	}
 	// リアクションのカウント
 	err := countReaction(ctx, db)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
@@ -58,7 +57,11 @@ func (ei *EmojiInfra) GetByEmptyImage(ctx context.Context, profile string) ([]mo
 	return reactions, nil
 }
 
-func (ei *EmojiInfra) Insert(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error {
+func (ei *EmojiInfra) Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = ei.infra.DB(profile)
+	}
 	_, err := db.NewInsert().
 		Model(reactions).
 		Ignore().

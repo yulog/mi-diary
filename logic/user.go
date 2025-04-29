@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/a-h/templ"
-	"github.com/uptrace/bun"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/internal/common"
 	"github.com/yulog/mi-diary/model"
@@ -13,7 +12,7 @@ import (
 type UserRepositorier interface {
 	Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error)
 
-	Insert(ctx context.Context, db bun.IDB, users *[]model.User) error
+	Insert(ctx context.Context, profile string, users *[]model.User) error
 }
 
 // type UserLogic struct {

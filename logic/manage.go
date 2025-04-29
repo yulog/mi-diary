@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	"github.com/a-h/templ"
-	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/color"
 	cm "github.com/yulog/mi-diary/components"
@@ -165,7 +164,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		return 0
 	}
 
-	l.Repo.RunInTx(ctx, profile, func(ctx context.Context, tx bun.Tx) error {
+	l.Repo.RunInTx(ctx, profile, func(ctx context.Context) error {
 		// JSONの中身をモデルへ移す
 		var (
 			users       []model.User
@@ -193,7 +192,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 
 			for _, tv := range v.Note.Tags {
 				ht := model.HashTag{Text: tv}
-				err := l.HashTagRepo.Insert(ctx, tx, &ht)
+				err := l.HashTagRepo.Insert(ctx, profile, &ht)
 				if err != nil {
 					return err
 				}
@@ -234,46 +233,46 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 
 		// 重複していたらアップデート
-		err := l.UserRepo.Insert(ctx, tx, &users)
+		err := l.UserRepo.Insert(ctx, profile, &users)
 		if err != nil {
 			return err
 		}
 
 		// 重複していたら登録しない(エラーにしない)
-		rows, err = l.Repo.InsertNotes(ctx, tx, &notes)
+		rows, err = l.Repo.InsertNotes(ctx, profile, &notes)
 		if err != nil {
 			return err
 		}
 		slog.Info("Notes inserted", slog.Int64("count", rows))
 
-		err = l.EmojiRepo.Insert(ctx, tx, &reactions)
+		err = l.EmojiRepo.Insert(ctx, profile, &reactions)
 		if err != nil {
 			return err
 		}
 
 		// 0件の場合がある
 		if len(noteToTags) > 0 {
-			err = l.Repo.InsertNoteToTags(ctx, tx, &noteToTags)
+			err = l.Repo.InsertNoteToTags(ctx, profile, &noteToTags)
 			if err != nil {
 				return err
 			}
 		}
 
 		if len(files) > 0 {
-			err = l.FileRepo.Insert(ctx, tx, &files)
+			err = l.FileRepo.Insert(ctx, profile, &files)
 			if err != nil {
 				return err
 			}
 		}
 
 		if len(noteToFiles) > 0 {
-			err = l.Repo.InsertNoteToFiles(ctx, tx, &noteToFiles)
+			err = l.Repo.InsertNoteToFiles(ctx, profile, &noteToFiles)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = l.Repo.Count(ctx, tx)
+		err = l.Repo.Count(ctx, profile)
 		// TODO: あってもなくても変わらない vs 統一感
 		if err != nil {
 			return err

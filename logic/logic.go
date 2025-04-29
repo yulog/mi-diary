@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/a-h/templ"
-	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/model"
@@ -17,13 +16,12 @@ import (
 type Repositorier interface {
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
-	// TODO: bunに依存しているのは良いのか
-	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
-	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
-	InsertNoteToFiles(ctx context.Context, db bun.IDB, noteToFiles *[]model.NoteToFile) error
-	Count(ctx context.Context, db bun.IDB) error
+	InsertNotes(ctx context.Context, profile string, notes *[]model.Note) (int64, error)
+	InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error
+	InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error
+	Count(ctx context.Context, profile string) error
 
-	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context, tx bun.Tx) error)
+	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
 
 	GenerateSchema(profile string)
 	Migrate(profile string)
@@ -49,7 +47,7 @@ type NoteRepositorier interface {
 type HashTagRepositorier interface {
 	Get(ctx context.Context, profile string) ([]model.HashTag, error)
 
-	Insert(ctx context.Context, db bun.IDB, hashtag *model.HashTag) error
+	Insert(ctx context.Context, profile string, hashtag *model.HashTag) error
 }
 
 type EmojiRepositorier interface {
@@ -57,7 +55,7 @@ type EmojiRepositorier interface {
 	GetByName(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
 	GetByEmptyImage(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
 
-	Insert(ctx context.Context, db bun.IDB, reactions *[]model.ReactionEmoji) error
+	Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error
 
 	UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji)
 }
@@ -69,7 +67,7 @@ type FileRepositorier interface {
 
 	Count(ctx context.Context, profile string) (int, error)
 
-	Insert(ctx context.Context, db bun.IDB, files *[]model.File) error
+	Insert(ctx context.Context, profile string, files *[]model.File) error
 
 	UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string)
 }

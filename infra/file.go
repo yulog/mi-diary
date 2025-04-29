@@ -80,7 +80,11 @@ func (fi *FileInfra) Count(ctx context.Context, profile string) (int, error) {
 		Count(ctx)
 }
 
-func (fi *FileInfra) Insert(ctx context.Context, db bun.IDB, files *[]model.File) error {
+func (fi *FileInfra) Insert(ctx context.Context, profile string, files *[]model.File) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = fi.infra.DB(profile)
+	}
 	_, err := db.NewInsert().
 		Model(files).
 		On("CONFLICT DO UPDATE").

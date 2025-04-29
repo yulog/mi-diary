@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/internal/common"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/model"
@@ -31,7 +30,11 @@ func (ui *UserInfra) Get(ctx context.Context, profile string, op common.QueryOpt
 	return users, nil
 }
 
-func (infra *UserInfra) Insert(ctx context.Context, db bun.IDB, users *[]model.User) error {
+func (i *UserInfra) Insert(ctx context.Context, profile string, users *[]model.User) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = i.infra.DB(profile)
+	}
 	_, err := db.NewInsert().
 		Model(users).
 		On("CONFLICT DO UPDATE").
