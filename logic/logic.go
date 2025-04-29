@@ -31,7 +31,7 @@ type Repositorier interface {
 	NewNoteInfra() NoteRepositorier
 	NewUserInfra() repository.UserRepositorier
 	NewHashTagInfra() repository.HashTagRepositorier
-	NewEmojiInfra() EmojiRepositorier
+	NewEmojiInfra() repository.EmojiRepositorier
 	NewFileInfra() FileRepositorier
 }
 
@@ -43,16 +43,6 @@ type NoteRepositorier interface {
 	GetByArchive(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
 
 	Count(ctx context.Context, profile string) (int, error)
-}
-
-type EmojiRepositorier interface {
-	Get(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
-	GetByName(ctx context.Context, profile, name string) (model.ReactionEmoji, error)
-	GetByEmptyImage(ctx context.Context, profile string) ([]model.ReactionEmoji, error)
-
-	Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error
-
-	UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji)
 }
 
 type FileRepositorier interface {
@@ -100,7 +90,7 @@ type Logic struct {
 	NoteRepo       NoteRepositorier
 	UserRepo       repository.UserRepositorier
 	HashTagRepo    repository.HashTagRepositorier
-	EmojiRepo      EmojiRepositorier
+	EmojiRepo      repository.EmojiRepositorier
 	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
@@ -112,7 +102,7 @@ type Dependency struct {
 	noteRepo       NoteRepositorier
 	userRepo       repository.UserRepositorier
 	hashTagRepo    repository.HashTagRepositorier
-	emojiRepo      EmojiRepositorier
+	emojiRepo      repository.EmojiRepositorier
 	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
@@ -143,7 +133,7 @@ func (d *Dependency) WithHashTagRepo(repo repository.HashTagRepositorier) *Depen
 	return d
 }
 
-func (d *Dependency) WithEmojiRepo(repo EmojiRepositorier) *Dependency {
+func (d *Dependency) WithEmojiRepo(repo repository.EmojiRepositorier) *Dependency {
 	d.emojiRepo = repo
 	return d
 }

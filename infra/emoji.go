@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/yulog/mi-diary/domain/model"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/domain/repository"
 	mi "github.com/yulog/miutil"
 )
 
@@ -13,7 +13,7 @@ type EmojiInfra struct {
 	infra *Infra
 }
 
-func (i *Infra) NewEmojiInfra() logic.EmojiRepositorier {
+func (i *Infra) NewEmojiInfra() repository.EmojiRepositorier {
 	return &EmojiInfra{infra: i}
 }
 
