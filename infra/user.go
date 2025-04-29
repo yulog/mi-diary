@@ -13,7 +13,7 @@ type UserInfra struct {
 	infra *Infra
 }
 
-func (i *Infra) NewUserInfra() logic.UserRepositorier {
+func (i *Infra) NewUserInfra() repository.UserRepositorier {
 	return &UserInfra{infra: i}
 }
 

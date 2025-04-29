@@ -29,7 +29,7 @@ type Repositorier interface {
 
 	// TODO: これは良いのか
 	NewNoteInfra() NoteRepositorier
-	NewUserInfra() UserRepositorier
+	NewUserInfra() repository.UserRepositorier
 	NewHashTagInfra() HashTagRepositorier
 	NewEmojiInfra() EmojiRepositorier
 	NewFileInfra() FileRepositorier
@@ -104,7 +104,7 @@ type MisskeyAPIRepositorier interface {
 type Logic struct {
 	Repo           Repositorier
 	NoteRepo       NoteRepositorier
-	UserRepo       UserRepositorier
+	UserRepo       repository.UserRepositorier
 	HashTagRepo    HashTagRepositorier
 	EmojiRepo      EmojiRepositorier
 	FileRepo       FileRepositorier
@@ -116,7 +116,7 @@ type Logic struct {
 type Dependency struct {
 	repo           Repositorier
 	noteRepo       NoteRepositorier
-	userRepo       UserRepositorier
+	userRepo       repository.UserRepositorier
 	hashTagRepo    HashTagRepositorier
 	emojiRepo      EmojiRepositorier
 	fileRepo       FileRepositorier
@@ -139,7 +139,7 @@ func (d *Dependency) WithNoteRepo(repo NoteRepositorier) *Dependency {
 	return d
 }
 
-func (d *Dependency) WithUserRepo(repo UserRepositorier) *Dependency {
+func (d *Dependency) WithUserRepo(repo repository.UserRepositorier) *Dependency {
 	d.userRepo = repo
 	return d
 }

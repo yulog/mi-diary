@@ -9,12 +9,6 @@ import (
 	"github.com/yulog/mi-diary/internal/common"
 )
 
-type UserRepositorier interface {
-	Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error)
-
-	Insert(ctx context.Context, profile string, users *[]model.User) error
-}
-
 // type UserLogic struct {
 // Repo UserRepositorier
 // }
