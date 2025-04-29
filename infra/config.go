@@ -5,14 +5,14 @@ import (
 	"slices"
 
 	"github.com/yulog/mi-diary/app"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/domain/repository"
 )
 
 type ConfigInfra struct {
 	app *app.App
 }
 
-func NewConfigInfra(a *app.App) logic.ConfigRepositorier {
+func NewConfigInfra(a *app.App) repository.ConfigRepositorier {
 	return &ConfigInfra{app: a}
 }
 

@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/a-h/templ"
-	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
@@ -45,18 +44,6 @@ type NoteRepositorier interface {
 	Count(ctx context.Context, profile string) (int, error)
 }
 
-type ConfigRepositorier interface {
-	SetConfig(key string, prof app.Profile)
-	StoreConfig() error
-
-	GetProfiles() *app.Profiles
-	GetProfilesSorted(yield func(k string, v app.Profile) bool)
-	GetProfilesSortedKey() []string
-	GetProfile(key string) (app.Profile, error)
-	GetProfileHost(key string) (string, error)
-	GetPort() string
-}
-
 type MisskeyAPIRepositorier interface {
 	GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error)
 	GetEmoji(profile, name string) (*mi.Emoji, error)
@@ -70,7 +57,7 @@ type Logic struct {
 	EmojiRepo      repository.EmojiRepositorier
 	FileRepo       repository.FileRepositorier
 	JobRepo        repository.JobRepositorier
-	ConfigRepo     ConfigRepositorier
+	ConfigRepo     repository.ConfigRepositorier
 	MisskeyAPIRepo MisskeyAPIRepositorier
 }
 
@@ -82,7 +69,7 @@ type Dependency struct {
 	emojiRepo      repository.EmojiRepositorier
 	fileRepo       repository.FileRepositorier
 	jobRepo        repository.JobRepositorier
-	configRepo     ConfigRepositorier
+	configRepo     repository.ConfigRepositorier
 	misskeyAPIRepo MisskeyAPIRepositorier
 }
 
@@ -151,7 +138,7 @@ func (d *Dependency) WithJobRepo(repo repository.JobRepositorier) *Dependency {
 	return d
 }
 
-func (d *Dependency) WithConfigRepo(repo ConfigRepositorier) *Dependency {
+func (d *Dependency) WithConfigRepo(repo repository.ConfigRepositorier) *Dependency {
 	d.configRepo = repo
 	return d
 }
