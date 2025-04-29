@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/uptrace/bun"
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
 )
 
 // https://techblog.enechain.com/entry/bun-atlas-migration-setup-guide
