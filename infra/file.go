@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/domain/model"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
@@ -14,7 +14,7 @@ type FileInfra struct {
 	infra *Infra
 }
 
-func (i *Infra) NewFileInfra() logic.FileRepositorier {
+func (i *Infra) NewFileInfra() repository.FileRepositorier {
 	return &FileInfra{infra: i}
 }
 

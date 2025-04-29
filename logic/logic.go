@@ -32,7 +32,7 @@ type Repositorier interface {
 	NewUserInfra() repository.UserRepositorier
 	NewHashTagInfra() repository.HashTagRepositorier
 	NewEmojiInfra() repository.EmojiRepositorier
-	NewFileInfra() FileRepositorier
+	NewFileInfra() repository.FileRepositorier
 }
 
 type NoteRepositorier interface {
@@ -43,18 +43,6 @@ type NoteRepositorier interface {
 	GetByArchive(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
 
 	Count(ctx context.Context, profile string) (int, error)
-}
-
-type FileRepositorier interface {
-	Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error)
-	GetByNoteID(ctx context.Context, profile, id string) ([]model.File, error)
-	GetByEmptyColor(ctx context.Context, profile string) ([]model.File, error)
-
-	Count(ctx context.Context, profile string) (int, error)
-
-	Insert(ctx context.Context, profile string, files *[]model.File) error
-
-	UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string)
 }
 
 type JobRepositorier interface {
@@ -91,7 +79,7 @@ type Logic struct {
 	UserRepo       repository.UserRepositorier
 	HashTagRepo    repository.HashTagRepositorier
 	EmojiRepo      repository.EmojiRepositorier
-	FileRepo       FileRepositorier
+	FileRepo       repository.FileRepositorier
 	JobRepo        JobRepositorier
 	ConfigRepo     ConfigRepositorier
 	MisskeyAPIRepo MisskeyAPIRepositorier
@@ -103,7 +91,7 @@ type Dependency struct {
 	userRepo       repository.UserRepositorier
 	hashTagRepo    repository.HashTagRepositorier
 	emojiRepo      repository.EmojiRepositorier
-	fileRepo       FileRepositorier
+	fileRepo       repository.FileRepositorier
 	jobRepo        JobRepositorier
 	configRepo     ConfigRepositorier
 	misskeyAPIRepo MisskeyAPIRepositorier
@@ -138,7 +126,7 @@ func (d *Dependency) WithEmojiRepo(repo repository.EmojiRepositorier) *Dependenc
 	return d
 }
 
-func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
+func (d *Dependency) WithFileRepo(repo repository.FileRepositorier) *Dependency {
 	d.fileRepo = repo
 	return d
 }
