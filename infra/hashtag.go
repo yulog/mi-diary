@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/yulog/mi-diary/domain/model"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/domain/repository"
 )
 
 type HashTagInfra struct {
 	infra *Infra
 }
 
-func (i *Infra) NewHashTagInfra() logic.HashTagRepositorier {
+func (i *Infra) NewHashTagInfra() repository.HashTagRepositorier {
 	return &HashTagInfra{infra: i}
 }
 

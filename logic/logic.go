@@ -30,7 +30,7 @@ type Repositorier interface {
 	// TODO: これは良いのか
 	NewNoteInfra() NoteRepositorier
 	NewUserInfra() repository.UserRepositorier
-	NewHashTagInfra() HashTagRepositorier
+	NewHashTagInfra() repository.HashTagRepositorier
 	NewEmojiInfra() EmojiRepositorier
 	NewFileInfra() FileRepositorier
 }
@@ -43,12 +43,6 @@ type NoteRepositorier interface {
 	GetByArchive(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
 
 	Count(ctx context.Context, profile string) (int, error)
-}
-
-type HashTagRepositorier interface {
-	Get(ctx context.Context, profile string) ([]model.HashTag, error)
-
-	Insert(ctx context.Context, profile string, hashtag *model.HashTag) error
 }
 
 type EmojiRepositorier interface {
@@ -105,7 +99,7 @@ type Logic struct {
 	Repo           Repositorier
 	NoteRepo       NoteRepositorier
 	UserRepo       repository.UserRepositorier
-	HashTagRepo    HashTagRepositorier
+	HashTagRepo    repository.HashTagRepositorier
 	EmojiRepo      EmojiRepositorier
 	FileRepo       FileRepositorier
 	JobRepo        JobRepositorier
@@ -117,7 +111,7 @@ type Dependency struct {
 	repo           Repositorier
 	noteRepo       NoteRepositorier
 	userRepo       repository.UserRepositorier
-	hashTagRepo    HashTagRepositorier
+	hashTagRepo    repository.HashTagRepositorier
 	emojiRepo      EmojiRepositorier
 	fileRepo       FileRepositorier
 	jobRepo        JobRepositorier
@@ -144,7 +138,7 @@ func (d *Dependency) WithUserRepo(repo repository.UserRepositorier) *Dependency 
 	return d
 }
 
-func (d *Dependency) WithHashTagRepo(repo HashTagRepositorier) *Dependency {
+func (d *Dependency) WithHashTagRepo(repo repository.HashTagRepositorier) *Dependency {
 	d.hashTagRepo = repo
 	return d
 }
