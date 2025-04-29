@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
 )
 
 //	css emoji() {

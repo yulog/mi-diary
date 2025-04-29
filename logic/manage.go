@@ -13,7 +13,7 @@ import (
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/color"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
 	mi "github.com/yulog/miutil"
 )
 

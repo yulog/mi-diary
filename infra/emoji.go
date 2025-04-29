@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/model"
 	mi "github.com/yulog/miutil"
 )
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/yulog/mi-diary/domain/model"
+	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/internal/common"
-	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/model"
 )
 
 type UserInfra struct {

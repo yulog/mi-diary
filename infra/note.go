@@ -5,8 +5,8 @@ import (
 	"regexp"
 
 	"github.com/uptrace/bun"
+	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/model"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 

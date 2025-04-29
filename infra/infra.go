@@ -10,9 +10,9 @@ import (
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/migrate"
-	"github.com/yulog/mi-diary/model"
 )
 
 type Infra struct {

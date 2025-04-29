@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
 	"strings"
 )
 

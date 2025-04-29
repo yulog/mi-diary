@@ -5,8 +5,8 @@ import (
 
 	"github.com/a-h/templ"
 	cm "github.com/yulog/mi-diary/components"
+	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/internal/common"
-	"github.com/yulog/mi-diary/model"
 )
 
 type UserRepositorier interface {

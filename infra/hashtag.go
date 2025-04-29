@@ -3,8 +3,8 @@ package infra
 import (
 	"context"
 
+	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/model"
 )
 
 type HashTagInfra struct {

@@ -8,7 +8,8 @@ import (
 	"github.com/a-h/templ"
 	"github.com/yulog/mi-diary/app"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
+	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/util/pagination"
 	mi "github.com/yulog/miutil"
 )
