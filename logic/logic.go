@@ -17,14 +17,6 @@ import (
 type Repositorier interface {
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
-	Notes(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error)
-	ReactionNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
-	HashTagNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
-	UserNotes(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
-	ArchiveNotes(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
-
-	NoteCount(ctx context.Context, profile string) (int, error)
-
 	// TODO: bunに依存しているのは良いのか
 	InsertNotes(ctx context.Context, db bun.IDB, notes *[]model.Note) (int64, error)
 	InsertNoteToTags(ctx context.Context, db bun.IDB, noteToTags *[]model.NoteToTag) error
@@ -37,10 +29,21 @@ type Repositorier interface {
 	Migrate(profile string)
 
 	// TODO: これは良いのか
+	NewNoteInfra() NoteRepositorier
 	NewUserInfra() UserRepositorier
 	NewHashTagInfra() HashTagRepositorier
 	NewEmojiInfra() EmojiRepositorier
 	NewFileInfra() FileRepositorier
+}
+
+type NoteRepositorier interface {
+	Get(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error)
+	GetByReaction(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	GetByHashTag(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	GetByUser(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error)
+	GetByArchive(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
+
+	Count(ctx context.Context, profile string) (int, error)
 }
 
 type HashTagRepositorier interface {
@@ -101,6 +104,7 @@ type MisskeyAPIRepositorier interface {
 
 type Logic struct {
 	Repo           Repositorier
+	NoteRepo       NoteRepositorier
 	UserRepo       UserRepositorier
 	HashTagRepo    HashTagRepositorier
 	EmojiRepo      EmojiRepositorier
@@ -112,6 +116,7 @@ type Logic struct {
 
 type Dependency struct {
 	repo           Repositorier
+	noteRepo       NoteRepositorier
 	userRepo       UserRepositorier
 	hashTagRepo    HashTagRepositorier
 	emojiRepo      EmojiRepositorier
@@ -127,6 +132,11 @@ func New() *Dependency {
 
 func (d *Dependency) WithRepo(repo Repositorier) *Dependency {
 	d.repo = repo
+	return d
+}
+
+func (d *Dependency) WithNoteRepo(repo NoteRepositorier) *Dependency {
+	d.noteRepo = repo
 	return d
 }
 
@@ -147,6 +157,11 @@ func (d *Dependency) WithEmojiRepo(repo EmojiRepositorier) *Dependency {
 
 func (d *Dependency) WithFileRepo(repo FileRepositorier) *Dependency {
 	d.fileRepo = repo
+	return d
+}
+
+func (d *Dependency) WithNoteRepoUsingRepo() *Dependency {
+	d.noteRepo = d.repo.NewNoteInfra()
 	return d
 }
 
@@ -189,6 +204,7 @@ func (d *Dependency) WithMisskeyAPIRepo(repo MisskeyAPIRepositorier) *Dependency
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:           d.repo,
+		NoteRepo:       d.noteRepo,
 		UserRepo:       d.userRepo,
 		HashTagRepo:    d.hashTagRepo,
 		EmojiRepo:      d.emojiRepo,
@@ -253,7 +269,7 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 		slog.Error(err.Error())
 	}
 
-	notes, err := l.Repo.ReactionNotes(ctx, profile, name, p)
+	notes, err := l.NoteRepo.GetByReaction(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +312,7 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 		slog.Error(err.Error())
 	}
 
-	notes, err := l.Repo.HashTagNotes(ctx, profile, name, p)
+	notes, err := l.NoteRepo.GetByHashTag(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +355,7 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Para
 		slog.Error(err.Error())
 	}
 
-	notes, err := l.Repo.UserNotes(ctx, profile, name, p)
+	notes, err := l.NoteRepo.GetByUser(ctx, profile, name, p)
 	if err != nil {
 		return nil, err
 	}
@@ -447,7 +463,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 
 	count := 0
 	if params.S == "" {
-		count, err = l.Repo.NoteCount(ctx, profile)
+		count, err = l.NoteRepo.Count(ctx, profile)
 		if err != nil {
 			return nil, err
 		}
@@ -458,7 +474,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 		slog.Error(err.Error())
 	}
 
-	notes, err := l.Repo.Notes(ctx, profile, params.S, p)
+	notes, err := l.NoteRepo.Get(ctx, profile, params.S, p)
 	if err != nil {
 		return nil, err
 	}
@@ -530,7 +546,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 	}
 	// slog.Info("perPage", slog.Int("perPage", p2.Limit()))
 
-	notes, err := l.Repo.ArchiveNotes(ctx, profile, d, p)
+	notes, err := l.NoteRepo.GetByArchive(ctx, profile, d, p)
 	if err != nil {
 		return nil, err
 	}
