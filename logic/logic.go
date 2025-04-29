@@ -45,17 +45,6 @@ type NoteRepositorier interface {
 	Count(ctx context.Context, profile string) (int, error)
 }
 
-type JobRepositorier interface {
-	GetJob() chan app.Job
-	SetJob(j app.Job)
-
-	GetProgress() (int, int)
-	SetProgress(p, t int) (int, int)
-	UpdateProgress(p, t int) (int, int)
-	GetProgressDone() bool
-	SetProgressDone(d bool) bool
-}
-
 type ConfigRepositorier interface {
 	SetConfig(key string, prof app.Profile)
 	StoreConfig() error
@@ -80,7 +69,7 @@ type Logic struct {
 	HashTagRepo    repository.HashTagRepositorier
 	EmojiRepo      repository.EmojiRepositorier
 	FileRepo       repository.FileRepositorier
-	JobRepo        JobRepositorier
+	JobRepo        repository.JobRepositorier
 	ConfigRepo     ConfigRepositorier
 	MisskeyAPIRepo MisskeyAPIRepositorier
 }
@@ -92,7 +81,7 @@ type Dependency struct {
 	hashTagRepo    repository.HashTagRepositorier
 	emojiRepo      repository.EmojiRepositorier
 	fileRepo       repository.FileRepositorier
-	jobRepo        JobRepositorier
+	jobRepo        repository.JobRepositorier
 	configRepo     ConfigRepositorier
 	misskeyAPIRepo MisskeyAPIRepositorier
 }
@@ -157,7 +146,7 @@ func (d *Dependency) WithFileRepoUsingRepo() *Dependency {
 	return d
 }
 
-func (d *Dependency) WithJobRepo(repo JobRepositorier) *Dependency {
+func (d *Dependency) WithJobRepo(repo repository.JobRepositorier) *Dependency {
 	d.jobRepo = repo
 	return d
 }
