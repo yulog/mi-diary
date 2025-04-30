@@ -138,3 +138,31 @@ func (i *NoteInfra) Count(ctx context.Context, profile string) (int, error) {
 		Model((*model.Note)(nil)).
 		Count(ctx)
 }
+
+func (i *NoteInfra) Insert(ctx context.Context, profile string, notes *[]model.Note) (int64, error) {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = i.infra.DB(profile)
+	}
+	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
+	rows, _ := result.RowsAffected()
+	return rows, err
+}
+
+func (i *NoteInfra) InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = i.infra.DB(profile)
+	}
+	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
+	return err
+}
+
+func (i *NoteInfra) InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = i.infra.DB(profile)
+	}
+	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
+	return err
+}

@@ -16,9 +16,6 @@ import (
 type Repositorier interface {
 	Archives(ctx context.Context, profile string) ([]model.Month, error)
 
-	InsertNotes(ctx context.Context, profile string, notes *[]model.Note) (int64, error)
-	InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error
-	InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error
 	Count(ctx context.Context, profile string) error
 
 	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
@@ -42,6 +39,10 @@ type NoteRepositorier interface {
 	GetByArchive(ctx context.Context, profile, d string, p pagination.Paging) ([]model.Note, error)
 
 	Count(ctx context.Context, profile string) (int, error)
+
+	Insert(ctx context.Context, profile string, notes *[]model.Note) (int64, error)
+	InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error
+	InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error
 }
 
 type MisskeyAPIRepositorier interface {

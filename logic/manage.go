@@ -239,7 +239,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 
 		// 重複していたら登録しない(エラーにしない)
-		rows, err = l.Repo.InsertNotes(ctx, profile, &notes)
+		rows, err = l.NoteRepo.Insert(ctx, profile, &notes)
 		if err != nil {
 			return err
 		}
@@ -252,7 +252,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 
 		// 0件の場合がある
 		if len(noteToTags) > 0 {
-			err = l.Repo.InsertNoteToTags(ctx, profile, &noteToTags)
+			err = l.NoteRepo.InsertNoteToTags(ctx, profile, &noteToTags)
 			if err != nil {
 				return err
 			}
@@ -266,7 +266,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		}
 
 		if len(noteToFiles) > 0 {
-			err = l.Repo.InsertNoteToFiles(ctx, profile, &noteToFiles)
+			err = l.NoteRepo.InsertNoteToFiles(ctx, profile, &noteToFiles)
 			if err != nil {
 				return err
 			}

@@ -39,34 +39,6 @@ func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx con
 	}
 }
 
-func (infra *Infra) InsertNotes(ctx context.Context, profile string, notes *[]model.Note) (int64, error) {
-	db, ok := txFromContext(ctx)
-	if !ok {
-		db = infra.DB(profile)
-	}
-	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
-	rows, _ := result.RowsAffected()
-	return rows, err
-}
-
-func (infra *Infra) InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error {
-	db, ok := txFromContext(ctx)
-	if !ok {
-		db = infra.DB(profile)
-	}
-	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
-	return err
-}
-
-func (infra *Infra) InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error {
-	db, ok := txFromContext(ctx)
-	if !ok {
-		db = infra.DB(profile)
-	}
-	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
-	return err
-}
-
 func (infra *Infra) Count(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
