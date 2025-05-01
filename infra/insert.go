@@ -44,26 +44,9 @@ func (infra *Infra) Count(ctx context.Context, profile string) error {
 	if !ok {
 		db = infra.DB(profile)
 	}
-	// リアクションのカウント
-	err := countReaction(ctx, db)
-	if err != nil {
-		return err
-	}
-
-	// タグのカウント
-	err = countHashTag(ctx, db)
-	if err != nil {
-		return err
-	}
-
-	// ユーザーのカウント
-	err = countUser(ctx, db)
-	if err != nil {
-		return err
-	}
 
 	// 月別のカウント
-	err = countMonthly(ctx, db)
+	err := countMonthly(ctx, db)
 	if err != nil {
 		return err
 	}
@@ -74,91 +57,6 @@ func (infra *Infra) Count(ctx context.Context, profile string) error {
 		return err
 	}
 	return err
-}
-
-// リアクションのカウント
-func countReaction(ctx context.Context, db bun.IDB) error {
-	var reactions []model.ReactionEmoji
-	err := db.NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("Reaction", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.ColumnExpr("reaction.id as id")
-		}).
-		ColumnExpr("reaction_emoji_name as name").
-		ColumnExpr("count(*) as count").
-		Group("reaction_emoji_name").
-		Scan(ctx, &reactions)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.NewUpdate().
-		Model(&reactions).
-		OmitZero().
-		Column("count").
-		Bulk().
-		Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// タグのカウント
-func countHashTag(ctx context.Context, db bun.IDB) error {
-	var hashtags []model.HashTag
-	err := db.NewSelect().
-		Model((*model.NoteToTag)(nil)).
-		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Column("text")
-		}).
-		ColumnExpr("hash_tag_id as id").
-		ColumnExpr("count(*) as count").
-		Group("hash_tag_id").
-		Scan(ctx, &hashtags)
-	if err != nil {
-		return err
-	}
-
-	if len(hashtags) > 0 {
-		_, err = db.NewUpdate().
-			Model(&hashtags).
-			OmitZero().
-			Column("count").
-			Bulk().
-			Exec(ctx)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// ユーザーのカウント
-func countUser(ctx context.Context, db bun.IDB) error {
-	var users []model.User
-	err := db.NewSelect().
-		Model((*model.Note)(nil)).
-		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Column("id", "name")
-		}).
-		ColumnExpr("count(*) as count").
-		Group("user_id").
-		Scan(ctx, &users)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.NewUpdate().
-		Model(&users).
-		OmitZero().
-		Column("count").
-		Bulk().
-		Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // 月別のカウント

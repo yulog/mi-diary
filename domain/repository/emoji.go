@@ -15,4 +15,5 @@ type EmojiRepositorier interface {
 	Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error
 
 	UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji)
+	UpdateCount(ctx context.Context, profile string) error
 }

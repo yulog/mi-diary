@@ -10,4 +10,6 @@ type HashTagRepositorier interface {
 	Get(ctx context.Context, profile string) ([]model.HashTag, error)
 
 	Insert(ctx context.Context, profile string, hashtag *model.HashTag) error
+
+	UpdateCount(ctx context.Context, profile string) error
 }

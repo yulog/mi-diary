@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
 	mi "github.com/yulog/miutil"
@@ -88,4 +89,36 @@ func (ei *EmojiInfra) UpdateByPKWithImage(ctx context.Context, profile string, i
 		slog.Error(err.Error())
 		panic(err)
 	}
+}
+
+// リアクションのカウント
+func (ei *EmojiInfra) UpdateCount(ctx context.Context, profile string) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = ei.infra.DB(profile)
+	}
+	var reactions []model.ReactionEmoji
+	err := db.NewSelect().
+		Model((*model.Note)(nil)).
+		Relation("Reaction", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.ColumnExpr("reaction.id as id")
+		}).
+		ColumnExpr("reaction_emoji_name as name").
+		ColumnExpr("count(*) as count").
+		Group("reaction_emoji_name").
+		Scan(ctx, &reactions)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.NewUpdate().
+		Model(&reactions).
+		OmitZero().
+		Column("count").
+		Bulk().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

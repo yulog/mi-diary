@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 
+	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
 )
@@ -38,4 +39,38 @@ func (hi *HashTagInfra) Insert(ctx context.Context, profile string, hashtag *mod
 		On("CONFLICT DO UPDATE").
 		Exec(ctx)
 	return err
+}
+
+// タグのカウント
+func (hi *HashTagInfra) UpdateCount(ctx context.Context, profile string) error {
+	db, ok := txFromContext(ctx)
+	if !ok {
+		db = hi.infra.DB(profile)
+	}
+	var hashtags []model.HashTag
+	err := db.NewSelect().
+		Model((*model.NoteToTag)(nil)).
+		Relation("HashTag", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Column("text")
+		}).
+		ColumnExpr("hash_tag_id as id").
+		ColumnExpr("count(*) as count").
+		Group("hash_tag_id").
+		Scan(ctx, &hashtags)
+	if err != nil {
+		return err
+	}
+
+	if len(hashtags) > 0 {
+		_, err = db.NewUpdate().
+			Model(&hashtags).
+			OmitZero().
+			Column("count").
+			Bulk().
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

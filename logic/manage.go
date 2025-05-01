@@ -272,6 +272,18 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 			}
 		}
 
+		err = l.EmojiRepo.UpdateCount(ctx, profile)
+		if err != nil {
+			return err
+		}
+		err = l.HashTagRepo.UpdateCount(ctx, profile)
+		if err != nil {
+			return err
+		}
+		err = l.UserRepo.UpdateCount(ctx, profile)
+		if err != nil {
+			return err
+		}
 		err = l.Repo.Count(ctx, profile)
 		// TODO: あってもなくても変わらない vs 統一感
 		if err != nil {
