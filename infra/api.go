@@ -6,7 +6,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/yulog/mi-diary/app"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/domain/repository"
 	mi "github.com/yulog/miutil"
 )
 
@@ -14,7 +14,7 @@ type MisskeyAPI struct {
 	app *app.App
 }
 
-func NewMisskeyAPI(a *app.App) logic.MisskeyAPIRepositorier {
+func NewMisskeyAPI(a *app.App) repository.MisskeyAPIRepositorier {
 	return &MisskeyAPI{app: a}
 }
 

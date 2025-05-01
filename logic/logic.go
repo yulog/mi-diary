@@ -10,7 +10,6 @@ import (
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/util/pagination"
-	mi "github.com/yulog/miutil"
 )
 
 type Repositorier interface {
@@ -31,11 +30,6 @@ type Repositorier interface {
 	NewFileInfra() repository.FileRepositorier
 }
 
-type MisskeyAPIRepositorier interface {
-	GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error)
-	GetEmoji(profile, name string) (*mi.Emoji, error)
-}
-
 type Logic struct {
 	Repo           Repositorier
 	NoteRepo       repository.NoteRepositorier
@@ -45,7 +39,7 @@ type Logic struct {
 	FileRepo       repository.FileRepositorier
 	JobRepo        repository.JobRepositorier
 	ConfigRepo     repository.ConfigRepositorier
-	MisskeyAPIRepo MisskeyAPIRepositorier
+	MisskeyAPIRepo repository.MisskeyAPIRepositorier
 }
 
 type Dependency struct {
@@ -57,7 +51,7 @@ type Dependency struct {
 	fileRepo       repository.FileRepositorier
 	jobRepo        repository.JobRepositorier
 	configRepo     repository.ConfigRepositorier
-	misskeyAPIRepo MisskeyAPIRepositorier
+	misskeyAPIRepo repository.MisskeyAPIRepositorier
 }
 
 func New() *Dependency {
@@ -130,7 +124,7 @@ func (d *Dependency) WithConfigRepo(repo repository.ConfigRepositorier) *Depende
 	return d
 }
 
-func (d *Dependency) WithMisskeyAPIRepo(repo MisskeyAPIRepositorier) *Dependency {
+func (d *Dependency) WithMisskeyAPIRepo(repo repository.MisskeyAPIRepositorier) *Dependency {
 	d.misskeyAPIRepo = repo
 	return d
 }
