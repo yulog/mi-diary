@@ -12,7 +12,6 @@ import (
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/migrate"
 )
 
 type Infra struct {
@@ -28,14 +27,6 @@ func New(a *app.App) logic.Repositorier {
 func (infra *Infra) DB(profile string) *bun.DB {
 	v, _ := infra.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)
-}
-
-func (infra *Infra) GenerateSchema(profile string) {
-	migrate.GenerateSchema(infra.DB(profile))
-}
-
-func (infra *Infra) Migrate(profile string) {
-	migrate.Do(infra.DB(profile).DB)
 }
 
 func connect(profile string) *bun.DB {

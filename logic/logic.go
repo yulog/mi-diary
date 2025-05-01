@@ -15,9 +15,6 @@ import (
 type Repositorier interface {
 	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
 
-	GenerateSchema(profile string)
-	Migrate(profile string)
-
 	// TODO: これは良いのか
 	NewNoteInfra() repository.NoteRepositorier
 	NewUserInfra() repository.UserRepositorier
@@ -25,32 +22,35 @@ type Repositorier interface {
 	NewEmojiInfra() repository.EmojiRepositorier
 	NewFileInfra() repository.FileRepositorier
 	NewArchiveInfra() repository.ArchiveRepositorier
+	NewMigrationInfra() service.MigrationServicer
 }
 
 type Logic struct {
-	Repo           Repositorier
-	NoteRepo       repository.NoteRepositorier
-	UserRepo       repository.UserRepositorier
-	HashTagRepo    repository.HashTagRepositorier
-	EmojiRepo      repository.EmojiRepositorier
-	FileRepo       repository.FileRepositorier
-	ArchiveRepo    repository.ArchiveRepositorier
-	JobRepo        repository.JobRepositorier
-	ConfigRepo     repository.ConfigRepositorier
-	MisskeyService service.MisskeyAPIServicer
+	Repo             Repositorier
+	NoteRepo         repository.NoteRepositorier
+	UserRepo         repository.UserRepositorier
+	HashTagRepo      repository.HashTagRepositorier
+	EmojiRepo        repository.EmojiRepositorier
+	FileRepo         repository.FileRepositorier
+	ArchiveRepo      repository.ArchiveRepositorier
+	JobRepo          repository.JobRepositorier
+	ConfigRepo       repository.ConfigRepositorier
+	MisskeyService   service.MisskeyAPIServicer
+	MigrationService service.MigrationServicer
 }
 
 type Dependency struct {
-	repo           Repositorier
-	noteRepo       repository.NoteRepositorier
-	userRepo       repository.UserRepositorier
-	hashTagRepo    repository.HashTagRepositorier
-	emojiRepo      repository.EmojiRepositorier
-	fileRepo       repository.FileRepositorier
-	archiveRepo    repository.ArchiveRepositorier
-	jobRepo        repository.JobRepositorier
-	configRepo     repository.ConfigRepositorier
-	misskeyService service.MisskeyAPIServicer
+	repo             Repositorier
+	noteRepo         repository.NoteRepositorier
+	userRepo         repository.UserRepositorier
+	hashTagRepo      repository.HashTagRepositorier
+	emojiRepo        repository.EmojiRepositorier
+	fileRepo         repository.FileRepositorier
+	archiveRepo      repository.ArchiveRepositorier
+	jobRepo          repository.JobRepositorier
+	configRepo       repository.ConfigRepositorier
+	misskeyService   service.MisskeyAPIServicer
+	migrationService service.MigrationServicer
 }
 
 func New() *Dependency {
@@ -123,6 +123,11 @@ func (d *Dependency) WithArchiveRepoUsingRepo() *Dependency {
 	return d
 }
 
+func (d *Dependency) WithMigrationServiceUsingRepo() *Dependency {
+	d.migrationService = d.repo.NewMigrationInfra()
+	return d
+}
+
 func (d *Dependency) WithJobRepo(repo repository.JobRepositorier) *Dependency {
 	d.jobRepo = repo
 	return d
@@ -138,18 +143,24 @@ func (d *Dependency) WithMisskeyAPIRepo(srv service.MisskeyAPIServicer) *Depende
 	return d
 }
 
+func (d *Dependency) WithMigrationService(srv service.MigrationServicer) *Dependency {
+	d.migrationService = srv
+	return d
+}
+
 func (d *Dependency) Build() *Logic {
 	return &Logic{
-		Repo:           d.repo,
-		NoteRepo:       d.noteRepo,
-		UserRepo:       d.userRepo,
-		HashTagRepo:    d.hashTagRepo,
-		EmojiRepo:      d.emojiRepo,
-		FileRepo:       d.fileRepo,
-		ArchiveRepo:    d.archiveRepo,
-		JobRepo:        d.jobRepo,
-		ConfigRepo:     d.configRepo,
-		MisskeyService: d.misskeyService,
+		Repo:             d.repo,
+		NoteRepo:         d.noteRepo,
+		UserRepo:         d.userRepo,
+		HashTagRepo:      d.hashTagRepo,
+		EmojiRepo:        d.emojiRepo,
+		FileRepo:         d.fileRepo,
+		ArchiveRepo:      d.archiveRepo,
+		JobRepo:          d.jobRepo,
+		ConfigRepo:       d.configRepo,
+		MisskeyService:   d.misskeyService,
+		MigrationService: d.migrationService,
 	}
 }
 
@@ -518,13 +529,13 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 
 func (l *Logic) GenerateSchema() {
 	for k := range *l.ConfigRepo.GetProfiles() {
-		l.Repo.GenerateSchema(k)
+		l.MigrationService.GenerateSchema(k)
 		break // schemaの生成は1つだけやれば良さそう
 	}
 }
 
 func (l *Logic) Migrate() {
 	for k := range *l.ConfigRepo.GetProfiles() {
-		l.Repo.Migrate(k)
+		l.MigrationService.Execute(k)
 	}
 }
