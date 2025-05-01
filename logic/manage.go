@@ -284,12 +284,16 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		if err != nil {
 			return err
 		}
-		err = l.Repo.Count(ctx, profile)
-		// TODO: あってもなくても変わらない vs 統一感
+		err = l.ArchiveRepo.UpdateCountMonthly(ctx, profile)
 		if err != nil {
 			return err
 		}
-		return err
+		err = l.ArchiveRepo.UpdateCountDaily(ctx, profile)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 	return rows
 }

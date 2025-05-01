@@ -34,6 +34,7 @@ func main() {
 		WithHashTagRepoUsingRepo().
 		WithEmojiRepoUsingRepo().
 		WithFileRepoUsingRepo().
+		WithArchiveRepoUsingRepo().
 		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		WithMisskeyAPIRepo(infra.NewMisskeyAPI(app)).

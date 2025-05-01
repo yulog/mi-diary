@@ -1,10 +1,7 @@
 package infra
 
 import (
-	"context"
-
 	"github.com/uptrace/bun"
-	"github.com/yulog/mi-diary/domain/model"
 )
 
 // addWhereLike
@@ -22,20 +19,4 @@ func addWhere(q bun.QueryBuilder, col, s string) bun.QueryBuilder {
 		return q
 	}
 	return q.Where("? = ?", bun.Ident(col), s)
-}
-
-func (infra *Infra) Archives(ctx context.Context, profile string) ([]model.Month, error) {
-	var archives []model.Month
-	err := infra.DB(profile).
-		NewSelect().
-		Model(&archives).
-		Relation("Days", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Order("ymd DESC")
-		}).
-		Order("ym DESC").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return archives, nil
 }

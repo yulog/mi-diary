@@ -7,16 +7,11 @@ import (
 
 	"github.com/a-h/templ"
 	cm "github.com/yulog/mi-diary/components"
-	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
 type Repositorier interface {
-	Archives(ctx context.Context, profile string) ([]model.Month, error)
-
-	Count(ctx context.Context, profile string) error
-
 	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
 
 	GenerateSchema(profile string)
@@ -28,6 +23,7 @@ type Repositorier interface {
 	NewHashTagInfra() repository.HashTagRepositorier
 	NewEmojiInfra() repository.EmojiRepositorier
 	NewFileInfra() repository.FileRepositorier
+	NewArchiveInfra() repository.ArchiveRepositorier
 }
 
 type Logic struct {
@@ -37,6 +33,7 @@ type Logic struct {
 	HashTagRepo    repository.HashTagRepositorier
 	EmojiRepo      repository.EmojiRepositorier
 	FileRepo       repository.FileRepositorier
+	ArchiveRepo    repository.ArchiveRepositorier
 	JobRepo        repository.JobRepositorier
 	ConfigRepo     repository.ConfigRepositorier
 	MisskeyAPIRepo repository.MisskeyAPIRepositorier
@@ -49,6 +46,7 @@ type Dependency struct {
 	hashTagRepo    repository.HashTagRepositorier
 	emojiRepo      repository.EmojiRepositorier
 	fileRepo       repository.FileRepositorier
+	archiveRepo    repository.ArchiveRepositorier
 	jobRepo        repository.JobRepositorier
 	configRepo     repository.ConfigRepositorier
 	misskeyAPIRepo repository.MisskeyAPIRepositorier
@@ -88,6 +86,11 @@ func (d *Dependency) WithFileRepo(repo repository.FileRepositorier) *Dependency 
 	return d
 }
 
+func (d *Dependency) WithArchiveRepo(repo repository.ArchiveRepositorier) *Dependency {
+	d.archiveRepo = repo
+	return d
+}
+
 func (d *Dependency) WithNoteRepoUsingRepo() *Dependency {
 	d.noteRepo = d.repo.NewNoteInfra()
 	return d
@@ -114,6 +117,11 @@ func (d *Dependency) WithFileRepoUsingRepo() *Dependency {
 	return d
 }
 
+func (d *Dependency) WithArchiveRepoUsingRepo() *Dependency {
+	d.archiveRepo = d.repo.NewArchiveInfra()
+	return d
+}
+
 func (d *Dependency) WithJobRepo(repo repository.JobRepositorier) *Dependency {
 	d.jobRepo = repo
 	return d
@@ -137,6 +145,7 @@ func (d *Dependency) Build() *Logic {
 		HashTagRepo:    d.hashTagRepo,
 		EmojiRepo:      d.emojiRepo,
 		FileRepo:       d.fileRepo,
+		ArchiveRepo:    d.archiveRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
 		MisskeyAPIRepo: d.misskeyAPIRepo,
@@ -451,7 +460,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 }
 
 func (l *Logic) ArchivesLogic(ctx context.Context, profile string) (templ.Component, error) {
-	a, err := l.Repo.Archives(ctx, profile)
+	a, err := l.ArchiveRepo.Get(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
