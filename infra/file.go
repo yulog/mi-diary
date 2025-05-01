@@ -11,11 +11,11 @@ import (
 )
 
 type FileInfra struct {
-	infra *Infra
+	infra *DataBase
 }
 
 func (i *Infra) NewFileInfra() repository.FileRepositorier {
-	return &FileInfra{infra: i}
+	return &FileInfra{infra: i.dao}
 }
 
 func (fi *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error) {

@@ -26,6 +26,7 @@ func main() {
 	app := app.New()
 	logic := logic.New().
 		WithRepo(infra.New(app)).
+		WithUWORepoUsingRepo().
 		WithNoteRepoUsingRepo().
 		WithUserRepoUsingRepo().
 		WithHashTagRepoUsingRepo().

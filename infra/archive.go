@@ -9,11 +9,11 @@ import (
 )
 
 type ArchiveInfra struct {
-	infra *Infra
+	infra *DataBase
 }
 
 func (i *Infra) NewArchiveInfra() repository.ArchiveRepositorier {
-	return &ArchiveInfra{infra: i}
+	return &ArchiveInfra{infra: i.dao}
 }
 
 func (i *ArchiveInfra) Get(ctx context.Context, profile string) ([]model.Month, error) {

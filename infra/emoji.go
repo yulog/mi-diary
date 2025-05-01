@@ -11,11 +11,11 @@ import (
 )
 
 type EmojiInfra struct {
-	infra *Infra
+	infra *DataBase
 }
 
 func (i *Infra) NewEmojiInfra() repository.EmojiRepositorier {
-	return &EmojiInfra{infra: i}
+	return &EmojiInfra{infra: i.dao}
 }
 
 func (ei *EmojiInfra) Get(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {

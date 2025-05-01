@@ -11,16 +11,16 @@ import (
 )
 
 type UserInfra struct {
-	infra *Infra
+	dao *DataBase
 }
 
 func (i *Infra) NewUserInfra() repository.UserRepositorier {
-	return &UserInfra{infra: i}
+	return &UserInfra{dao: i.dao}
 }
 
 func (ui *UserInfra) Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error) {
 	var users []model.User
-	err := ui.infra.DB(profile).
+	err := ui.dao.DB(profile).
 		NewSelect().
 		Model(&users).
 		Order(fmt.Sprintf("%s %s", op.SortBy, op.SortOrder)).
@@ -34,7 +34,7 @@ func (ui *UserInfra) Get(ctx context.Context, profile string, op common.QueryOpt
 func (i *UserInfra) Insert(ctx context.Context, profile string, users *[]model.User) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().
 		Model(users).
@@ -47,7 +47,7 @@ func (i *UserInfra) Insert(ctx context.Context, profile string, users *[]model.U
 func (i *UserInfra) UpdateCount(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	var users []model.User
 	err := db.NewSelect().

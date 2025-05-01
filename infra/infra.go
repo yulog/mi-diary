@@ -13,20 +13,32 @@ import (
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/domain/model"
+	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/logic"
 )
 
 type Infra struct {
 	app *app.App
 
-	db sync.Map // TODO:  sync.Onceの代わりになるのか？
+	dao *DataBase
 }
 
 func New(a *app.App) logic.Repositorier {
-	return &Infra{app: a}
+	return &Infra{
+		app: a,
+		dao: NewDAO(),
+	}
 }
 
-func (infra *Infra) DB(profile string) *bun.DB {
+type DataBase struct {
+	db sync.Map // TODO:  sync.Onceの代わりになるのか？
+}
+
+func NewDAO() *DataBase {
+	return &DataBase{}
+}
+
+func (infra *DataBase) DB(profile string) *bun.DB {
 	v, _ := infra.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)
 }
@@ -51,6 +63,10 @@ func connect(profile string) *bun.DB {
 	return db
 }
 
+func (i *Infra) NewUnitOfWorkInfra() repository.UnitOfWorkRepositorier {
+	return i.dao
+}
+
 type txKey struct{}
 
 func txFromContext(ctx context.Context) (bun.IDB, bool) {
@@ -58,7 +74,7 @@ func txFromContext(ctx context.Context) (bun.IDB, bool) {
 	return tx, ok
 }
 
-func (infra *Infra) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error) {
+func (infra *DataBase) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error) {
 	err := infra.DB(profile).RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		ctx = context.WithValue(ctx, txKey{}, tx)
 		if err := fn(ctx); err != nil {

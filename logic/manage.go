@@ -164,7 +164,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 		return 0
 	}
 
-	l.Repo.RunInTx(ctx, profile, func(ctx context.Context) error {
+	l.UWORepo.RunInTx(ctx, profile, func(ctx context.Context) error {
 		// JSONの中身をモデルへ移す
 		var (
 			users       []model.User

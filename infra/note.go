@@ -11,11 +11,11 @@ import (
 )
 
 type NoteInfra struct {
-	infra *Infra
+	infra *DataBase
 }
 
 func (i *Infra) NewNoteInfra() repository.NoteRepositorier {
-	return &NoteInfra{infra: i}
+	return &NoteInfra{infra: i.dao}
 }
 
 func (i *NoteInfra) Get(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error) {

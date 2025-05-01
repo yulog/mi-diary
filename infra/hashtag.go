@@ -9,11 +9,11 @@ import (
 )
 
 type HashTagInfra struct {
-	infra *Infra
+	infra *DataBase
 }
 
 func (i *Infra) NewHashTagInfra() repository.HashTagRepositorier {
-	return &HashTagInfra{infra: i}
+	return &HashTagInfra{infra: i.dao}
 }
 
 func (hi *HashTagInfra) Get(ctx context.Context, profile string) ([]model.HashTag, error) {

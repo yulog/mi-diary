@@ -9,9 +9,8 @@ import (
 )
 
 type Repositorier interface {
-	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
-
 	// TODO: これは良いのか
+	NewUnitOfWorkInfra() repository.UnitOfWorkRepositorier
 	NewNoteInfra() repository.NoteRepositorier
 	NewUserInfra() repository.UserRepositorier
 	NewHashTagInfra() repository.HashTagRepositorier
@@ -21,8 +20,14 @@ type Repositorier interface {
 	NewMigrationInfra() service.MigrationServicer
 }
 
+type UnitOfWork interface {
+	RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error)
+}
+
 type Logic struct {
 	Repo             Repositorier
+	UnitOfWork       UnitOfWork
+	UWORepo          repository.UnitOfWorkRepositorier
 	NoteRepo         repository.NoteRepositorier
 	UserRepo         repository.UserRepositorier
 	HashTagRepo      repository.HashTagRepositorier
@@ -37,6 +42,8 @@ type Logic struct {
 
 type Dependency struct {
 	repo             Repositorier
+	unitOfWork       UnitOfWork
+	UWORepo          repository.UnitOfWorkRepositorier
 	noteRepo         repository.NoteRepositorier
 	userRepo         repository.UserRepositorier
 	hashTagRepo      repository.HashTagRepositorier
@@ -85,6 +92,11 @@ func (d *Dependency) WithFileRepo(repo repository.FileRepositorier) *Dependency 
 
 func (d *Dependency) WithArchiveRepo(repo repository.ArchiveRepositorier) *Dependency {
 	d.archiveRepo = repo
+	return d
+}
+
+func (d *Dependency) WithUWORepoUsingRepo() *Dependency {
+	d.UWORepo = d.repo.NewUnitOfWorkInfra()
 	return d
 }
 
@@ -146,6 +158,7 @@ func (d *Dependency) WithMigrationService(srv service.MigrationServicer) *Depend
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:             d.repo,
+		UWORepo:          d.UWORepo,
 		NoteRepo:         d.noteRepo,
 		UserRepo:         d.userRepo,
 		HashTagRepo:      d.hashTagRepo,
