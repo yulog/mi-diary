@@ -24,11 +24,8 @@ func main() {
 	logger := slog.New(log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true}))
 	slog.SetDefault(logger)
 	app := app.New()
-	// inf := infra.New(app)
 	logic := logic.New().
 		WithRepo(infra.New(app)).
-		// WithRepo(inf).
-		// WithFileRepo(inf.NewFileInfra()).
 		WithNoteRepoUsingRepo().
 		WithUserRepoUsingRepo().
 		WithHashTagRepoUsingRepo().

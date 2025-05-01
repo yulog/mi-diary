@@ -108,7 +108,6 @@ func (d *Dependency) WithEmojiRepoUsingRepo() *Dependency {
 	return d
 }
 
-// TODO: WithFileRepoの後に使う必要がある。WithRepoはやめて、Newの引数にする？
 func (d *Dependency) WithFileRepoUsingRepo() *Dependency {
 	d.fileRepo = d.repo.NewFileInfra()
 	return d
