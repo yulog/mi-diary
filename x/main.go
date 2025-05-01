@@ -16,7 +16,7 @@ import (
 	_ "golang.org/x/image/webp"
 
 	icolor "github.com/yulog/mi-diary/color"
-	"github.com/yulog/mi-diary/model"
+	"github.com/yulog/mi-diary/domain/model"
 	mi "github.com/yulog/miutil"
 	"github.com/yulog/miutil/miauth"
 
