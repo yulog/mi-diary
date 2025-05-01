@@ -6,17 +6,17 @@ import (
 )
 
 type MigrationInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewMigrationInfra() service.MigrationServicer {
-	return &MigrationInfra{infra: i.dao}
+	return &MigrationInfra{dao: i.dao}
 }
 
 func (i *MigrationInfra) GenerateSchema(profile string) {
-	migrate.GenerateSchema(i.infra.DB(profile))
+	migrate.GenerateSchema(i.dao.DB(profile))
 }
 
 func (i *MigrationInfra) Execute(profile string) {
-	migrate.Do(i.infra.DB(profile).DB)
+	migrate.Do(i.dao.DB(profile).DB)
 }

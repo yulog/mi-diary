@@ -9,16 +9,16 @@ import (
 )
 
 type ArchiveInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewArchiveInfra() repository.ArchiveRepositorier {
-	return &ArchiveInfra{infra: i.dao}
+	return &ArchiveInfra{dao: i.dao}
 }
 
 func (i *ArchiveInfra) Get(ctx context.Context, profile string) ([]model.Month, error) {
 	var archives []model.Month
-	err := i.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&archives).
 		Relation("Days", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -36,7 +36,7 @@ func (i *ArchiveInfra) Get(ctx context.Context, profile string) ([]model.Month, 
 func (i *ArchiveInfra) UpdateCountMonthly(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	var months []model.Month
 	err := db.NewSelect().
@@ -64,7 +64,7 @@ func (i *ArchiveInfra) UpdateCountMonthly(ctx context.Context, profile string) e
 func (i *ArchiveInfra) UpdateCountDaily(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	var days []model.Day
 	err := db.NewSelect().

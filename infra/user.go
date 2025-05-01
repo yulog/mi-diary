@@ -18,9 +18,9 @@ func (i *Infra) NewUserInfra() repository.UserRepositorier {
 	return &UserInfra{dao: i.dao}
 }
 
-func (ui *UserInfra) Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error) {
+func (i *UserInfra) Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error) {
 	var users []model.User
-	err := ui.dao.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&users).
 		Order(fmt.Sprintf("%s %s", op.SortBy, op.SortOrder)).

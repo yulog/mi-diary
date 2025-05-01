@@ -38,8 +38,8 @@ func NewDAO() *DataBase {
 	return &DataBase{}
 }
 
-func (infra *DataBase) DB(profile string) *bun.DB {
-	v, _ := infra.db.LoadOrStore(profile, connect(profile))
+func (dao *DataBase) DB(profile string) *bun.DB {
+	v, _ := dao.db.LoadOrStore(profile, connect(profile))
 	return v.(*bun.DB)
 }
 
@@ -74,8 +74,8 @@ func txFromContext(ctx context.Context) (bun.IDB, bool) {
 	return tx, ok
 }
 
-func (infra *DataBase) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error) {
-	err := infra.DB(profile).RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
+func (dao *DataBase) RunInTx(ctx context.Context, profile string, fn func(ctx context.Context) error) {
+	err := dao.DB(profile).RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		ctx = context.WithValue(ctx, txKey{}, tx)
 		if err := fn(ctx); err != nil {
 			return err

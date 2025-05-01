@@ -11,17 +11,17 @@ import (
 )
 
 type NoteInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewNoteInfra() repository.NoteRepositorier {
-	return &NoteInfra{infra: i.dao}
+	return &NoteInfra{dao: i.dao}
 }
 
 func (i *NoteInfra) Get(ctx context.Context, profile, s string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
 	// https://bun.uptrace.dev/guide/query-where.html#querybuilder
-	qb := i.infra.DB(profile).NewSelect().QueryBuilder()
+	qb := i.dao.DB(profile).NewSelect().QueryBuilder()
 	qb = addWhereLike(qb, "text", s)
 	err := qb.
 		Unwrap().(*bun.SelectQuery).
@@ -41,7 +41,7 @@ func (i *NoteInfra) Get(ctx context.Context, profile, s string, p pagination.Pag
 
 func (i *NoteInfra) GetByReaction(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
-	err := i.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -60,7 +60,7 @@ func (i *NoteInfra) GetByReaction(ctx context.Context, profile, name string, p p
 func (i *NoteInfra) GetByHashTag(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	// サブクエリを使う
 	// note idだけ必要
-	sq := i.infra.DB(profile).
+	sq := i.dao.DB(profile).
 		NewSelect().
 		Model((*model.NoteToTag)(nil)).
 		// 必要な列だけ選択して、不要な列をなくす
@@ -73,7 +73,7 @@ func (i *NoteInfra) GetByHashTag(ctx context.Context, profile, name string, p pa
 		Offset(p.Offset())
 
 	var notes []model.Note
-	err := i.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -89,7 +89,7 @@ func (i *NoteInfra) GetByHashTag(ctx context.Context, profile, name string, p pa
 
 func (i *NoteInfra) GetByUser(ctx context.Context, profile, name string, p pagination.Paging) ([]model.Note, error) {
 	var notes []model.Note
-	err := i.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -116,7 +116,7 @@ func (i *NoteInfra) GetByArchive(ctx context.Context, profile, d string, p pagin
 	} else if reymd.MatchString(d) {
 		col = "strftime('%Y-%m-%d', created_at, 'localtime')"
 	}
-	err := i.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&notes).
 		Relation("User").
@@ -133,7 +133,7 @@ func (i *NoteInfra) GetByArchive(ctx context.Context, profile, d string, p pagin
 }
 
 func (i *NoteInfra) Count(ctx context.Context, profile string) (int, error) {
-	return i.infra.DB(profile).
+	return i.dao.DB(profile).
 		NewSelect().
 		Model((*model.Note)(nil)).
 		Count(ctx)
@@ -142,7 +142,7 @@ func (i *NoteInfra) Count(ctx context.Context, profile string) (int, error) {
 func (i *NoteInfra) Insert(ctx context.Context, profile string, notes *[]model.Note) (int64, error) {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	result, err := db.NewInsert().Model(notes).Ignore().Exec(ctx)
 	rows, _ := result.RowsAffected()
@@ -152,7 +152,7 @@ func (i *NoteInfra) Insert(ctx context.Context, profile string, notes *[]model.N
 func (i *NoteInfra) InsertNoteToTags(ctx context.Context, profile string, noteToTags *[]model.NoteToTag) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().Model(noteToTags).Ignore().Exec(ctx)
 	return err
@@ -161,7 +161,7 @@ func (i *NoteInfra) InsertNoteToTags(ctx context.Context, profile string, noteTo
 func (i *NoteInfra) InsertNoteToFiles(ctx context.Context, profile string, noteToFiles *[]model.NoteToFile) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = i.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().Model(noteToFiles).Ignore().Exec(ctx)
 	return err

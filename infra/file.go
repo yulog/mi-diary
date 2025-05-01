@@ -11,16 +11,16 @@ import (
 )
 
 type FileInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewFileInfra() repository.FileRepositorier {
-	return &FileInfra{infra: i.dao}
+	return &FileInfra{dao: i.dao}
 }
 
-func (fi *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error) {
+func (i *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error) {
 	var files []model.File
-	qb := fi.infra.DB(profile).NewSelect().QueryBuilder()
+	qb := i.dao.DB(profile).NewSelect().QueryBuilder()
 	qb = addWhere(qb, "f.group_color", c)
 	err := qb.
 		Unwrap().(*bun.SelectQuery).
@@ -38,17 +38,17 @@ func (fi *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Pa
 	return files, nil
 }
 
-func (fi *FileInfra) GetByNoteID(ctx context.Context, profile, id string) ([]model.File, error) {
+func (i *FileInfra) GetByNoteID(ctx context.Context, profile, id string) ([]model.File, error) {
 	// サブクエリを使う
 	// note idだけ必要
-	sq := fi.infra.DB(profile).
+	sq := i.dao.DB(profile).
 		NewSelect().
 		Model((*model.NoteToFile)(nil)).
 		Column("file_id").
 		Where("note_id = ?", id)
 
 	var files []model.File
-	err := fi.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&files).
 		Where("f.id IN (?)", sq). // サブクエリを使う
@@ -59,9 +59,9 @@ func (fi *FileInfra) GetByNoteID(ctx context.Context, profile, id string) ([]mod
 	return files, nil
 }
 
-func (fi *FileInfra) GetByEmptyColor(ctx context.Context, profile string) ([]model.File, error) {
+func (i *FileInfra) GetByEmptyColor(ctx context.Context, profile string) ([]model.File, error) {
 	var files []model.File
-	err := fi.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&files).
 		Where("group_color = ?", "").
@@ -73,17 +73,17 @@ func (fi *FileInfra) GetByEmptyColor(ctx context.Context, profile string) ([]mod
 	return files, nil
 }
 
-func (fi *FileInfra) Count(ctx context.Context, profile string) (int, error) {
-	return fi.infra.DB(profile).
+func (i *FileInfra) Count(ctx context.Context, profile string) (int, error) {
+	return i.dao.DB(profile).
 		NewSelect().
 		Model((*model.File)(nil)).
 		Count(ctx)
 }
 
-func (fi *FileInfra) Insert(ctx context.Context, profile string, files *[]model.File) error {
+func (i *FileInfra) Insert(ctx context.Context, profile string, files *[]model.File) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = fi.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().
 		Model(files).
@@ -92,7 +92,7 @@ func (fi *FileInfra) Insert(ctx context.Context, profile string, files *[]model.
 	return err
 }
 
-func (fi *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string) {
+func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string) {
 	r := model.File{
 		ID:            id,
 		DominantColor: c1,
@@ -100,7 +100,7 @@ func (fi *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, c1, c
 	}
 	var s []model.File
 	s = append(s, r)
-	_, err := fi.infra.DB(profile).NewUpdate().
+	_, err := i.dao.DB(profile).NewUpdate().
 		Model(&s).
 		OmitZero().
 		Column("dominant_color").

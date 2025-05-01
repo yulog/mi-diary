@@ -9,16 +9,16 @@ import (
 )
 
 type HashTagInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewHashTagInfra() repository.HashTagRepositorier {
-	return &HashTagInfra{infra: i.dao}
+	return &HashTagInfra{dao: i.dao}
 }
 
-func (hi *HashTagInfra) Get(ctx context.Context, profile string) ([]model.HashTag, error) {
+func (i *HashTagInfra) Get(ctx context.Context, profile string) ([]model.HashTag, error) {
 	var tags []model.HashTag
-	err := hi.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&tags).
 		Order("count DESC").
@@ -29,10 +29,10 @@ func (hi *HashTagInfra) Get(ctx context.Context, profile string) ([]model.HashTa
 	return tags, nil
 }
 
-func (hi *HashTagInfra) Insert(ctx context.Context, profile string, hashtag *model.HashTag) error {
+func (i *HashTagInfra) Insert(ctx context.Context, profile string, hashtag *model.HashTag) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = hi.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().
 		Model(hashtag).
@@ -42,10 +42,10 @@ func (hi *HashTagInfra) Insert(ctx context.Context, profile string, hashtag *mod
 }
 
 // タグのカウント
-func (hi *HashTagInfra) UpdateCount(ctx context.Context, profile string) error {
+func (i *HashTagInfra) UpdateCount(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = hi.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	var hashtags []model.HashTag
 	err := db.NewSelect().

@@ -11,16 +11,16 @@ import (
 )
 
 type EmojiInfra struct {
-	infra *DataBase
+	dao *DataBase
 }
 
 func (i *Infra) NewEmojiInfra() repository.EmojiRepositorier {
-	return &EmojiInfra{infra: i.dao}
+	return &EmojiInfra{dao: i.dao}
 }
 
-func (ei *EmojiInfra) Get(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
+func (i *EmojiInfra) Get(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
-	err := ei.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&reactions).
 		Order("count DESC").
@@ -31,9 +31,9 @@ func (ei *EmojiInfra) Get(ctx context.Context, profile string) ([]model.Reaction
 	return reactions, nil
 }
 
-func (ei *EmojiInfra) GetByName(ctx context.Context, profile, name string) (model.ReactionEmoji, error) {
+func (i *EmojiInfra) GetByName(ctx context.Context, profile, name string) (model.ReactionEmoji, error) {
 	var reaction model.ReactionEmoji
-	err := ei.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&reaction).
 		Where("name = ?", name).
@@ -45,9 +45,9 @@ func (ei *EmojiInfra) GetByName(ctx context.Context, profile, name string) (mode
 	return reaction, nil
 }
 
-func (ei *EmojiInfra) GetByEmptyImage(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
+func (i *EmojiInfra) GetByEmptyImage(ctx context.Context, profile string) ([]model.ReactionEmoji, error) {
 	var reactions []model.ReactionEmoji
-	err := ei.infra.DB(profile).
+	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&reactions).
 		Where("image = ?", "").
@@ -58,10 +58,10 @@ func (ei *EmojiInfra) GetByEmptyImage(ctx context.Context, profile string) ([]mo
 	return reactions, nil
 }
 
-func (ei *EmojiInfra) Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error {
+func (i *EmojiInfra) Insert(ctx context.Context, profile string, reactions *[]model.ReactionEmoji) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = ei.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	_, err := db.NewInsert().
 		Model(reactions).
@@ -70,7 +70,7 @@ func (ei *EmojiInfra) Insert(ctx context.Context, profile string, reactions *[]m
 	return err
 }
 
-func (ei *EmojiInfra) UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji) {
+func (i *EmojiInfra) UpdateByPKWithImage(ctx context.Context, profile string, id int64, e *mi.Emoji) {
 	// TODO: emoji画像をローカルに保存する
 
 	r := model.ReactionEmoji{
@@ -79,7 +79,7 @@ func (ei *EmojiInfra) UpdateByPKWithImage(ctx context.Context, profile string, i
 	}
 	var s []model.ReactionEmoji
 	s = append(s, r)
-	_, err := ei.infra.DB(profile).NewUpdate().
+	_, err := i.dao.DB(profile).NewUpdate().
 		Model(&s).
 		OmitZero().
 		Column("image").
@@ -92,10 +92,10 @@ func (ei *EmojiInfra) UpdateByPKWithImage(ctx context.Context, profile string, i
 }
 
 // リアクションのカウント
-func (ei *EmojiInfra) UpdateCount(ctx context.Context, profile string) error {
+func (i *EmojiInfra) UpdateCount(ctx context.Context, profile string) error {
 	db, ok := txFromContext(ctx)
 	if !ok {
-		db = ei.infra.DB(profile)
+		db = i.dao.DB(profile)
 	}
 	var reactions []model.ReactionEmoji
 	err := db.NewSelect().
