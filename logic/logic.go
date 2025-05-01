@@ -8,6 +8,7 @@ import (
 	"github.com/a-h/templ"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/domain/repository"
+	"github.com/yulog/mi-diary/domain/service"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
@@ -36,7 +37,7 @@ type Logic struct {
 	ArchiveRepo    repository.ArchiveRepositorier
 	JobRepo        repository.JobRepositorier
 	ConfigRepo     repository.ConfigRepositorier
-	MisskeyAPIRepo repository.MisskeyAPIRepositorier
+	MisskeyService service.MisskeyAPIServicer
 }
 
 type Dependency struct {
@@ -49,7 +50,7 @@ type Dependency struct {
 	archiveRepo    repository.ArchiveRepositorier
 	jobRepo        repository.JobRepositorier
 	configRepo     repository.ConfigRepositorier
-	misskeyAPIRepo repository.MisskeyAPIRepositorier
+	misskeyService service.MisskeyAPIServicer
 }
 
 func New() *Dependency {
@@ -132,8 +133,8 @@ func (d *Dependency) WithConfigRepo(repo repository.ConfigRepositorier) *Depende
 	return d
 }
 
-func (d *Dependency) WithMisskeyAPIRepo(repo repository.MisskeyAPIRepositorier) *Dependency {
-	d.misskeyAPIRepo = repo
+func (d *Dependency) WithMisskeyAPIRepo(srv service.MisskeyAPIServicer) *Dependency {
+	d.misskeyService = srv
 	return d
 }
 
@@ -148,7 +149,7 @@ func (d *Dependency) Build() *Logic {
 		ArchiveRepo:    d.archiveRepo,
 		JobRepo:        d.jobRepo,
 		ConfigRepo:     d.configRepo,
-		MisskeyAPIRepo: d.misskeyAPIRepo,
+		MisskeyService: d.misskeyService,
 	}
 }
 

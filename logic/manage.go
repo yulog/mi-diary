@@ -412,7 +412,7 @@ func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
 }
 
 func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions, error) {
-	count, r, err := l.MisskeyAPIRepo.GetUserReactions(profile, id, limit)
+	count, r, err := l.MisskeyService.GetUserReactions(profile, id, limit)
 	if err != nil {
 		return 0, &mi.Reactions{}, err
 	}
@@ -421,7 +421,7 @@ func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int)
 }
 
 func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, error) {
-	emoji, err := l.MisskeyAPIRepo.GetEmoji(profile, name)
+	emoji, err := l.MisskeyService.GetEmoji(profile, name)
 	if err != nil {
 		return &mi.Emoji{}, err
 	}
