@@ -26,8 +26,43 @@ import (
 // 	return &ManageLogic{Repo: r, ProgressRepo: p}
 // }
 
+type Job struct {
+	Logic   *Logic
+	Profile string
+	Type    app.JobType
+	ID      string
+}
+
+type ReactionJob struct {
+	Job
+}
+
+type ReactionOneJob struct {
+	Job
+}
+
+type ReactionFullJob struct {
+	Job
+}
+
+type EmojiOneJob struct {
+	Job
+}
+
+type EmojiFullJob struct {
+	Job
+}
+
+type ColorOneJob struct {
+	Job
+}
+
+type ColorFullJob struct {
+	Job
+}
+
 func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
-	p, _ := l.JobRepo.GetProgress()
+	p, _ := l.JobWorkerService.GetJobProgress()
 	// TODO: 進行中の判定これで良いの？
 	if p > 0 {
 		return cm.ManageStart("Manage")
@@ -36,46 +71,58 @@ func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 }
 
 func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
-	l.JobRepo.SetJob(job)
+	l.CreateJob(ctx, job)
 
 	return cm.Start("", "Get", job.Profile, job.Type.String(), job.ID)
 }
 
 func (l *Logic) JobProgressLogic(ctx context.Context) (int, bool, templ.Component) {
-	p, t := l.JobRepo.GetProgress()
+	p, t := l.JobWorkerService.GetJobProgress()
+	completed := (l.JobWorkerService.GetJobStatus() == model.Completed || l.JobWorkerService.GetJobStatus() == model.Failed)
 
-	return p, l.JobRepo.GetProgressDone(), cm.Progress(fmt.Sprintf("%d / %d", p, t))
+	return p, completed, cm.Progress(fmt.Sprintf("%d / %d", p, t))
 }
 
 func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
-	p, t := l.JobRepo.GetProgress()
-	l.JobRepo.SetProgress(0, 0)
-	l.JobRepo.SetProgressDone(false)
+	p, t := l.JobWorkerService.GetJobProgress()
+	// TODO: 進捗、ステータスのリセットをする必要がある？
 
 	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), l.ConfigRepo.GetProfilesSortedKey())
+}
+
+func (l *Logic) CreateJob(ctx context.Context, job app.Job) {
+	switch job.Type {
+	case app.Reaction:
+		j := &ReactionJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+		l.JobWorkerService.CreateJob(j)
+	case app.ReactionOne:
+		j := &ReactionOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+		l.JobWorkerService.CreateJob(j)
+	case app.ReactionFull:
+		j := &ReactionFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+		l.JobWorkerService.CreateJob(j)
+	case app.Emoji:
+		if job.ID != "" {
+			j := &EmojiOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+			l.JobWorkerService.CreateJob(j)
+		} else {
+			j := &EmojiFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+			l.JobWorkerService.CreateJob(j)
+		}
+	case app.Color:
+		if job.ID != "" {
+			j := &ColorOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+			l.JobWorkerService.CreateJob(j)
+		} else {
+			j := &ColorFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+			l.JobWorkerService.CreateJob(j)
+		}
+	}
 }
 
 func (l *Logic) JobProcesser(ctx context.Context) {
 	for j := range l.JobRepo.GetJob() {
 		switch j.Type {
-		case app.Reaction:
-			l.reactionJob(ctx, j)
-		case app.ReactionOne:
-			l.reactionOneJob(ctx, j)
-		case app.ReactionFull:
-			l.reactionFullJob(ctx, j)
-		case app.Emoji:
-			if j.ID != "" {
-				l.emojiOneJob(ctx, j)
-			} else {
-				l.emojiFullJob(ctx, j)
-			}
-		case app.Color:
-			if j.ID != "" {
-				l.colorOneJob(ctx, j)
-			} else {
-				l.colorFullJob(ctx, j)
-			}
 		default:
 			// progressの動作確認用
 			for i := 0; i < 10; i++ {
@@ -86,76 +133,6 @@ func (l *Logic) JobProcesser(ctx context.Context) {
 			}
 		}
 		l.JobRepo.SetProgressDone(true)
-	}
-}
-
-func (l *Logic) reactionJob(ctx context.Context, j app.Job) {
-	var rid = j.ID
-	for {
-		gc, r, err := l.getReactions(ctx, j.Profile, rid, 20)
-		if err != nil {
-			// TODO: エラー処理
-			slog.Error(err.Error())
-		}
-		if gc == 0 || r == nil {
-			break
-		}
-
-		ac := l.InsertReactionTx(ctx, j.Profile, r)
-		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
-
-		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
-
-		slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
-		if gc == 0 || ac == 0 {
-			break
-		}
-		rid = (*r)[gc-1].ID
-		time.Sleep(rand.N(time.Second))
-	}
-}
-
-func (l *Logic) reactionOneJob(ctx context.Context, j app.Job) {
-	gc, r, err := l.getReactions(ctx, j.Profile, j.ID, 1)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-	if gc == 0 || r == nil {
-		return
-	}
-
-	ac := l.InsertReactionTx(ctx, j.Profile, r)
-	slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
-
-	p, t := l.JobRepo.UpdateProgress(int(ac), gc)
-
-	slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
-	if gc == 0 || ac == 0 {
-		return
-	}
-}
-
-func (l *Logic) reactionFullJob(ctx context.Context, j app.Job) {
-	var rid = j.ID
-	for {
-		gc, r, err := l.getReactions(ctx, j.Profile, rid, 20)
-		if err != nil {
-			// TODO: エラー処理
-			slog.Error(err.Error())
-		}
-
-		ac := l.InsertReactionTx(ctx, j.Profile, r)
-		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
-
-		p, t := l.JobRepo.UpdateProgress(int(ac), gc)
-
-		slog.Info("reaction progress", slog.Int("progress", p), slog.Int("total", t))
-		if gc == 0 {
-			break
-		}
-		rid = (*r)[gc-1].ID
-		time.Sleep(rand.N(time.Second))
 	}
 }
 
@@ -298,119 +275,6 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 	return rows
 }
 
-func (l *Logic) emojiOneJob(ctx context.Context, j app.Job) {
-	res, err := l.EmojiRepo.GetByName(ctx, j.Profile, j.ID)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-	emoji, err := l.getEmoji(ctx, j.Profile, j.ID)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-	l.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, res.ID, emoji)
-
-	p, _ := l.JobRepo.GetProgress()
-	l.JobRepo.SetProgress(p+1, 1)
-	slog.Info("emoji progress", slog.Int("progress", p+1), slog.Int("total", 1))
-}
-
-func (l *Logic) emojiFullJob(ctx context.Context, j app.Job) {
-	r, err := l.EmojiRepo.GetByEmptyImage(ctx, j.Profile)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-
-	for _, v := range r {
-		// unicode emojiならスキップしたい
-		symbol := false
-		for _, rune := range v.Name {
-			if unicode.IsSymbol(rune) {
-				symbol = true
-				break
-			}
-		}
-		if symbol {
-			continue
-		}
-		emoji, err := l.getEmoji(ctx, j.Profile, v.Name)
-		if err != nil {
-			// TODO: エラー処理
-			slog.Error(err.Error())
-		}
-		l.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, emoji)
-
-		p, _ := l.JobRepo.GetProgress()
-		l.JobRepo.SetProgress(p+1, len(r))
-		slog.Info("emoji progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
-
-		time.Sleep(rand.N(time.Second))
-	}
-}
-
-func (l *Logic) colorOneJob(ctx context.Context, j app.Job) {
-	r, err := l.FileRepo.GetByNoteID(ctx, j.Profile, j.ID)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-
-	for _, v := range r {
-		if !strings.HasPrefix(v.Type, "image") {
-			continue
-		}
-		c1, c2, err := color.Color(v.ThumbnailURL)
-		if err != nil {
-			// TODO: エラー処理
-			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-			continue
-		}
-		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
-
-		p, _ := l.JobRepo.GetProgress()
-		l.JobRepo.SetProgress(p+1, len(r))
-		slog.Info("color progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
-
-		time.Sleep(rand.N(5 * time.Second))
-	}
-}
-
-func (l *Logic) colorFullJob(ctx context.Context, j app.Job) {
-	r, err := l.FileRepo.GetByEmptyColor(ctx, j.Profile)
-	if err != nil {
-		// TODO: エラー処理
-		slog.Error(err.Error())
-	}
-
-	p, _ := l.JobRepo.GetProgress()
-	l.JobRepo.SetProgress(p, len(r))
-	slog.Info("color progress", slog.Int("progress", p), slog.Int("total", len(r)))
-
-	for _, v := range r {
-		if !strings.HasPrefix(v.Type, "image") {
-			continue
-		}
-		c1, c2, err := color.Color(v.ThumbnailURL)
-		if err != nil {
-			// TODO: エラー処理
-			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-			// TODO: エラーだったとき、次回の処理対象にならないようにする
-			continue
-		}
-		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		l.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
-
-		p, _ := l.JobRepo.GetProgress()
-		l.JobRepo.SetProgress(p+1, len(r))
-		slog.Info("color progress", slog.Int("progress", p+1), slog.Int("total", len(r)))
-
-		time.Sleep(rand.N(5 * time.Second))
-	}
-}
-
 func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions, error) {
 	count, r, err := l.MisskeyService.GetUserReactions(profile, id, limit)
 	if err != nil {
@@ -427,4 +291,202 @@ func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, 
 	}
 
 	return emoji, nil
+}
+
+func (j *ReactionJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	var rid = j.ID
+	var progress int
+	var total int
+	for {
+		gc, r, err := j.Logic.getReactions(ctx, j.Profile, rid, 20)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
+		if gc == 0 || r == nil {
+			break
+		}
+
+		ac := j.Logic.InsertReactionTx(ctx, j.Profile, r)
+		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
+
+		progress += int(ac)
+		total += gc
+		progressCallback(progress, total)
+
+		slog.Info("reaction progress", slog.Int("progress", progress), slog.Int("total", total))
+		if gc == 0 || ac == 0 {
+			break
+		}
+		rid = (*r)[gc-1].ID
+		time.Sleep(rand.N(time.Second))
+	}
+	return nil
+}
+
+func (j *ReactionOneJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	gc, r, err := j.Logic.getReactions(ctx, j.Profile, j.ID, 1)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+	if gc == 0 || r == nil {
+		return nil
+	}
+
+	ac := j.Logic.InsertReactionTx(ctx, j.Profile, r)
+	slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
+
+	progressCallback(int(ac), gc)
+
+	slog.Info("reaction progress", slog.Int("progress", int(ac)), slog.Int("total", gc))
+
+	return nil
+}
+
+func (j *ReactionFullJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	var rid = j.ID
+	var progress int
+	var total int
+	for {
+		gc, r, err := j.Logic.getReactions(ctx, j.Profile, rid, 20)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
+
+		ac := j.Logic.InsertReactionTx(ctx, j.Profile, r)
+		slog.Info("Notes inserted(caller)", slog.Int64("count", ac))
+
+		progress += int(ac)
+		total += gc
+		progressCallback(int(ac), gc)
+
+		slog.Info("reaction progress", slog.Int("progress", progress), slog.Int("total", total))
+		if gc == 0 {
+			break
+		}
+		rid = (*r)[gc-1].ID
+		time.Sleep(rand.N(time.Second))
+	}
+	return nil
+}
+
+func (j *EmojiOneJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	res, err := j.Logic.EmojiRepo.GetByName(ctx, j.Profile, j.ID)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+	emoji, err := j.Logic.getEmoji(ctx, j.Profile, j.ID)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+	j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, res.ID, emoji)
+
+	progressCallback(1, 1)
+	slog.Info("emoji progress", slog.Int("progress", 1), slog.Int("total", 1))
+	return nil
+}
+
+func (j *EmojiFullJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	r, err := j.Logic.EmojiRepo.GetByEmptyImage(ctx, j.Profile)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+
+	var progress int
+	for _, v := range r {
+		// unicode emojiならスキップしたい
+		symbol := false
+		for _, rune := range v.Name {
+			if unicode.IsSymbol(rune) {
+				symbol = true
+				break
+			}
+		}
+		if symbol {
+			continue
+		}
+		emoji, err := j.Logic.getEmoji(ctx, j.Profile, v.Name)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error())
+		}
+		j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, emoji)
+
+		progress += 1
+		progressCallback(progress, len(r))
+		slog.Info("emoji progress", slog.Int("progress", progress), slog.Int("total", len(r)))
+
+		time.Sleep(rand.N(time.Second))
+	}
+	return nil
+}
+
+func (j *ColorOneJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	r, err := j.Logic.FileRepo.GetByNoteID(ctx, j.Profile, j.ID)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+
+	var progress int
+	for _, v := range r {
+		if !strings.HasPrefix(v.Type, "image") {
+			continue
+		}
+		c1, c2, err := color.Color(v.ThumbnailURL)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			continue
+		}
+		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
+
+		progress += 1
+		progressCallback(progress, len(r))
+		slog.Info("color progress", slog.Int("progress", progress), slog.Int("total", len(r)))
+
+		time.Sleep(rand.N(5 * time.Second))
+	}
+	return nil
+}
+
+func (j *ColorFullJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	r, err := j.Logic.FileRepo.GetByEmptyColor(ctx, j.Profile)
+	if err != nil {
+		// TODO: エラー処理
+		slog.Error(err.Error())
+	}
+
+	// p, _ := l.JobRepo.GetProgress()
+	// l.JobRepo.SetProgress(p, len(r))
+	// slog.Info("color progress", slog.Int("progress", p), slog.Int("total", len(r)))
+
+	var progress int
+	for _, v := range r {
+		if !strings.HasPrefix(v.Type, "image") {
+			continue
+		}
+		c1, c2, err := color.Color(v.ThumbnailURL)
+		if err != nil {
+			// TODO: エラー処理
+			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			// TODO: エラーだったとき、次回の処理対象にならないようにする
+			continue
+		}
+		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
+
+		progress += 1
+		progressCallback(progress, len(r))
+		slog.Info("color progress", slog.Int("progress", progress), slog.Int("total", len(r)))
+
+		time.Sleep(rand.N(5 * time.Second))
+	}
+	return nil
 }

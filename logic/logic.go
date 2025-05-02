@@ -38,6 +38,7 @@ type Logic struct {
 	ConfigRepo       repository.ConfigRepositorier
 	MisskeyService   service.MisskeyAPIServicer
 	MigrationService service.MigrationServicer
+	JobWorkerService service.JobWorker
 }
 
 type Dependency struct {
@@ -54,6 +55,7 @@ type Dependency struct {
 	configRepo       repository.ConfigRepositorier
 	misskeyService   service.MisskeyAPIServicer
 	migrationService service.MigrationServicer
+	jobWorkerService service.JobWorker
 }
 
 func New() *Dependency {
@@ -155,6 +157,11 @@ func (d *Dependency) WithMigrationService(srv service.MigrationServicer) *Depend
 	return d
 }
 
+func (d *Dependency) WithJobWorkerService(srv service.JobWorker) *Dependency {
+	d.jobWorkerService = srv
+	return d
+}
+
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:             d.repo,
@@ -169,6 +176,7 @@ func (d *Dependency) Build() *Logic {
 		ConfigRepo:       d.configRepo,
 		MisskeyService:   d.misskeyService,
 		MigrationService: d.migrationService,
+		JobWorkerService: d.jobWorkerService,
 	}
 }
 

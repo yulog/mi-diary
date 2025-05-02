@@ -37,6 +37,7 @@ func main() {
 		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		WithMisskeyAPIRepo(infra.NewMisskeyAPI(app)).
+		WithJobWorkerService(infra.NewJobWorker()).
 		Build()
 	srv := server.New(logic)
 
@@ -45,7 +46,7 @@ func main() {
 	e := srv.NewRouter()
 
 	// TODO: context良く分からない
-	go logic.JobProcesser(context.Background())
+	go logic.JobWorkerService.StartWorker(context.Background())
 
 	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
 }
