@@ -60,7 +60,7 @@ func (j JobType) String() string {
 	case Color:
 		return "color"
 	default:
-		return "unkown"
+		return "unknown"
 	}
 }
 
