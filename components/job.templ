@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/domain/model"
 )
 
 templ Initial(placeholder, button string, profiles []string) {
@@ -28,11 +28,11 @@ templ Initial(placeholder, button string, profiles []string) {
 							<p class="control">
 								<span class="select">
 									<select name="job-type">
-										<option value={ fmt.Sprintf("%d", int(app.Reaction)) }>reaction</option>
-										<option value={ fmt.Sprintf("%d", int(app.ReactionOne)) }>reaction(one)</option>
-										<option value={ fmt.Sprintf("%d", int(app.ReactionFull)) }>reaction(full scan)</option>
-										<option value={ fmt.Sprintf("%d", int(app.Emoji)) }>emoji</option>
-										<option value={ fmt.Sprintf("%d", int(app.Color)) }>color(by NoteID)</option>
+										<option value={ fmt.Sprintf("%d", int(model.Reaction)) }>reaction</option>
+										<option value={ fmt.Sprintf("%d", int(model.ReactionOne)) }>reaction(one)</option>
+										<option value={ fmt.Sprintf("%d", int(model.ReactionFull)) }>reaction(full scan)</option>
+										<option value={ fmt.Sprintf("%d", int(model.Emoji)) }>emoji</option>
+										<option value={ fmt.Sprintf("%d", int(model.Color)) }>color(by NoteID)</option>
 									</select>
 								</span>
 							</p>
@@ -132,10 +132,10 @@ templ Job(placeholder, button string, p string, profiles []string) {
 							<p class="control">
 								<span class="select">
 									<select name="job-type">
-										<option value={ fmt.Sprintf("%d", int(app.Reaction)) }>reaction</option>
-										<option value={ fmt.Sprintf("%d", int(app.ReactionOne)) }>reaction(one)</option>
-										<option value={ fmt.Sprintf("%d", int(app.Emoji)) }>emoji</option>
-										<option value={ fmt.Sprintf("%d", int(app.Color)) }>color(by NoteID)</option>
+										<option value={ fmt.Sprintf("%d", int(model.Reaction)) }>reaction</option>
+										<option value={ fmt.Sprintf("%d", int(model.ReactionOne)) }>reaction(one)</option>
+										<option value={ fmt.Sprintf("%d", int(model.Emoji)) }>emoji</option>
+										<option value={ fmt.Sprintf("%d", int(model.Color)) }>color(by NoteID)</option>
 									</select>
 								</span>
 							</p>

@@ -3,16 +3,13 @@ package app
 import (
 	"bytes"
 	"fmt"
-	"sync"
 
 	"github.com/goccy/go-json"
 	"github.com/spf13/viper"
 )
 
 type App struct {
-	Config   Config
-	Job      chan Job
-	Progress *Progress
+	Config Config
 }
 
 type Config struct {
@@ -37,51 +34,9 @@ func (p Profiles) Get(key string) (Profile, error) {
 	return v, nil
 }
 
-type JobType int
-
-const (
-	Reaction JobType = iota + 1
-	ReactionOne
-	ReactionFull
-	Emoji
-	Color
-)
-
-func (j JobType) String() string {
-	switch j {
-	case Reaction:
-		return "reaction"
-	case ReactionOne:
-		return "reaction(one)"
-	case ReactionFull:
-		return "reaction(full scan)"
-	case Emoji:
-		return "emoji"
-	case Color:
-		return "color"
-	default:
-		return "unknown"
-	}
-}
-
-type Job struct {
-	Profile string
-	Type    JobType
-	ID      string
-}
-
-type Progress struct {
-	sync.RWMutex
-	Progress int
-	Total    int
-	Done     bool
-}
-
 func New() *App {
 	return &App{
-		Config:   loadConfig(),
-		Job:      make(chan Job),
-		Progress: &Progress{},
+		Config: loadConfig(),
 	}
 }
 

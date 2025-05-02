@@ -34,7 +34,6 @@ type Logic struct {
 	EmojiRepo        repository.EmojiRepositorier
 	FileRepo         repository.FileRepositorier
 	ArchiveRepo      repository.ArchiveRepositorier
-	JobRepo          repository.JobRepositorier
 	ConfigRepo       repository.ConfigRepositorier
 	MisskeyService   service.MisskeyAPIServicer
 	MigrationService service.MigrationServicer
@@ -51,7 +50,6 @@ type Dependency struct {
 	emojiRepo        repository.EmojiRepositorier
 	fileRepo         repository.FileRepositorier
 	archiveRepo      repository.ArchiveRepositorier
-	jobRepo          repository.JobRepositorier
 	configRepo       repository.ConfigRepositorier
 	misskeyService   service.MisskeyAPIServicer
 	migrationService service.MigrationServicer
@@ -137,11 +135,6 @@ func (d *Dependency) WithMigrationServiceUsingRepo() *Dependency {
 	return d
 }
 
-func (d *Dependency) WithJobRepo(repo repository.JobRepositorier) *Dependency {
-	d.jobRepo = repo
-	return d
-}
-
 func (d *Dependency) WithConfigRepo(repo repository.ConfigRepositorier) *Dependency {
 	d.configRepo = repo
 	return d
@@ -172,7 +165,6 @@ func (d *Dependency) Build() *Logic {
 		EmojiRepo:        d.emojiRepo,
 		FileRepo:         d.fileRepo,
 		ArchiveRepo:      d.archiveRepo,
-		JobRepo:          d.jobRepo,
 		ConfigRepo:       d.configRepo,
 		MisskeyService:   d.misskeyService,
 		MigrationService: d.migrationService,

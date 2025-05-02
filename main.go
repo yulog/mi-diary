@@ -34,7 +34,6 @@ func main() {
 		WithFileRepoUsingRepo().
 		WithArchiveRepoUsingRepo().
 		WithMigrationServiceUsingRepo().
-		WithJobRepo(infra.NewJobInfra(app)).
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		WithMisskeyAPIRepo(infra.NewMisskeyAPI(app)).
 		WithJobWorkerService(infra.NewJobWorker()).

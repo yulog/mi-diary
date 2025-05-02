@@ -4,7 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/domain/model"
+	"github.com/yulog/mi-diary/logic"
 )
 
 // type ManageHandler struct {
@@ -31,9 +32,9 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 	if err := c.Validate(j); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	job := app.Job{
+	job := logic.Job{
 		Profile: j.Profile,
-		Type:    app.JobType(j.Type),
+		Type:    model.JobType(j.Type),
 		ID:      j.ID,
 	}
 

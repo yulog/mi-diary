@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	"github.com/a-h/templ"
-	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/color"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/domain/model"
@@ -29,8 +28,12 @@ import (
 type Job struct {
 	Logic   *Logic
 	Profile string
-	Type    app.JobType
+	Type    model.JobType
 	ID      string
+}
+
+type DummyJob struct {
+	Job
 }
 
 type ReactionJob struct {
@@ -70,7 +73,7 @@ func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
 	return cm.ManageInit("Manage", l.ConfigRepo.GetProfilesSortedKey())
 }
 
-func (l *Logic) JobStartLogic(ctx context.Context, job app.Job) templ.Component {
+func (l *Logic) JobStartLogic(ctx context.Context, job Job) templ.Component {
 	l.CreateJob(ctx, job)
 
 	return cm.Start("", "Get", job.Profile, job.Type.String(), job.ID)
@@ -90,18 +93,18 @@ func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
 	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), l.ConfigRepo.GetProfilesSortedKey())
 }
 
-func (l *Logic) CreateJob(ctx context.Context, job app.Job) {
+func (l *Logic) CreateJob(ctx context.Context, job Job) {
 	switch job.Type {
-	case app.Reaction:
+	case model.Reaction:
 		j := &ReactionJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 		l.JobWorkerService.CreateJob(j)
-	case app.ReactionOne:
+	case model.ReactionOne:
 		j := &ReactionOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 		l.JobWorkerService.CreateJob(j)
-	case app.ReactionFull:
+	case model.ReactionFull:
 		j := &ReactionFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 		l.JobWorkerService.CreateJob(j)
-	case app.Emoji:
+	case model.Emoji:
 		if job.ID != "" {
 			j := &EmojiOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 			l.JobWorkerService.CreateJob(j)
@@ -109,7 +112,7 @@ func (l *Logic) CreateJob(ctx context.Context, job app.Job) {
 			j := &EmojiFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 			l.JobWorkerService.CreateJob(j)
 		}
-	case app.Color:
+	case model.Color:
 		if job.ID != "" {
 			j := &ColorOneJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 			l.JobWorkerService.CreateJob(j)
@@ -117,22 +120,10 @@ func (l *Logic) CreateJob(ctx context.Context, job app.Job) {
 			j := &ColorFullJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
 			l.JobWorkerService.CreateJob(j)
 		}
-	}
-}
-
-func (l *Logic) JobProcesser(ctx context.Context) {
-	for j := range l.JobRepo.GetJob() {
-		switch j.Type {
-		default:
-			// progressの動作確認用
-			for i := 0; i < 10; i++ {
-				p, _ := l.JobRepo.GetProgress()
-				p, t := l.JobRepo.SetProgress(p+10, 0)
-				fmt.Println(j, p, t)
-				time.Sleep(time.Second)
-			}
-		}
-		l.JobRepo.SetProgressDone(true)
+	default:
+		// progressの動作確認用
+		j := &DummyJob{Job{Logic: l, Profile: job.Profile, Type: job.Type, ID: job.ID}}
+		l.JobWorkerService.CreateJob(j)
 	}
 }
 
@@ -291,6 +282,18 @@ func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, 
 	}
 
 	return emoji, nil
+}
+
+func (j *DummyJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
+	// progressの動作確認用
+	var progress int
+	for i := 0; i < 10; i++ {
+		progress += 10
+		progressCallback(progress, 0)
+		fmt.Println(j.Job, progress)
+		time.Sleep(time.Second)
+	}
+	return nil
 }
 
 func (j *ReactionJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
