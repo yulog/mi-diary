@@ -8,7 +8,7 @@ import (
 )
 
 // https://techblog.enechain.com/entry/bun-atlas-migration-setup-guide
-func modelsToByte(db *bun.DB, models []interface{}) []byte {
+func modelsToByte(db *bun.DB, models []any) []byte {
 	var data []byte
 	for _, model := range models {
 		query := db.NewCreateTable().Model(model).WithForeignKeys()
@@ -38,7 +38,7 @@ func indexesToByte(db *bun.DB, idxCreators []model.IndexQueryCreator) []byte {
 }
 
 func GenerateSchema(db *bun.DB) {
-	models := []interface{}{
+	models := []any{
 		(*model.Note)(nil),
 		(*model.User)(nil),
 		(*model.ReactionEmoji)(nil),
