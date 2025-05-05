@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yulog/mi-diary/presenter"
 )
 
 type Params struct {
@@ -34,13 +35,13 @@ type Profiles struct {
 
 // RootHandler は / のハンドラ
 func (srv *Server) RootHandler(c echo.Context) error {
-	return renderer(c, srv.logic.SelectProfileLogic(c.Request().Context()))
+	return renderer(c, presenter.SelectProfilePresentation(c, srv.logic.SelectProfileLogic(c.Request().Context())))
 }
 
 // NewProfilesHandler は /profiles のハンドラ
 func (srv *Server) NewProfilesHandler(c echo.Context) error {
 
-	return renderer(c, srv.logic.NewProfileLogic(c.Request().Context()))
+	return renderer(c, presenter.AddProfilePresentation(c, srv.logic.NewProfileLogic(c.Request().Context())))
 }
 
 // AddProfileHandler は /profiles のハンドラ

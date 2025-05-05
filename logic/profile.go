@@ -7,20 +7,23 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/a-h/templ"
 	"github.com/google/uuid"
 	"github.com/yulog/mi-diary/app"
-	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/miutil/miauth"
 )
 
-func (l *Logic) SelectProfileLogic(ctx context.Context) templ.Component {
-	return cm.SelectProfile("Select profile...", l.ConfigRepo.GetProfilesSortedKey())
+func (l *Logic) SelectProfileLogic(ctx context.Context) *SelectProfileOutput {
+	return &SelectProfileOutput{
+		Title:    "Select profile...",
+		Profiles: l.ConfigRepo.GetProfilesSortedKey(),
+	}
 }
 
-func (l *Logic) NewProfileLogic(ctx context.Context) templ.Component {
+func (l *Logic) NewProfileLogic(ctx context.Context) *AddProfileOutput {
 
-	return cm.AddProfile("New Profile")
+	return &AddProfileOutput{
+		Title: "New Profile",
+	}
 }
 
 func (l *Logic) AddProfileLogic(ctx context.Context, server string) (string, error) {

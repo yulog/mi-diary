@@ -9,9 +9,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/a-h/templ"
 	"github.com/yulog/mi-diary/color"
-	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/domain/model"
 	mi "github.com/yulog/miutil"
 )
@@ -64,33 +62,48 @@ type ColorFullJob struct {
 	Job
 }
 
-func (l *Logic) ManageLogic(ctx context.Context) templ.Component {
+func (l *Logic) ManageLogic(ctx context.Context) *ManageOutput {
 	p, _ := l.JobWorkerService.GetJobProgress()
 	// TODO: 進行中の判定これで良いの？
 	if p > 0 {
-		return cm.ManageStart("Manage")
+		return &ManageOutput{Title: "Manage"}
 	}
-	return cm.ManageInit("Manage", l.ConfigRepo.GetProfilesSortedKey())
+	return &ManageOutput{Title: "Manage", Profiles: l.ConfigRepo.GetProfilesSortedKey()}
 }
 
-func (l *Logic) JobStartLogic(ctx context.Context, job Job) templ.Component {
+func (l *Logic) JobStartLogic(ctx context.Context, job Job) *JobStartOutput {
 	l.CreateJob(ctx, job)
 
-	return cm.Start("", "Get", job.Profile, job.Type.String(), job.ID)
+	return &JobStartOutput{
+		Placeholder: "",
+		Button:      "Get",
+		Profile:     job.Profile,
+		JobType:     job.Type.String(),
+		JobID:       job.ID,
+	}
 }
 
-func (l *Logic) JobProgressLogic(ctx context.Context) (int, bool, templ.Component) {
+func (l *Logic) JobProgressLogic(ctx context.Context) *JobProgressOutput {
 	p, t := l.JobWorkerService.GetJobProgress()
 	completed := (l.JobWorkerService.GetJobStatus() == model.Completed || l.JobWorkerService.GetJobStatus() == model.Failed)
 
-	return p, completed, cm.Progress(fmt.Sprintf("%d / %d", p, t))
+	return &JobProgressOutput{
+		Progress:        p,
+		Completed:       completed,
+		ProgressMessage: fmt.Sprintf("%d / %d", p, t),
+	}
 }
 
-func (l *Logic) JobLogic(ctx context.Context, profile string) templ.Component {
+func (l *Logic) JobLogic(ctx context.Context, profile string) *JobFinishedOutput {
 	p, t := l.JobWorkerService.GetJobProgress()
 	// TODO: 進捗、ステータスのリセットをする必要がある？
 
-	return cm.Job("", "Get", fmt.Sprintf("%d / %d", p, t), l.ConfigRepo.GetProfilesSortedKey())
+	return &JobFinishedOutput{
+		Placeholder:     "",
+		Button:          "Get",
+		ProgressMessage: fmt.Sprintf("%d / %d", p, t),
+		Profiles:        l.ConfigRepo.GetProfilesSortedKey(),
+	}
 }
 
 func (l *Logic) CreateJob(ctx context.Context, job Job) {

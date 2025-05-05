@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/a-h/templ"
-	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
-func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
+func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (*FileWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -57,23 +55,23 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 	hasLast := p.CurrentPage+1 < p.TotalPages()
 	slog.Info("has last", slog.Bool("bool", hasLast))
 
-	n := cm.File{
-		Title:          fmt.Sprint(p.CurrentPage),
-		Profile:        profile,
-		Host:           host,
-		FileFilterPath: fmt.Sprintf("/profiles/%s/files", profile),
-		Items:          files,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages(), Has: hasLast},
-		QueryParams: cm.QueryParams{
-			Page:  params.Page,
-			Color: params.Color,
+	return &FileWithPages{
+		File: File{
+			Title:          fmt.Sprint(p.CurrentPage),
+			Profile:        profile,
+			Host:           host,
+			FileFilterPath: fmt.Sprintf("/profiles/%s/files", profile),
+			Items:          files,
 		},
-	}
-
-	return n.WithPages(cp), nil
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages(), Has: hasLast},
+			QueryParams: QueryParams{
+				Page:  params.Page,
+				Color: params.Color,
+			},
+		},
+	}, nil
 }

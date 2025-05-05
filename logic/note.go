@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/a-h/templ"
-	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
-func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -37,23 +35,23 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 		slog.Info(err.Error())
 	}
 
-	n := cm.Note{
-		Title:   name,
-		Profile: profile,
-		Host:    host,
-		Items:   notes,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages()},
-	}
-
-	return n.WithPages(cp), nil
+	return &NoteWithPages{
+		Note: Note{
+			Title:   name,
+			Profile: profile,
+			Host:    host,
+			Items:   notes,
+		},
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages()},
+		},
+	}, nil
 }
 
-func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -80,23 +78,23 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 		slog.Info(err.Error())
 	}
 
-	n := cm.Note{
-		Title:   name,
-		Profile: profile,
-		Host:    host,
-		Items:   notes,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages()},
-	}
-
-	return n.WithPages(cp), nil
+	return &NoteWithPages{
+		Note: Note{
+			Title:   name,
+			Profile: profile,
+			Host:    host,
+			Items:   notes,
+		},
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages()},
+		},
+	}, nil
 }
 
-func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Params) (templ.Component, error) {
+func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -123,23 +121,23 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Para
 		slog.Info(err.Error())
 	}
 
-	n := cm.Note{
-		Title:   fmt.Sprintf("%s - %d", name, p.CurrentPage),
-		Profile: profile,
-		Host:    host,
-		Items:   notes,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages()},
-	}
-
-	return n.WithPages(cp), nil
+	return &NoteWithPages{
+		Note: Note{
+			Title:   fmt.Sprintf("%s - %d", name, p.CurrentPage),
+			Profile: profile,
+			Host:    host,
+			Items:   notes,
+		},
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages()},
+		},
+	}, nil
 }
 
-func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (templ.Component, error) {
+func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -185,28 +183,29 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	hasLast := p.CurrentPage+1 < p.TotalPages()
 	// slog.Info("has last", slog.Bool("hasLast", hasLast), slog.Int("next", next), slog.Int("total", p.TotalPages()), slog.Int("current", p.CurrentPage))
 
-	n := cm.Note{
-		Title:      title,
-		Profile:    profile,
-		Host:       host,
-		SearchPath: fmt.Sprintf("/profiles/%s/notes", profile),
-		Items:      notes,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages(), Has: hasLast},
-		QueryParams: cm.QueryParams{
-			Page: params.Page,
-			S:    params.S,
+	return &NoteWithPages{
+		Note: Note{
+			Title:      title,
+			Profile:    profile,
+			Host:       host,
+			SearchPath: fmt.Sprintf("/profiles/%s/notes", profile),
+			Items:      notes,
 		},
-	}
-
-	return n.WithPages(cp), nil
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages(), Has: hasLast},
+			// TODO: Queryがある/ないのパターンでpresenterを分けたほうが良い？
+			QueryParams: QueryParams{
+				Page: params.Page,
+				S:    params.S,
+			},
+		},
+	}, nil
 }
 
-func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (templ.Component, error) {
+func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -234,18 +233,18 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 		slog.Info(err.Error())
 	}
 
-	n := cm.Note{
-		Title:   fmt.Sprintf("%s - %d", d, p.CurrentPage),
-		Profile: profile,
-		Host:    host,
-		Items:   notes,
-	}
-	cp := cm.Pages{
-		Current: p.CurrentPage,
-		Prev:    cm.Page{Index: prev, Has: p.HasPreviousPage()},
-		Next:    cm.Page{Index: next, Has: p.HasNextPage()},
-		Last:    cm.Page{Index: p.TotalPages()},
-	}
-
-	return n.WithPages(cp), nil
+	return &NoteWithPages{
+		Note: Note{
+			Title:   fmt.Sprintf("%s - %d", d, p.CurrentPage),
+			Profile: profile,
+			Host:    host,
+			Items:   notes,
+		},
+		Pages: Pages{
+			Current: p.CurrentPage,
+			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+			Next:    Page{Index: next, Has: p.HasNextPage()},
+			Last:    Page{Index: p.TotalPages()},
+		},
+	}, nil
 }

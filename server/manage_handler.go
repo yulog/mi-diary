@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/presenter"
 )
 
 // type ManageHandler struct {
@@ -20,7 +21,7 @@ import (
 // ManageHandler は /manage のハンドラ
 func (srv *Server) ManageHandler(c echo.Context) error {
 
-	return renderer(c, srv.logic.ManageLogic(c.Request().Context()))
+	return renderer(c, presenter.ManagePresentation(c, srv.logic.ManageLogic(c.Request().Context())))
 }
 
 // JobStartHandler は /job/start のハンドラ
@@ -38,18 +39,18 @@ func (srv *Server) JobStartHandler(c echo.Context) error {
 		ID:      j.ID,
 	}
 
-	return renderer(c, srv.logic.JobStartLogic(c.Request().Context(), job))
+	return renderer(c, presenter.JobStartPresentation(c, srv.logic.JobStartLogic(c.Request().Context(), job)))
 }
 
 // JobProgressHandler は /job/progress のハンドラ
 func (srv *Server) JobProgressHandler(c echo.Context) error {
-	_, d, com := srv.logic.JobProgressLogic(c.Request().Context())
+	_, d, out := presenter.JobProgressPresentation(c, srv.logic.JobProgressLogic(c.Request().Context()))
 
 	if d {
 		c.Response().Header().Set("hx-trigger", "done")
 	}
 
-	return renderer(c, com)
+	return renderer(c, out)
 }
 
 // JobHandler は /job のハンドラ
@@ -58,7 +59,7 @@ func (srv *Server) JobHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	com := srv.logic.JobLogic(c.Request().Context(), params.Profile)
+	out := srv.logic.JobLogic(c.Request().Context(), params.Profile)
 
-	return renderer(c, com)
+	return renderer(c, presenter.JobFinishedPresentation(c, out))
 }
