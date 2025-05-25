@@ -41,8 +41,8 @@ func FileWithPagesPresentation(c echo.Context, o *logic.FileWithPages) templ.Com
 			Next:    cm.Page{Index: o.Pages.Next.Index, Has: o.Pages.Next.Has},
 			Last:    cm.Page{Index: o.Pages.Last.Index},
 			QueryParams: cm.QueryParams{
-				Page: o.Pages.QueryParams.Page,
-				S:    o.Pages.QueryParams.S,
+				Page:  o.Pages.QueryParams.Page,
+				Color: o.Pages.QueryParams.Color,
 			},
 		})
 }
