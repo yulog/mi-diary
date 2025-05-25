@@ -33,7 +33,7 @@ func UserPresentation(c echo.Context, o *logic.UserOutput) templ.Component {
 
 func ManagePresentation(c echo.Context, o *logic.ManageOutput) templ.Component {
 	if len(o.Profiles) > 0 {
-		cm.ManageInit(o.Title, o.Profiles)
+		return cm.ManageInit(o.Title, o.Profiles)
 	}
 	return cm.ManageStart(o.Title)
 }
