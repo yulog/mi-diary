@@ -1,6 +1,9 @@
 package logic
 
-import "github.com/yulog/mi-diary/domain/model"
+import (
+	"github.com/yulog/mi-diary/domain/model"
+	"github.com/yulog/mi-diary/internal/shared"
+)
 
 type ArchivesOutput struct {
 	Title   string
@@ -91,16 +94,10 @@ type Pages struct {
 	Next    Page
 	Last    Page
 
-	QueryParams Params
+	QueryParams shared.QueryParams
 }
 
 type Page struct {
 	Index int
 	Has   bool
-}
-
-type Params struct {
-	Page  int
-	S     string
-	Color string
 }

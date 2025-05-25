@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yulog/mi-diary/logic"
+	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/presenter"
 )
 
@@ -32,7 +32,7 @@ func (srv *Server) ReactionHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page: params.Page,
 	}
 
@@ -65,7 +65,7 @@ func (srv *Server) HashTagHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page: params.Page,
 	}
 
@@ -98,7 +98,7 @@ func (srv *Server) UserHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page: params.Page,
 	}
 
@@ -116,7 +116,7 @@ func (srv *Server) FilesHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page:  params.Page,
 		Color: params.Color,
 	}
@@ -134,7 +134,7 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page: params.Page,
 		S:    params.S,
 	}
@@ -166,7 +166,7 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return err
 	}
-	params2 := logic.Params{
+	params2 := shared.QueryParams{
 		Page: params.Page,
 	}
 

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
-func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (*FileWithPages, error) {
+func (l *Logic) FilesLogic(ctx context.Context, profile string, params shared.QueryParams) (*FileWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -68,7 +69,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
 			Next:    Page{Index: next, Has: p.HasNextPage()},
 			Last:    Page{Index: p.TotalPages(), Has: hasLast},
-			QueryParams: Params{
+			QueryParams: shared.QueryParams{
 				Page:  params.Page,
 				Color: params.Color,
 			},

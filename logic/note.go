@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/util/pagination"
 )
 
-func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
+func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, params shared.QueryParams) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 	}, nil
 }
 
-func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
+func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, params shared.QueryParams) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -94,7 +95,7 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 	}, nil
 }
 
-func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Params) (*NoteWithPages, error) {
+func (l *Logic) UserLogic(ctx context.Context, profile, name string, params shared.QueryParams) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -137,7 +138,7 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params Para
 	}, nil
 }
 
-func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (*NoteWithPages, error) {
+func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.QueryParams) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
@@ -197,7 +198,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 			Next:    Page{Index: next, Has: p.HasNextPage()},
 			Last:    Page{Index: p.TotalPages(), Has: hasLast},
 			// TODO: Queryがある/ないのパターンでpresenterを分けたほうが良い？
-			QueryParams: Params{
+			QueryParams: shared.QueryParams{
 				Page: params.Page,
 				S:    params.S,
 			},
@@ -205,7 +206,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 	}, nil
 }
 
-func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params Params) (*NoteWithPages, error) {
+func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params shared.QueryParams) (*NoteWithPages, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return nil, err
