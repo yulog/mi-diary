@@ -1,4 +1,4 @@
-package common
+package shared
 
 type QueryOptions struct {
 	SortBy    string

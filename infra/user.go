@@ -7,7 +7,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
-	"github.com/yulog/mi-diary/internal/common"
+	"github.com/yulog/mi-diary/internal/shared"
 )
 
 type UserInfra struct {
@@ -18,7 +18,7 @@ func (i *Infra) NewUserInfra() repository.UserRepositorier {
 	return &UserInfra{dao: i.dao}
 }
 
-func (i *UserInfra) Get(ctx context.Context, profile string, op common.QueryOptions) ([]model.User, error) {
+func (i *UserInfra) Get(ctx context.Context, profile string, op shared.QueryOptions) ([]model.User, error) {
 	var users []model.User
 	err := i.dao.DB(profile).
 		NewSelect().
