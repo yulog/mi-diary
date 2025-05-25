@@ -197,7 +197,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params Params) (
 			Next:    Page{Index: next, Has: p.HasNextPage()},
 			Last:    Page{Index: p.TotalPages(), Has: hasLast},
 			// TODO: Queryがある/ないのパターンでpresenterを分けたほうが良い？
-			QueryParams: QueryParams{
+			QueryParams: Params{
 				Page: params.Page,
 				S:    params.S,
 			},

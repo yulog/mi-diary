@@ -172,12 +172,6 @@ func (d *Dependency) Build() *Logic {
 	}
 }
 
-type Params struct {
-	Page  int
-	S     string
-	Color string
-}
-
 type ItemLimitHasNextPageChecker struct {
 	ItemCount int
 }

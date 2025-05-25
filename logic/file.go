@@ -68,7 +68,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params Params) (
 			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
 			Next:    Page{Index: next, Has: p.HasNextPage()},
 			Last:    Page{Index: p.TotalPages(), Has: hasLast},
-			QueryParams: QueryParams{
+			QueryParams: Params{
 				Page:  params.Page,
 				Color: params.Color,
 			},

@@ -91,7 +91,7 @@ type Pages struct {
 	Next    Page
 	Last    Page
 
-	QueryParams QueryParams
+	QueryParams Params
 }
 
 type Page struct {
@@ -99,8 +99,8 @@ type Page struct {
 	Has   bool
 }
 
-type QueryParams struct {
-	Page  int    `url:"page"`
-	S     string `url:"s,omitempty"`
-	Color string `url:"color,omitempty"`
+type Params struct {
+	Page  int
+	S     string
+	Color string
 }
