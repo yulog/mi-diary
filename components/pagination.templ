@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/google/go-querystring/query"
+	"github.com/yulog/mi-diary/internal/shared"
 )
 
 type Pages struct {
@@ -11,18 +11,12 @@ type Pages struct {
 	Next    Page
 	Last    Page
 
-	QueryParams QueryParams
+	QueryParams shared.QueryParams
 }
 
 type Page struct {
 	Index int
 	Has   bool
-}
-
-type QueryParams struct {
-	Page  int    `url:"page"`
-	S     string `url:"s,omitempty"`
-	Color string `url:"color,omitempty"`
 }
 
 templ Pagination(p Pages) {
@@ -33,15 +27,9 @@ templ Pagination(p Pages) {
 	@pager(p)
 }
 
-func (q *QueryParams) getPageQuery(p int) templ.SafeURL {
-	q.Page = p
-	v, _ := query.Values(q)
-	return templ.URL("?" + v.Encode())
-}
-
-templ paginationLink(q QueryParams, num int) {
+templ paginationLink(q shared.QueryParams, num int) {
 	<li>
-		<a href={ q.getPageQuery(num) } class="pagination-link">
+		<a href={ templ.URL(q.SetPage(num).GetQuery()) } class="pagination-link">
 			{ fmt.Sprintf("%d", num) }
 		</a>
 	</li>
@@ -50,12 +38,12 @@ templ paginationLink(q QueryParams, num int) {
 templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
 		if p.Prev.Has {
-			<a href={ p.QueryParams.getPageQuery(p.Prev.Index) } class="pagination-previous">Prev</a>
+			<a href={ templ.URL(p.QueryParams.SetPage(p.Prev.Index).GetQuery()) } class="pagination-previous">Prev</a>
 		} else {
 			<span class="pagination-previous is-disabled">Prev</span>
 		}
 		if p.Next.Has {
-			<a href={ p.QueryParams.getPageQuery(p.Next.Index) } class="pagination-next">Next</a>
+			<a href={ templ.URL(p.QueryParams.SetPage(p.Next.Index).GetQuery()) } class="pagination-next">Next</a>
 		} else {
 			<span class="pagination-next is-disabled">Next</span>
 		}

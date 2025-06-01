@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/google/go-querystring/query"
+	"github.com/yulog/mi-diary/internal/shared"
 )
 
 type Pages struct {
@@ -19,18 +19,12 @@ type Pages struct {
 	Next    Page
 	Last    Page
 
-	QueryParams QueryParams
+	QueryParams shared.QueryParams
 }
 
 type Page struct {
 	Index int
 	Has   bool
-}
-
-type QueryParams struct {
-	Page  int    `url:"page"`
-	S     string `url:"s,omitempty"`
-	Color string `url:"color,omitempty"`
 }
 
 func Pagination(p Pages) templ.Component {
@@ -78,13 +72,7 @@ func Pagination(p Pages) templ.Component {
 	})
 }
 
-func (q *QueryParams) getPageQuery(p int) templ.SafeURL {
-	q.Page = p
-	v, _ := query.Values(q)
-	return templ.URL("?" + v.Encode())
-}
-
-func paginationLink(q QueryParams, num int) templ.Component {
+func paginationLink(q shared.QueryParams, num int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -109,7 +97,7 @@ func paginationLink(q QueryParams, num int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 templ.SafeURL = q.getPageQuery(num)
+		var templ_7745c5c3_Var3 templ.SafeURL = templ.URL(q.SetPage(num).GetQuery())
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -121,7 +109,7 @@ func paginationLink(q QueryParams, num int) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", num))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 45, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 33, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -165,7 +153,7 @@ func pager(p Pages) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 templ.SafeURL = p.QueryParams.getPageQuery(p.Prev.Index)
+			var templ_7745c5c3_Var6 templ.SafeURL = templ.URL(p.QueryParams.SetPage(p.Prev.Index).GetQuery())
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -185,7 +173,7 @@ func pager(p Pages) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 templ.SafeURL = p.QueryParams.getPageQuery(p.Next.Index)
+			var templ_7745c5c3_Var7 templ.SafeURL = templ.URL(p.QueryParams.SetPage(p.Next.Index).GetQuery())
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -227,7 +215,7 @@ func pager(p Pages) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", p.Current))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 72, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/pagination.templ`, Line: 60, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

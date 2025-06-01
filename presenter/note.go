@@ -4,6 +4,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	cm "github.com/yulog/mi-diary/components"
+	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/logic"
 )
 
@@ -20,7 +21,7 @@ func NoteWithPagesPresentation(c echo.Context, o *logic.NoteWithPages) templ.Com
 			Prev:    cm.Page{Index: o.Pages.Prev.Index, Has: o.Pages.Prev.Has},
 			Next:    cm.Page{Index: o.Pages.Next.Index, Has: o.Pages.Next.Has},
 			Last:    cm.Page{Index: o.Pages.Last.Index},
-			QueryParams: cm.QueryParams{
+			QueryParams: shared.QueryParams{
 				Page: o.Pages.QueryParams.Page,
 				S:    o.Pages.QueryParams.S,
 			},
@@ -40,7 +41,7 @@ func FileWithPagesPresentation(c echo.Context, o *logic.FileWithPages) templ.Com
 			Prev:    cm.Page{Index: o.Pages.Prev.Index, Has: o.Pages.Prev.Has},
 			Next:    cm.Page{Index: o.Pages.Next.Index, Has: o.Pages.Next.Has},
 			Last:    cm.Page{Index: o.Pages.Last.Index},
-			QueryParams: cm.QueryParams{
+			QueryParams: shared.QueryParams{
 				Page:  o.Pages.QueryParams.Page,
 				Color: o.Pages.QueryParams.Color,
 			},
