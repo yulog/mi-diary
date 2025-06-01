@@ -95,7 +95,7 @@ func (d *Dependency) WithArchiveRepo(repo repository.ArchiveRepositorier) *Depen
 	return d
 }
 
-func (d *Dependency) WithUWORepoUsingRepo() *Dependency {
+func (d *Dependency) WithUOWRepoUsingRepo() *Dependency {
 	d.uowRepo = d.repo.NewUnitOfWorkInfra()
 	return d
 }
