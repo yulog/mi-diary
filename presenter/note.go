@@ -20,7 +20,7 @@ func NoteWithPagesPresentation(c echo.Context, o *logic.NoteWithPages) templ.Com
 			Current: o.Pages.Current,
 			Prev:    cm.Page{Index: o.Pages.Prev.Index, Has: o.Pages.Prev.Has},
 			Next:    cm.Page{Index: o.Pages.Next.Index, Has: o.Pages.Next.Has},
-			Last:    cm.Page{Index: o.Pages.Last.Index},
+			Last:    cm.Page{Index: o.Pages.Last.Index, Has: o.Pages.Last.Has},
 			QueryParams: shared.QueryParams{
 				Page: o.Pages.QueryParams.Page,
 				S:    o.Pages.QueryParams.S,
