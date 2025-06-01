@@ -12,6 +12,7 @@ import (
 	"github.com/cenkalti/dominantcolor"
 	"github.com/google/go-querystring/query"
 	"github.com/yulog/mi-diary/color"
+	"github.com/yulog/mi-diary/internal/shared"
 )
 
 func SearchBar(path, s string) templ.Component {
@@ -43,7 +44,7 @@ func SearchBar(path, s string) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(s)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 15, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 16, Col: 99}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -56,7 +57,7 @@ func SearchBar(path, s string) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 18, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 19, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -72,7 +73,7 @@ func SearchBar(path, s string) templ.Component {
 }
 
 func getColorQuery(color string) templ.SafeURL {
-	q := QueryParams{
+	q := shared.QueryParams{
 		Page:  1,
 		Color: color,
 	}

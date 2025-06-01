@@ -4,6 +4,7 @@ import (
 	"github.com/cenkalti/dominantcolor"
 	"github.com/google/go-querystring/query"
 	"github.com/yulog/mi-diary/color"
+	"github.com/yulog/mi-diary/internal/shared"
 )
 
 templ SearchBar(path, s string) {
@@ -24,7 +25,7 @@ templ SearchBar(path, s string) {
 }
 
 func getColorQuery(color string) templ.SafeURL {
-	q := QueryParams{
+	q := shared.QueryParams{
 		Page:  1,
 		Color: color,
 	}
