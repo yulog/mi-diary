@@ -8,7 +8,7 @@ import (
 )
 
 type UserRepositorier interface {
-	Get(ctx context.Context, profile string, op shared.QueryOptions) ([]model.User, error)
+	Get(ctx context.Context, profile string, op shared.SortOptions) ([]model.User, error)
 
 	Insert(ctx context.Context, profile string, users *[]model.User) error
 

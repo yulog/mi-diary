@@ -46,9 +46,9 @@ func (l *Logic) UsersLogic(ctx context.Context, profile string, partial bool, so
 	}
 	var u []model.User
 	if sortBy == "name" {
-		u, err = l.UserRepo.Get(ctx, profile, shared.QueryOptions{SortBy: "name", SortOrder: "ASC"})
+		u, err = l.UserRepo.Get(ctx, profile, shared.SortOptions{SortBy: "name", SortOrder: "ASC"})
 	} else {
-		u, err = l.UserRepo.Get(ctx, profile, shared.QueryOptions{SortBy: "count", SortOrder: "DESC"})
+		u, err = l.UserRepo.Get(ctx, profile, shared.SortOptions{SortBy: "count", SortOrder: "DESC"})
 	}
 	if err != nil {
 		return nil, err

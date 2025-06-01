@@ -18,7 +18,7 @@ func (i *Infra) NewUserInfra() repository.UserRepositorier {
 	return &UserInfra{dao: i.dao}
 }
 
-func (i *UserInfra) Get(ctx context.Context, profile string, op shared.QueryOptions) ([]model.User, error) {
+func (i *UserInfra) Get(ctx context.Context, profile string, op shared.SortOptions) ([]model.User, error) {
 	var users []model.User
 	err := i.dao.DB(profile).
 		NewSelect().
