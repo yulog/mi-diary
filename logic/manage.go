@@ -479,10 +479,6 @@ func (j *ColorFullJob) Execute(ctx context.Context, progressCallback func(int, i
 		slog.Error(err.Error())
 	}
 
-	// p, _ := l.JobRepo.GetProgress()
-	// l.JobRepo.SetProgress(p, len(r))
-	// slog.Info("color progress", slog.Int("progress", p), slog.Int("total", len(r)))
-
 	var progress int
 	for _, v := range r {
 		if !strings.HasPrefix(v.Type, "image") {

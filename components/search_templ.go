@@ -76,7 +76,6 @@ func getColorQuery(color string) templ.SafeURL {
 		Page:  1,
 		Color: color,
 	}
-	// v, _ := query.Values(q)
 	return templ.URL(q.GetQuery())
 }
 
