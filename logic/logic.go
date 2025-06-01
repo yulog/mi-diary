@@ -27,7 +27,7 @@ type UnitOfWork interface {
 type Logic struct {
 	Repo             Repositorier
 	UnitOfWork       UnitOfWork
-	UWORepo          repository.UnitOfWorkRepositorier
+	UOWRepo          repository.UnitOfWorkRepositorier
 	NoteRepo         repository.NoteRepositorier
 	UserRepo         repository.UserRepositorier
 	HashTagRepo      repository.HashTagRepositorier
@@ -43,7 +43,7 @@ type Logic struct {
 type Dependency struct {
 	repo             Repositorier
 	unitOfWork       UnitOfWork
-	UWORepo          repository.UnitOfWorkRepositorier
+	uowRepo          repository.UnitOfWorkRepositorier
 	noteRepo         repository.NoteRepositorier
 	userRepo         repository.UserRepositorier
 	hashTagRepo      repository.HashTagRepositorier
@@ -96,7 +96,7 @@ func (d *Dependency) WithArchiveRepo(repo repository.ArchiveRepositorier) *Depen
 }
 
 func (d *Dependency) WithUWORepoUsingRepo() *Dependency {
-	d.UWORepo = d.repo.NewUnitOfWorkInfra()
+	d.uowRepo = d.repo.NewUnitOfWorkInfra()
 	return d
 }
 
@@ -158,7 +158,7 @@ func (d *Dependency) WithJobWorkerService(srv service.JobWorker) *Dependency {
 func (d *Dependency) Build() *Logic {
 	return &Logic{
 		Repo:             d.repo,
-		UWORepo:          d.UWORepo,
+		UOWRepo:          d.uowRepo,
 		NoteRepo:         d.noteRepo,
 		UserRepo:         d.userRepo,
 		HashTagRepo:      d.hashTagRepo,
