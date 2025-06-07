@@ -30,9 +30,9 @@ type App struct {
 // 	return v, nil
 // }
 
-func New(cfg *config.Config) *App {
+func New() *App {
 	return &App{
-		Config: *cfg,
+		Config: *config.Load(),
 	}
 }
 
