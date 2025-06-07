@@ -25,7 +25,7 @@ func main() {
 	slog.SetDefault(logger)
 	app := app.New()
 	logic := logic.New().
-		WithRepo(infra.New(app)).
+		WithRepo(infra.New()).
 		WithUOWRepoUsingRepo().
 		WithNoteRepoUsingRepo().
 		WithUserRepoUsingRepo().

@@ -125,7 +125,7 @@ func GenSchema() {
 	fmt.Println("Generate schema...")
 	app := app.New()
 	l := logic.New().
-		WithRepo(infra.New(app)).
+		WithRepo(infra.New()).
 		WithMigrationServiceUsingRepo().
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		Build()
@@ -142,7 +142,7 @@ func Migrate() {
 	fmt.Println("Migration...")
 	app := app.New()
 	l := logic.New().
-		WithRepo(infra.New(app)).
+		WithRepo(infra.New()).
 		WithMigrationServiceUsingRepo().
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		Build()

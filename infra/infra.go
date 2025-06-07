@@ -11,21 +11,17 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
-	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/domain/repository"
 	"github.com/yulog/mi-diary/logic"
 )
 
 type Infra struct {
-	app *app.App
-
 	dao *DataBase
 }
 
-func New(a *app.App) logic.Repositorier {
+func New() logic.Repositorier {
 	return &Infra{
-		app: a,
 		dao: NewDAO(),
 	}
 }
