@@ -7,7 +7,6 @@ import (
 )
 
 templ SearchBar(path, s string) {
-	// if s != "" {
 	if path != "" {
 		<div class="block">
 			<div class="field has-addons has-addons-centered">
@@ -20,7 +19,6 @@ templ SearchBar(path, s string) {
 			</div>
 		</div>
 	}
-	// }
 }
 
 func getColorQuery(color string) templ.SafeURL {
