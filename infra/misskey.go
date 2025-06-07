@@ -26,7 +26,7 @@ func (infra *MisskeyAPI) GetUserReactions(profile, id string, limit int) (int, *
 	body := map[string]any{
 		"i":      prof.I,
 		"limit":  limit,
-		"userId": prof.UserId,
+		"userId": prof.UserID,
 	}
 	if id != "" {
 		body["untilId"] = id

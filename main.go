@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
+	"github.com/yulog/mi-diary/internal/config"
 	"github.com/yulog/mi-diary/logic"
 	"github.com/yulog/mi-diary/server"
 )
@@ -23,7 +24,8 @@ func main() {
 	// logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	logger := slog.New(log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true}))
 	slog.SetDefault(logger)
-	app := app.New()
+	cfg := config.Load()
+	app := app.New(cfg)
 	logic := logic.New().
 		WithRepo(infra.New(app)).
 		WithUOWRepoUsingRepo().
@@ -47,5 +49,5 @@ func main() {
 	// TODO: context良く分からない
 	go logic.JobWorkerService.StartWorker(context.Background())
 
-	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
+	e.Logger.Fatal(e.Start(net.JoinHostPort("", cfg.Port)))
 }

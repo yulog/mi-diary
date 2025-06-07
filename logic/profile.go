@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/google/uuid"
-	"github.com/yulog/mi-diary/app"
+	"github.com/yulog/mi-diary/internal/config"
 	"github.com/yulog/miutil/miauth"
 )
 
@@ -71,9 +71,9 @@ func (l *Logic) CallbackLogic(ctx context.Context, host, sessionId string) error
 
 	l.ConfigRepo.SetConfig(
 		fmt.Sprintf("%s@%s", resp.User.Username, host),
-		app.Profile{
+		config.Profile{
 			I:        resp.Token,
-			UserId:   resp.User.ID,
+			UserID:   resp.User.ID,
 			UserName: resp.User.Username,
 			Host:     host,
 		},

@@ -11,6 +11,7 @@ import (
 
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
+	"github.com/yulog/mi-diary/internal/config"
 	"github.com/yulog/mi-diary/logic"
 )
 
@@ -123,7 +124,8 @@ func Upload() {
 
 func GenSchema() {
 	fmt.Println("Generate schema...")
-	app := app.New()
+	cfg := config.Load()
+	app := app.New(cfg)
 	l := logic.New().
 		WithRepo(infra.New(app)).
 		WithMigrationServiceUsingRepo().
@@ -140,7 +142,8 @@ func GenMigrate() {
 
 func Migrate() {
 	fmt.Println("Migration...")
-	app := app.New()
+	cfg := config.Load()
+	app := app.New(cfg)
 	l := logic.New().
 		WithRepo(infra.New(app)).
 		WithMigrationServiceUsingRepo().
