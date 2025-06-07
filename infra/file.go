@@ -18,10 +18,10 @@ func (i *Infra) NewFileInfra() repository.FileRepositorier {
 	return &FileInfra{dao: i.dao}
 }
 
-func (i *FileInfra) Get(ctx context.Context, profile, c string, p pagination.Paging) ([]model.File, error) {
+func (i *FileInfra) Get(ctx context.Context, profile, color string, p pagination.Paging) ([]model.File, error) {
 	var files []model.File
 	qb := i.dao.DB(profile).NewSelect().QueryBuilder()
-	qb = addWhere(qb, "f.group_color", c)
+	qb = addWhere(qb, "f.group_color", color)
 	err := qb.
 		Unwrap().(*bun.SelectQuery).
 		Model(&files).
@@ -92,11 +92,11 @@ func (i *FileInfra) Insert(ctx context.Context, profile string, files *[]model.F
 	return err
 }
 
-func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string) {
+func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, color1, color2 string) {
 	r := model.File{
 		ID:            id,
-		DominantColor: c1,
-		GroupColor:    c2,
+		DominantColor: color1,
+		GroupColor:    color2,
 	}
 	var s []model.File
 	s = append(s, r)
