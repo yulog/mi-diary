@@ -34,10 +34,11 @@ type User struct {
 type ReactionEmoji struct {
 	bun.BaseModel `bun:"table:reactions,alias:r"`
 
-	ID    int64  `bun:",pk,autoincrement"`
-	Name  string `bun:",unique,notnull"`
-	Image string
-	Count int64
+	ID       int64  `bun:",pk,autoincrement"`
+	Name     string `bun:",unique,notnull"`
+	Image    string
+	IsSymbol bool
+	Count    int64
 }
 
 type HashTag struct {

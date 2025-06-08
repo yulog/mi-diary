@@ -1,6 +1,6 @@
 CREATE TABLE "notes" ("id" VARCHAR NOT NULL, "reaction_id" VARCHAR NOT NULL, "user_id" VARCHAR NOT NULL, "reaction_emoji_name" VARCHAR NOT NULL, "text" VARCHAR, "created_at" TIMESTAMP, PRIMARY KEY ("id"), FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY ("reaction_emoji_name") REFERENCES "reactions" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
 CREATE TABLE "users" ("id" VARCHAR NOT NULL, "name" VARCHAR, "display_name" VARCHAR, "avatar_url" VARCHAR, "count" INTEGER, PRIMARY KEY ("id"));
-CREATE TABLE "reactions" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "name" VARCHAR NOT NULL, "image" VARCHAR, "count" INTEGER, UNIQUE ("name"));
+CREATE TABLE "reactions" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "name" VARCHAR NOT NULL, "image" VARCHAR, "is_symbol" BOOLEAN, "count" INTEGER, UNIQUE ("name"));
 CREATE TABLE "hash_tags" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "text" VARCHAR, "count" INTEGER, UNIQUE ("text"));
 CREATE TABLE "note_to_tags" ("note_id" VARCHAR NOT NULL, "hash_tag_id" INTEGER NOT NULL, PRIMARY KEY ("note_id", "hash_tag_id"), FOREIGN KEY ("note_id") REFERENCES "notes" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY ("hash_tag_id") REFERENCES "hash_tags" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
 CREATE TABLE "files" ("id" VARCHAR NOT NULL, "name" VARCHAR, "url" VARCHAR, "thumbnail_url" VARCHAR, "type" VARCHAR, "dominant_color" VARCHAR, "group_color" VARCHAR, "created_at" TIMESTAMP, PRIMARY KEY ("id"));

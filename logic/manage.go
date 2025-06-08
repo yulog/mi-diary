@@ -207,8 +207,16 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 			}
 			notes = append(notes, n)
 
+			symbol := false
+			for _, rune := range reactionName {
+				if unicode.IsSymbol(rune) {
+					symbol = true
+					break
+				}
+			}
 			r := model.ReactionEmoji{
-				Name: reactionName,
+				Name:     reactionName,
+				IsSymbol: symbol,
 			}
 			reactions = append(reactions, r)
 		}

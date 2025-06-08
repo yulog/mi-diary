@@ -51,6 +51,7 @@ func (i *EmojiInfra) GetByEmptyImage(ctx context.Context, profile string) ([]mod
 		NewSelect().
 		Model(&reactions).
 		Where("image = ?", "").
+		Where("is_symbol = ?", false).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
