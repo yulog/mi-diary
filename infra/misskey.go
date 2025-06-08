@@ -1,78 +1,55 @@
 package infra
 
 import (
-	"bytes"
-	"net/url"
-
-	"github.com/goccy/go-json"
-	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/domain/service"
 	mi "github.com/yulog/miutil"
 )
 
 type MisskeyAPI struct {
-	app *app.App
+	client *mi.Client
 }
 
-func NewMisskeyAPI(a *app.App) service.MisskeyAPIServicer {
-	return &MisskeyAPI{app: a}
+func NewMisskeyAPI() service.MisskeyAPIServicer {
+	return &MisskeyAPI{}
 }
 
-func (infra *MisskeyAPI) GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error) {
-	prof, err := infra.app.Config.Profiles.Get(profile)
-	if err != nil {
-		return 0, &mi.Reactions{}, err
-	}
+func (infra *MisskeyAPI) Client(host, credential string) service.MisskeyAPIServicer {
+	infra.client = mi.NewClient("https://"+host, credential)
+	return infra
+}
+
+func (infra *MisskeyAPI) GetUserReactions(userID, untilID string, limit int) (int, *mi.Reactions, error) {
 	body := map[string]any{
-		"i":      prof.I,
 		"limit":  limit,
-		"userId": prof.UserID,
+		"userId": userID,
 	}
-	if id != "" {
-		body["untilId"] = id
+	if untilID != "" {
+		body["untilId"] = untilID
 	}
-
-	// https://host.tld/api/users/reactions
-	// 却って分かりにくい気もする
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   prof.Host,
-	}).
-		JoinPath("api", "users", "reactions").String()
-
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	r, err := mi.Post2[mi.Reactions](u, buf)
+	req, err := infra.client.NewPostRequest("api/users/reactions", body)
 	if err != nil {
 		return 0, &mi.Reactions{}, err
 	}
-
-	return len(*r), r, nil
+	var out mi.Reactions
+	err = req.Do(&out)
+	if err != nil {
+		return 0, &mi.Reactions{}, err
+	}
+	return len(out), &out, nil
 }
 
-func (infra *MisskeyAPI) GetEmoji(profile, name string) (*mi.Emoji, error) {
-	prof, err := infra.app.Config.Profiles.Get(profile)
-	if err != nil {
-		return &mi.Emoji{}, err
-	}
+func (infra *MisskeyAPI) GetEmoji(name string) (*mi.Emoji, error) {
 	body := map[string]any{
 		"name": name,
 	}
-
-	// https://host.tld/api/emoji
-	u := (&url.URL{
-		Scheme: "https",
-		Host:   prof.Host,
-	}).
-		JoinPath("api", "emoji").String()
-	buf := bytes.NewBuffer(nil)
-	json.NewEncoder(buf).Encode(body)
-
-	emoji, err := mi.Post2[mi.Emoji](u, buf)
+	req, err := infra.client.NewPostRequest("api/emoji", body)
 	if err != nil {
 		return &mi.Emoji{}, err
 	}
-
-	return emoji, nil
+	var out mi.Emoji
+	err = req.Do(&out)
+	if err != nil {
+		return &mi.Emoji{}, err
+	}
+	return &out, nil
 }

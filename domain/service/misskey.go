@@ -1,8 +1,12 @@
 package service
 
-import mi "github.com/yulog/miutil"
+import (
+	mi "github.com/yulog/miutil"
+)
 
 type MisskeyAPIServicer interface {
-	GetUserReactions(profile, id string, limit int) (int, *mi.Reactions, error)
-	GetEmoji(profile, name string) (*mi.Emoji, error)
+	Client(host, credential string) MisskeyAPIServicer
+
+	GetUserReactions(userID, untilID string, limit int) (int, *mi.Reactions, error)
+	GetEmoji(name string) (*mi.Emoji, error)
 }

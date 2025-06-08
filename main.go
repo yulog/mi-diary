@@ -35,7 +35,7 @@ func main() {
 		WithArchiveRepoUsingRepo().
 		WithMigrationServiceUsingRepo().
 		WithConfigRepo(infra.NewConfigInfra(app)).
-		WithMisskeyAPIRepo(infra.NewMisskeyAPI(app)).
+		WithMisskeyAPIRepo(infra.NewMisskeyAPI()).
 		WithJobWorkerService(infra.NewJobWorker()).
 		Build()
 	srv := server.New(logic)

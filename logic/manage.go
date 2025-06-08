@@ -280,7 +280,11 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 }
 
 func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int) (int, *mi.Reactions, error) {
-	count, r, err := l.MisskeyService.GetUserReactions(profile, id, limit)
+	prof, err := l.ConfigRepo.GetProfile(profile)
+	if err != nil {
+		return 0, &mi.Reactions{}, err
+	}
+	count, r, err := l.MisskeyService.Client(prof.Host, prof.I).GetUserReactions(prof.UserID, id, limit)
 	if err != nil {
 		return 0, &mi.Reactions{}, err
 	}
@@ -289,7 +293,11 @@ func (l *Logic) getReactions(ctx context.Context, profile, id string, limit int)
 }
 
 func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, error) {
-	emoji, err := l.MisskeyService.GetEmoji(profile, name)
+	prof, err := l.ConfigRepo.GetProfile(profile)
+	if err != nil {
+		return &mi.Emoji{}, err
+	}
+	emoji, err := l.MisskeyService.Client(prof.Host, prof.I).GetEmoji(name)
 	if err != nil {
 		return &mi.Emoji{}, err
 	}
