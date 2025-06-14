@@ -392,7 +392,7 @@ func (j *ReactionFullJob) Execute(ctx context.Context, progressCallback func(int
 
 		progress += int(ac)
 		total += gc
-		progressCallback(int(ac), gc)
+		progressCallback(progress, total)
 
 		slog.Info("reaction progress", slog.Int("progress", progress), slog.Int("total", total))
 		if gc == 0 {
