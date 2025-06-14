@@ -9,7 +9,6 @@ import (
 )
 
 type JobWorker struct {
-	// app      *app.App
 	JobQueue chan *JobWrapper
 	Progress *Progress
 }
