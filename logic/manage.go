@@ -409,11 +409,13 @@ func (j *EmojiOneJob) Execute(ctx context.Context, progressCallback func(int, in
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
+		return err
 	}
 	emoji, err := j.Logic.getEmoji(ctx, j.Profile, j.ID)
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
+		return err
 	}
 	j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, res.ID, emoji)
 
@@ -427,6 +429,7 @@ func (j *EmojiFullJob) Execute(ctx context.Context, progressCallback func(int, i
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
+		return err
 	}
 
 	var progress int
@@ -446,6 +449,7 @@ func (j *EmojiFullJob) Execute(ctx context.Context, progressCallback func(int, i
 		if err != nil {
 			// TODO: エラー処理
 			slog.Error(err.Error())
+			continue
 		}
 		j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, emoji)
 
@@ -463,6 +467,7 @@ func (j *ColorOneJob) Execute(ctx context.Context, progressCallback func(int, in
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
+		return err
 	}
 
 	var progress int
@@ -493,6 +498,7 @@ func (j *ColorFullJob) Execute(ctx context.Context, progressCallback func(int, i
 	if err != nil {
 		// TODO: エラー処理
 		slog.Error(err.Error())
+		return err
 	}
 
 	var progress int
