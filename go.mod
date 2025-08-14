@@ -1,8 +1,6 @@
 module github.com/yulog/mi-diary
 
-go 1.24
-
-toolchain go1.24.0
+go 1.25
 
 require (
 	github.com/a-h/templ v0.3.898
