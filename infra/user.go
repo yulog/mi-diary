@@ -53,7 +53,7 @@ func (i *UserInfra) UpdateCount(ctx context.Context, profile string) error {
 	err := db.NewSelect().
 		Model((*model.Note)(nil)).
 		Relation("User", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Column("user_id", "name")
+			return q.Column("id", "user_id", "name")
 		}).
 		ColumnExpr("count(*) as count").
 		Group("n.user_id").
