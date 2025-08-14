@@ -10,7 +10,7 @@ type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
 	ID                int64  `bun:",pk,autoincrement"`
-	NoteID            string `bun:",notnull"` // `bun:",pk"` pk,autoincrementとpkを組み合わせるとschemaの生成が上手くいかず、autoincrementにならない
+	NoteID            string `bun:",unique,notnull"` // `bun:",pk"` pk,autoincrementとpkを組み合わせるとschemaの生成が上手くいかず、autoincrementにならない
 	ReactionID        string `bun:",notnull"`
 	UserID            string `bun:",notnull"` // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
 	ReactionEmojiName string `bun:",notnull"`
@@ -26,7 +26,7 @@ type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
 	ID          int64  `bun:",pk,autoincrement"`
-	UserID      string `bun:",notnull"`
+	UserID      string `bun:",unique,notnull"`
 	Name        string
 	DisplayName string
 	AvatarURL   string
@@ -63,7 +63,7 @@ type File struct {
 	bun.BaseModel `bun:"table:files,alias:f"`
 
 	ID            int64  `bun:",pk,autoincrement"`
-	FileID        string `bun:",notnull"`
+	FileID        string `bun:",unique,notnull"`
 	Name          string
 	URL           string
 	ThumbnailURL  string
