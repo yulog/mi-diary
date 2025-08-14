@@ -9,13 +9,13 @@ import (
 type Note struct {
 	bun.BaseModel `bun:"table:notes,alias:n"`
 
-	ID                string `bun:",pk"`
+	NoteID            string `bun:",pk"`
 	ReactionID        string `bun:",notnull"`
 	UserID            string `bun:",notnull"` // `bun:",pk"` ここをprimary keyにするとm2mのリレーション結合が壊れる
 	ReactionEmojiName string `bun:",notnull"`
 	Text              string
 	CreatedAt         time.Time
-	User              User          `bun:"rel:belongs-to,join:user_id=id"`
+	User              User          `bun:"rel:belongs-to,join:user_id=user_id"`
 	Reaction          ReactionEmoji `bun:"rel:belongs-to,join:reaction_emoji_name=name"`
 	Tags              []HashTag     `bun:"m2m:note_to_tags,join:Note=HashTag"`
 	Files             []File        `bun:"m2m:note_to_files,join:Note=File"`
@@ -24,7 +24,7 @@ type Note struct {
 type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
-	ID          string `bun:",pk"`
+	UserID      string `bun:",pk"`
 	Name        string
 	DisplayName string
 	AvatarURL   string
@@ -52,7 +52,7 @@ type HashTag struct {
 
 type NoteToTag struct {
 	NoteID    string   `bun:",pk"`
-	Note      *Note    `bun:"rel:belongs-to,join:note_id=id"`
+	Note      *Note    `bun:"rel:belongs-to,join:note_id=note_id"`
 	HashTagID int64    `bun:",pk"`
 	HashTag   *HashTag `bun:"rel:belongs-to,join:hash_tag_id=id"`
 }
@@ -60,7 +60,7 @@ type NoteToTag struct {
 type File struct {
 	bun.BaseModel `bun:"table:files,alias:f"`
 
-	ID            string `bun:",pk"`
+	FileID        string `bun:",pk"`
 	Name          string
 	URL           string
 	ThumbnailURL  string
@@ -73,9 +73,9 @@ type File struct {
 
 type NoteToFile struct {
 	NoteID string `bun:",pk"`
-	Note   *Note  `bun:"rel:belongs-to,join:note_id=id"`
+	Note   *Note  `bun:"rel:belongs-to,join:note_id=note_id"`
 	FileID string `bun:",pk"`
-	File   *File  `bun:"rel:belongs-to,join:file_id=id"`
+	File   *File  `bun:"rel:belongs-to,join:file_id=file_id"`
 }
 
 type Month struct {

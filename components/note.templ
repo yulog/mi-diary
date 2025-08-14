@@ -110,9 +110,9 @@ templ noteContent(host string, note model.Note) {
 				</div>
 			}
 		</div>
-		<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.ID)) } target="_blank" class="has-text-grey is-underlined">
+		<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.NoteID)) } target="_blank" class="has-text-grey is-underlined">
 			// SQLite は日時をUTCで保持する
-			{ note.ID } ({ note.CreatedAt.In(time.Local).Format(time.DateTime) })
+			{ note.NoteID } ({ note.CreatedAt.In(time.Local).Format(time.DateTime) })
 		</a>
 	</div>
 }

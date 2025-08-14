@@ -51,7 +51,7 @@ func (i *FileInfra) GetByNoteID(ctx context.Context, profile, id string) ([]mode
 	err := i.dao.DB(profile).
 		NewSelect().
 		Model(&files).
-		Where("f.id IN (?)", sq). // サブクエリを使う
+		Where("f.file_id IN (?)", sq). // サブクエリを使う
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (i *FileInfra) Insert(ctx context.Context, profile string, files *[]model.F
 
 func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, color1, color2 string) {
 	r := model.File{
-		ID:            id,
+		FileID:        id,
 		DominantColor: color1,
 		GroupColor:    color2,
 	}

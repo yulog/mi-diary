@@ -55,11 +55,11 @@ templ fileList(host string, items []model.File) {
 						default:
 							@cardPlaceholder(file)
 					}
-					<button class="button is-text js-modal-trigger" data-target={ "modal-" + file.ID }>
+					<button class="button is-text js-modal-trigger" data-target={ "modal-" + file.FileID }>
 						…
 					</button>
 					for _, note := range file.Notes {
-						<div id={ "modal-" + file.ID } class="modal">
+						<div id={ "modal-" + file.FileID } class="modal">
 							<div class="modal-background"></div>
 							<div class="modal-content">
 								@Card() {

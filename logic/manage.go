@@ -164,7 +164,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 				dn = v.Note.User.Name.(string)
 			}
 			u := model.User{
-				ID:          v.Note.User.ID,
+				UserID:      v.Note.User.ID,
 				Name:        v.Note.User.Username,
 				DisplayName: dn,
 				AvatarURL:   v.Note.User.AvatarURL,
@@ -185,7 +185,7 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 
 			for _, fv := range v.Note.Files {
 				f := model.File{
-					ID:           fv.ID,
+					FileID:       fv.ID,
 					Name:         fv.Name,
 					URL:          fv.URL,
 					ThumbnailURL: fv.ThumbnailURL,
@@ -193,12 +193,12 @@ func (l *Logic) InsertReactionTx(ctx context.Context, profile string, r *mi.Reac
 					CreatedAt:    fv.CreatedAt,
 				}
 				files = append(files, f)
-				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.ID})
+				noteToFiles = append(noteToFiles, model.NoteToFile{NoteID: v.Note.ID, FileID: f.FileID})
 			}
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 			n := model.Note{
-				ID:                v.Note.ID,
+				NoteID:            v.Note.ID,
 				ReactionID:        v.ID,
 				UserID:            v.Note.User.ID,
 				ReactionEmojiName: reactionName,
@@ -478,11 +478,11 @@ func (j *ColorOneJob) Execute(ctx context.Context, progressCallback func(int, in
 		c1, c2, err := color.Color(v.ThumbnailURL)
 		if err != nil {
 			// TODO: エラー処理
-			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			slog.Error(err.Error(), slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
 			continue
 		}
-		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
+		slog.Info("get color", slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.FileID, c1, c2)
 
 		progress += 1
 		progressCallback(progress, len(r))
@@ -509,12 +509,12 @@ func (j *ColorFullJob) Execute(ctx context.Context, progressCallback func(int, i
 		c1, c2, err := color.Color(v.ThumbnailURL)
 		if err != nil {
 			// TODO: エラー処理
-			slog.Error(err.Error(), slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+			slog.Error(err.Error(), slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
 			// TODO: エラーだったとき、次回の処理対象にならないようにする
 			continue
 		}
-		slog.Info("get color", slog.String("file_id", v.ID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
+		slog.Info("get color", slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.FileID, c1, c2)
 
 		progress += 1
 		progressCallback(progress, len(r))

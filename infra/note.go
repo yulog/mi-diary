@@ -78,7 +78,7 @@ func (i *NoteInfra) GetByHashTag(ctx context.Context, profile, name string, p pa
 		Model(&notes).
 		Relation("User").
 		Relation("Files").
-		Where("n.id IN (?)", sq). // サブクエリを使う
+		Where("n.note_id IN (?)", sq). // サブクエリを使う
 		Order("created_at DESC").
 		Scan(ctx)
 	if err != nil {

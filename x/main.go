@@ -121,8 +121,8 @@ func createTable() {
 		// JSONの中身をモデルへ移す
 		for _, v := range r {
 			u := model.User{
-				ID:   v.Note.User.ID,
-				Name: v.Note.User.Username,
+				UserID: v.Note.User.ID,
+				Name:   v.Note.User.Username,
 			}
 			users = append(users, u)
 
@@ -135,7 +135,7 @@ func createTable() {
 
 			reactionName := strings.TrimSuffix(strings.TrimPrefix(v.Note.MyReaction, ":"), "@.:")
 			n := model.Note{
-				ID:                v.Note.ID,
+				NoteID:            v.Note.ID,
 				UserID:            v.Note.User.ID,
 				ReactionEmojiName: reactionName,
 			}
@@ -154,7 +154,7 @@ func createTable() {
 			return err
 		}
 		for _, user := range users {
-			fmt.Println(user.ID) // id is scanned automatically
+			fmt.Println(user.UserID) // id is scanned automatically
 		}
 
 		_, err = db.NewInsert().Model(&notes).Ignore().Exec(ctx)
@@ -162,7 +162,7 @@ func createTable() {
 			return err
 		}
 		for _, note := range notes {
-			fmt.Println(note.ID) // id is scanned automatically
+			fmt.Println(note.NoteID) // id is scanned automatically
 		}
 
 		_, err = db.NewInsert().Model(&reactions).Ignore().Exec(ctx)

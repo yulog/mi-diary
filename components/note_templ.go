@@ -506,9 +506,9 @@ func noteContent(host string, note model.Note) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 templ.SafeURL
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.ID)))
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.NoteID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 113, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 113, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -519,9 +519,9 @@ func noteContent(host string, note model.Note) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(note.ID)
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(note.NoteID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 115, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 115, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -534,7 +534,7 @@ func noteContent(host string, note model.Note) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.In(time.Local).Format(time.DateTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 115, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/note.templ`, Line: 115, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
