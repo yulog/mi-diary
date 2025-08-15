@@ -22,7 +22,7 @@ templ reaction(profile string, items []model.ReactionEmoji) {
 		for _, item := range items {
 			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name)) } class="tag level-left">
 				if item.Image != "" {
-					<img src={ item.Image } alt={ item.Name } class={ "image", "level-item", "emoji" }/>
+					<img src={ fmt.Sprintf("/profiles/%s/emojis/%s", profile, item.Name) } alt={ item.Name } class={ "image", "level-item", "emoji" }/>
 				} else {
 					<span class="level-item">{ item.Name }</span>
 				}
