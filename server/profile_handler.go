@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/presenter"
@@ -176,4 +178,33 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 	}
 
 	return renderer(c, presenter.NoteWithPagesPresentation(c, out))
+}
+
+// EmojiHandler は /:profile/emojis/:name のハンドラ
+func (srv *Server) EmojiHandler(c echo.Context) error {
+	var params Params
+	if err := c.Bind(&params); err != nil {
+		return err
+	}
+
+	out, err := srv.logic.EmojiRepo.GetByName(c.Request().Context(), params.Profile, params.Name)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	if out.IsSymbol {
+		log.Fatal(err)
+		return echo.ErrBadRequest
+	}
+
+	resp, err := srv.logic.CacheLogic(c.Request().Context(), params.Profile, params.Name, out)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer resp.Response.Close()
+	defer resp.DoCache()
+
+	c.Stream(resp.StatusCode, resp.ContentType, resp.Response)
+	return nil
 }

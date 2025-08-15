@@ -1,6 +1,8 @@
 package logic
 
 import (
+	"io"
+
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/internal/shared"
 )
@@ -100,4 +102,11 @@ type Pages struct {
 type Page struct {
 	Index int
 	Has   bool
+}
+
+type CacheOutput struct {
+	StatusCode  int
+	ContentType string
+	Response    io.ReadCloser
+	DoCache     func()
 }

@@ -37,5 +37,7 @@ func (srv *Server) NewRouter() *echo.Echo {
 	profile.GET("/archives", srv.ArchivesHandler)
 	profile.GET("/archives/:date", srv.ArchiveNotesHandler)
 
+	profile.GET("/emojis/:name", srv.EmojiHandler)
+
 	return e
 }

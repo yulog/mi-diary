@@ -74,6 +74,7 @@ require (
 )
 
 require (
+	github.com/akrylysov/pogreb v0.10.2
 	github.com/cenkalti/dominantcolor v1.0.3
 	github.com/charmbracelet/log v0.4.2
 	github.com/go-playground/validator/v10 v10.27.0

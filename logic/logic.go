@@ -17,6 +17,7 @@ type Repositorier interface {
 	NewEmojiInfra() repository.EmojiRepositorier
 	NewFileInfra() repository.FileRepositorier
 	NewArchiveInfra() repository.ArchiveRepositorier
+	NewCacheInfra() repository.CacheRepositorier
 	NewMigrationInfra() service.MigrationServicer
 }
 
@@ -35,6 +36,7 @@ type Logic struct {
 	FileRepo         repository.FileRepositorier
 	ArchiveRepo      repository.ArchiveRepositorier
 	ConfigRepo       repository.ConfigRepositorier
+	CacheRepo        repository.CacheRepositorier
 	MisskeyService   service.MisskeyAPIServicer
 	MigrationService service.MigrationServicer
 	JobWorkerService service.JobWorker
@@ -51,6 +53,7 @@ type Dependency struct {
 	fileRepo         repository.FileRepositorier
 	archiveRepo      repository.ArchiveRepositorier
 	configRepo       repository.ConfigRepositorier
+	cacheRepo        repository.CacheRepositorier
 	misskeyService   service.MisskeyAPIServicer
 	migrationService service.MigrationServicer
 	jobWorkerService service.JobWorker
@@ -95,6 +98,11 @@ func (d *Dependency) WithArchiveRepo(repo repository.ArchiveRepositorier) *Depen
 	return d
 }
 
+func (d *Dependency) WithCacheRepo(repo repository.CacheRepositorier) *Dependency {
+	d.cacheRepo = repo
+	return d
+}
+
 func (d *Dependency) WithUOWRepoUsingRepo() *Dependency {
 	d.uowRepo = d.repo.NewUnitOfWorkInfra()
 	return d
@@ -127,6 +135,11 @@ func (d *Dependency) WithFileRepoUsingRepo() *Dependency {
 
 func (d *Dependency) WithArchiveRepoUsingRepo() *Dependency {
 	d.archiveRepo = d.repo.NewArchiveInfra()
+	return d
+}
+
+func (d *Dependency) WithCacheRepoUsingRepo() *Dependency {
+	d.cacheRepo = d.repo.NewCacheInfra()
 	return d
 }
 
@@ -166,6 +179,7 @@ func (d *Dependency) Build() *Logic {
 		FileRepo:         d.fileRepo,
 		ArchiveRepo:      d.archiveRepo,
 		ConfigRepo:       d.configRepo,
+		CacheRepo:        d.cacheRepo,
 		MisskeyService:   d.misskeyService,
 		MigrationService: d.migrationService,
 		JobWorkerService: d.jobWorkerService,

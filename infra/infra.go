@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"log/slog"
 	"sync"
 
+	"github.com/akrylysov/pogreb"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
@@ -27,7 +29,8 @@ func New() logic.Repositorier {
 }
 
 type DataBase struct {
-	db sync.Map // TODO:  sync.Onceの代わりになるのか？
+	db    sync.Map // TODO:  sync.Onceの代わりになるのか？
+	cache sync.Map
 }
 
 func NewDAO() *DataBase {
@@ -55,6 +58,28 @@ func connect(profile string) *bun.DB {
 		(*model.NoteToTag)(nil),
 		(*model.NoteToFile)(nil),
 	)
+
+	return db
+}
+
+func (dao *DataBase) Cache(host string) *pogreb.DB {
+	v, ok := dao.cache.Load(host)
+	if ok {
+		return v.(*pogreb.DB)
+	}
+	db := connectCache(host)
+	dao.cache.Store(host, db)
+
+	return db
+}
+
+func connectCache(host string) *pogreb.DB {
+	log.Println("connect")
+	db, err := pogreb.Open(fmt.Sprintf(".cache/%s.db", host), nil)
+	if err != nil {
+		log.Println(err)
+		panic(err)
+	}
 
 	return db
 }

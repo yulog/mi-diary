@@ -33,12 +33,14 @@ func main() {
 		WithEmojiRepoUsingRepo().
 		WithFileRepoUsingRepo().
 		WithArchiveRepoUsingRepo().
+		WithCacheRepoUsingRepo().
 		WithMigrationServiceUsingRepo().
 		WithConfigRepo(infra.NewConfigInfra(app)).
 		WithMisskeyAPIRepo(infra.NewMisskeyAPI()).
 		WithJobWorkerService(infra.NewJobWorker()).
 		Build()
 	srv := server.New(logic)
+	defer logic.CacheRepo.Close()
 
 	logic.Migrate()
 
