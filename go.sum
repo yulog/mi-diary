@@ -159,6 +159,8 @@ github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e h1:JVG44RsyaB9T2KIHavM
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJuqunuUZ/Dhy/avygyECGrLceyNeo4LiM=
 github.com/yulog/miutil v0.0.0-20250330095625-d8102cda8590 h1:TNxR28+XezIrXKMFX1x3pg4U5+X2dOFllk/+ds8150g=
 github.com/yulog/miutil v0.0.0-20250330095625-d8102cda8590/go.mod h1:GYmJsZDkn8Sm8YpoOA563wRRUZT+LmDM+qeAc+IywRg=
+github.com/yulog/miutil v0.0.0-20250814132429-34595ad13249 h1:VhP3vg5bVCdKNf6yvI1iBH8Aws5hfLFcfdvYfHRE0LU=
+github.com/yulog/miutil v0.0.0-20250814132429-34595ad13249/go.mod h1:GYmJsZDkn8Sm8YpoOA563wRRUZT+LmDM+qeAc+IywRg=
 go.uber.org/atomic v1.11.0 h1:ZvwS0R+56ePWxUNi+Atn9dWONBPp/AUETXlHW0DxSjE=
 go.uber.org/atomic v1.11.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=

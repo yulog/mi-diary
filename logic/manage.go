@@ -313,6 +313,19 @@ func (l *Logic) getEmoji(ctx context.Context, profile, name string) (*mi.Emoji, 
 	return emoji, nil
 }
 
+func (l *Logic) getEmojis(ctx context.Context, profile string) (*mi.Emojis, error) {
+	prof, err := l.ConfigRepo.GetProfile(profile)
+	if err != nil {
+		return &mi.Emojis{}, err
+	}
+	emojis, err := l.MisskeyService.Client(prof.Host, prof.I).GetEmojis()
+	if err != nil {
+		return &mi.Emojis{}, err
+	}
+
+	return emojis, nil
+}
+
 func (j *DummyJob) Execute(ctx context.Context, progressCallback func(int, int)) error {
 	// progressの動作確認用
 	var progress int
@@ -431,6 +444,15 @@ func (j *EmojiFullJob) Execute(ctx context.Context, progressCallback func(int, i
 		slog.Error(err.Error())
 		return err
 	}
+	emojis, err := j.Logic.getEmojis(ctx, j.Profile)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	emap := map[string]mi.Emoji{}
+	for _, emoji := range emojis.Emojis {
+		emap[emoji.Name] = emoji
+	}
 
 	var progress int
 	for _, v := range r {
@@ -445,13 +467,19 @@ func (j *EmojiFullJob) Execute(ctx context.Context, progressCallback func(int, i
 		if symbol {
 			continue
 		}
-		emoji, err := j.Logic.getEmoji(ctx, j.Profile, v.Name)
-		if err != nil {
+		// emoji, err := j.Logic.getEmoji(ctx, j.Profile, v.Name)
+		// if err != nil {
+		// 	// TODO: エラー処理
+		// 	slog.Error(err.Error())
+		// 	continue
+		// }
+		emoji, ok := emap[v.Name]
+		if !ok {
 			// TODO: エラー処理
-			slog.Error(err.Error())
+			slog.Error("emoji not found", slog.String("name", v.Name))
 			continue
 		}
-		j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, emoji)
+		j.Logic.EmojiRepo.UpdateByPKWithImage(ctx, j.Profile, v.ID, &emoji)
 
 		progress += 1
 		progressCallback(progress, len(r))

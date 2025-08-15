@@ -9,4 +9,5 @@ type MisskeyAPIServicer interface {
 
 	GetUserReactions(userID, untilID string, limit int) (int, *mi.Reactions, error)
 	GetEmoji(name string) (*mi.Emoji, error)
+	GetEmojis() (*mi.Emojis, error)
 }

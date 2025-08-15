@@ -53,3 +53,17 @@ func (infra *MisskeyAPI) GetEmoji(name string) (*mi.Emoji, error) {
 	}
 	return &out, nil
 }
+
+func (infra *MisskeyAPI) GetEmojis() (*mi.Emojis, error) {
+	body := map[string]any{}
+	req, err := infra.client.NewPostRequest("api/emojis", body)
+	if err != nil {
+		return &mi.Emojis{}, err
+	}
+	var out mi.Emojis
+	err = req.Do(&out)
+	if err != nil {
+		return &mi.Emojis{}, err
+	}
+	return &out, nil
+}

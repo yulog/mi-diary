@@ -91,7 +91,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.15
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/yulog/miutil v0.0.0-20250330095625-d8102cda8590
+	github.com/yulog/miutil v0.0.0-20250814132429-34595ad13249
 	golang.org/x/sys v0.34.0 // indirect
 )
 
