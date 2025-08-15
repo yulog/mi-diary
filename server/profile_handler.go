@@ -187,17 +187,7 @@ func (srv *Server) EmojiHandler(c echo.Context) error {
 		return err
 	}
 
-	out, err := srv.logic.EmojiRepo.GetByName(c.Request().Context(), params.Profile, params.Name)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	if out.IsSymbol {
-		log.Fatal(err)
-		return echo.ErrBadRequest
-	}
-
-	resp, err := srv.logic.CacheLogic(c.Request().Context(), params.Profile, params.Name, out)
+	resp, err := srv.logic.CacheLogic(c.Request().Context(), params.Profile, params.Name)
 	if err != nil {
 		log.Fatal(err)
 		return err

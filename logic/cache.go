@@ -3,14 +3,13 @@ package logic
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/yulog/mi-diary/domain/model"
 )
 
-func (l *Logic) CacheLogic(ctx context.Context, profile, name string, emoji model.ReactionEmoji) (CacheOutput, error) {
+func (l *Logic) CacheLogic(ctx context.Context, profile, name string) (CacheOutput, error) {
 	host, err := l.ConfigRepo.GetProfileHost(profile)
 	if err != nil {
 		return CacheOutput{}, err
@@ -31,7 +30,16 @@ func (l *Logic) CacheLogic(ctx context.Context, profile, name string, emoji mode
 		}, nil
 	}
 
-	resp, err := http.Get(emoji.Image)
+	out, err := l.EmojiRepo.GetByName(ctx, profile, name)
+	if err != nil {
+		log.Fatal(err)
+		return CacheOutput{}, err
+	}
+	if out.IsSymbol {
+		return CacheOutput{}, fmt.Errorf("%s is symbol", name)
+	}
+
+	resp, err := http.Get(out.Image)
 	if err != nil {
 		log.Fatal(err)
 		return CacheOutput{}, err
