@@ -3,6 +3,7 @@ package infra
 import (
 	"log"
 
+	"github.com/akrylysov/pogreb"
 	"github.com/yulog/mi-diary/domain/repository"
 )
 
