@@ -14,19 +14,19 @@ templ SearchBar(path, s string) {
 					<input name="s" class="input is-rounded is-primary" type="text" placeholder="Search" value={ s }/>
 				</div>
 				<div class="control">
-					<button hx-get={ path } hx-include="[name='s']" hx-target="body" hx-swap="outerHTML" hx-trigger="click, keyup[key=='Enter'] from:input[name='s']" hx-push-url="true" class="button is-rounded is-primary">Go</button>
+					<button hx-get={ templ.URL(path) } hx-include="[name='s']" hx-target="body" hx-swap="outerHTML" hx-trigger="click, keyup[key=='Enter'] from:input[name='s']" hx-push-url="true" class="button is-rounded is-primary">Go</button>
 				</div>
 			</div>
 		</div>
 	}
 }
 
-func getColorQuery(color string) templ.SafeURL {
+func getColorQuery(color string) string {
 	q := shared.QueryParams{
 		Page:  1,
 		Color: color,
 	}
-	return templ.URL(q.GetQuery())
+	return q.GetQuery()
 }
 
 templ FileFilterBar(path string, currentColor string) {

@@ -69,9 +69,9 @@ func SelectProfile(title string, profiles []string) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 templ.SafeURL
-					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/profiles/%s", profile)))
+					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/profiles/%s", profile))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 12, Col: 63}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 12, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -84,7 +84,7 @@ func SelectProfile(title string, profiles []string) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(profile)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 12, Col: 95}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 12, Col: 84}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -100,9 +100,9 @@ func SelectProfile(title string, profiles []string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 templ.SafeURL
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/profiles"))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs("/profiles")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 14, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 14, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -190,9 +190,9 @@ func AddProfile(title string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var10 templ.SafeURL
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/"))
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("/")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 27, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 27, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

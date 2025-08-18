@@ -62,7 +62,7 @@ templ (n Note) WithPages(p Pages) {
 
 templ cardImage(file model.File) {
 	<div class="card-image">
-		<a href={ templ.URL(file.URL) } class="luminous">
+		<a href={ file.URL } class="luminous">
 			<figure class="image">
 				<img src={ file.ThumbnailURL } alt={ file.Name } class="Thumbnail"/>
 			</figure>
@@ -73,7 +73,7 @@ templ cardImage(file model.File) {
 // TODO: imgに代替画像を入れる？
 templ cardPlaceholder(file model.File) {
 	<div class="card-image">
-		<a href={ templ.URL(file.URL) }>
+		<a href={ file.URL }>
 			<figure class="image">
 				<img src={ file.ThumbnailURL } alt={ file.Name } class="Thumbnail"/>
 			</figure>
@@ -110,7 +110,7 @@ templ noteContent(host string, note model.Note) {
 				</div>
 			}
 		</div>
-		<a href={ templ.URL(fmt.Sprintf("https://%s/notes/%s", host, note.NoteID)) } target="_blank" class="has-text-grey is-underlined">
+		<a href={ fmt.Sprintf("https://%s/notes/%s", host, note.NoteID) } target="_blank" class="has-text-grey is-underlined">
 			// SQLite は日時をUTCで保持する
 			{ note.NoteID } ({ note.CreatedAt.In(time.Local).Format(time.DateTime) })
 		</a>

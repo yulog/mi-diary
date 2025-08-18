@@ -8,7 +8,7 @@ import (
 templ Users(profile string, items []model.User) {
 	<div id="user-list" class="tags ml-5">
 		for _, item := range items {
-			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/users/%s", profile, item.Name)) } class="tag">
+			<a href={ fmt.Sprintf("/profiles/%s/users/%s", profile, item.Name) } class="tag">
 				{ item.DisplayName } ( { fmt.Sprintf("%d", item.Count) } )
 			</a>
 		}

@@ -9,7 +9,7 @@ type FormParams struct {
 }
 
 templ Form(p FormParams) {
-	<form hx-post={ string(templ.URL(p.PostURL)) } hx-swap="none">
+	<form hx-post={ templ.URL(p.PostURL) } hx-swap="none">
 		<label class="label">
 			{ p.Label }
 			<div class="field has-addons">

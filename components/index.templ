@@ -25,7 +25,7 @@ templ (p IndexParams) Index() {
 					<h3>HashTags</h3>
 					<div
 						id="hashtag-list"
-						hx-get={ fmt.Sprintf("/profiles/%s/hashtags?partial=true&sort=count", p.Profile) }
+						hx-get={ templ.URL(fmt.Sprintf("/profiles/%s/hashtags?partial=true&sort=count", p.Profile)) }
 						hx-trigger="load"
 						hx-swap="outerHTML"
 					></div>
@@ -36,7 +36,7 @@ templ (p IndexParams) Index() {
 						<div class="buttons has-addons is-right">
 							<button
 								id="sort-count"
-								hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile) }
+								hx-get={ templ.URL(fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile)) }
 								hx-target="#user-list"
 								hx-swap="outerHTML"
 								class="button is-rounded is-primary is-selected is-outlined"
@@ -48,7 +48,7 @@ templ (p IndexParams) Index() {
 							</button>
 							<button
 								id="sort-name"
-								hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=name", p.Profile) }
+								hx-get={ templ.URL(fmt.Sprintf("/profiles/%s/users?partial=true&sort=name", p.Profile)) }
 								hx-target="#user-list"
 								hx-swap="outerHTML"
 								class="button is-rounded"
@@ -62,7 +62,7 @@ templ (p IndexParams) Index() {
 					</div>
 					<div
 						id="user-list"
-						hx-get={ fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile) }
+						hx-get={ templ.URL(fmt.Sprintf("/profiles/%s/users?partial=true&sort=count", p.Profile)) }
 						hx-trigger="load"
 						hx-swap="outerHTML"
 					></div>
@@ -72,7 +72,7 @@ templ (p IndexParams) Index() {
 						<h3>Notes</h3>
 					}
 					@CardFooter() {
-						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/notes", p.Profile)) } class="card-footer-item">View All</a>
+						<a href={ fmt.Sprintf("/profiles/%s/notes", p.Profile) } class="card-footer-item">View All</a>
 					}
 				}
 				@CardFrame() {
@@ -80,7 +80,7 @@ templ (p IndexParams) Index() {
 						<h3>Files</h3>
 					}
 					@CardFooter() {
-						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/files", p.Profile)) } class="card-footer-item">View All</a>
+						<a href={ fmt.Sprintf("/profiles/%s/files", p.Profile) } class="card-footer-item">View All</a>
 					}
 				}
 				@CardFrame() {
@@ -88,7 +88,7 @@ templ (p IndexParams) Index() {
 						<h3>Archives</h3>
 					}
 					@CardFooter() {
-						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives", p.Profile)) } class="card-footer-item">View All</a>
+						<a href={ fmt.Sprintf("/profiles/%s/archives", p.Profile) } class="card-footer-item">View All</a>
 					}
 				}
 			</div>

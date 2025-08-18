@@ -29,7 +29,7 @@ templ Pagination(p Pages) {
 
 templ paginationLink(q shared.QueryParams, num int) {
 	<li>
-		<a href={ templ.URL(q.SetPage(num).GetQuery()) } class="pagination-link">
+		<a href={ q.SetPage(num).GetQuery() } class="pagination-link">
 			{ fmt.Sprintf("%d", num) }
 		</a>
 	</li>
@@ -38,12 +38,12 @@ templ paginationLink(q shared.QueryParams, num int) {
 templ pager(p Pages) {
 	<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
 		if p.Prev.Has {
-			<a href={ templ.URL(p.QueryParams.SetPage(p.Prev.Index).GetQuery()) } class="pagination-previous">Prev</a>
+			<a href={ p.QueryParams.SetPage(p.Prev.Index).GetQuery() } class="pagination-previous">Prev</a>
 		} else {
 			<span class="pagination-previous is-disabled">Prev</span>
 		}
 		if p.Next.Has {
-			<a href={ templ.URL(p.QueryParams.SetPage(p.Next.Index).GetQuery()) } class="pagination-next">Next</a>
+			<a href={ p.QueryParams.SetPage(p.Next.Index).GetQuery() } class="pagination-next">Next</a>
 		} else {
 			<span class="pagination-next is-disabled">Next</span>
 		}

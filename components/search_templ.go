@@ -54,9 +54,9 @@ func SearchBar(path, s string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(path)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 17, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 17, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -71,12 +71,12 @@ func SearchBar(path, s string) templ.Component {
 	})
 }
 
-func getColorQuery(color string) templ.SafeURL {
+func getColorQuery(color string) string {
 	q := shared.QueryParams{
 		Page:  1,
 		Color: color,
 	}
-	return templ.URL(q.GetQuery())
+	return q.GetQuery()
 }
 
 func FileFilterBar(path string, currentColor string) templ.Component {

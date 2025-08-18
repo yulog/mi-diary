@@ -25,12 +25,12 @@ templ BaseWithNav(title, profile string) {
 		<body class="has-navbar-fixed-top" hx-boost="true">
 			<nav class="navbar is-fixed-top is-primary" role="navigation" aria-label="main navigation">
 				<div class="navbar-brand">
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="navbar-item">Mi Diary</a>
+					<a href={ fmt.Sprintf("/profiles/%s", profile) } class="navbar-item">Mi Diary</a>
 				</div>
 				<div class="navbar-end">
-					<a href={ templ.URL(fmt.Sprintf("/profiles/%s", profile)) } class="navbar-item">Home</a>
-					<a href={ templ.URL("/manage") } class="navbar-item">Manage</a>
-					<a href={ templ.URL("/") } class="navbar-item">Profiles</a>
+					<a href={ fmt.Sprintf("/profiles/%s", profile) } class="navbar-item">Home</a>
+					<a href={ "/manage" } class="navbar-item">Manage</a>
+					<a href={ "/" } class="navbar-item">Profiles</a>
 				</div>
 			</nav>
 			<main class="section">

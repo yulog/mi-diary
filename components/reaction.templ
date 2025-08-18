@@ -20,7 +20,7 @@ templ reaction(profile string, items []model.ReactionEmoji) {
 	@emojiStyle()
 	<div class="tags ml-5">
 		for _, item := range items {
-			<a href={ templ.URL(fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name)) } class="tag level-left">
+			<a href={ fmt.Sprintf("/profiles/%s/reactions/%s", profile, item.Name) } class="tag level-left">
 				if item.Image != "" {
 					<img src={ fmt.Sprintf("/profiles/%s/emojis/%s", profile, item.Name) } alt={ item.Name } class={ "image", "level-item", "emoji" }/>
 				} else {

@@ -15,13 +15,13 @@ templ (p ArchiveParams) Archive() {
 	@BaseWithNav(p.Title, p.Profile) {
 		<div class="content">
 			for _, item := range p.Items {
-				<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YM)) }>
+				<a href={ fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, item.YM) }>
 					<h3>{ item.YM } ( { fmt.Sprintf("%d", item.Count) } )</h3>
 				</a>
 				@templ.Raw("<ul>")
 				for _, day := range item.Days {
 					<li>
-						<a href={ templ.URL(fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, day.YMD)) }>
+						<a href={ fmt.Sprintf("/profiles/%s/archives/%s", p.Profile, day.YMD) }>
 							{ day.YMD } ( { fmt.Sprintf("%d", day.Count) } )
 						</a>
 					</li>
