@@ -510,7 +510,7 @@ func (j *ColorOneJob) Execute(ctx context.Context, progressCallback func(int, in
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.FileID, c1, c2)
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
 
 		progress += 1
 		progressCallback(progress, len(r))
@@ -542,7 +542,7 @@ func (j *ColorFullJob) Execute(ctx context.Context, progressCallback func(int, i
 			continue
 		}
 		slog.Info("get color", slog.String("file_id", v.FileID), slog.String("url", v.ThumbnailURL), slog.String("dominant_color", c1), slog.String("group_color", c2))
-		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.FileID, c1, c2)
+		j.Logic.FileRepo.UpdateByPKWithColor(ctx, j.Profile, v.ID, c1, c2)
 
 		progress += 1
 		progressCallback(progress, len(r))

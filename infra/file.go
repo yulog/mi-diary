@@ -92,9 +92,9 @@ func (i *FileInfra) Insert(ctx context.Context, profile string, files *[]model.F
 	return err
 }
 
-func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile, id, color1, color2 string) {
+func (i *FileInfra) UpdateByPKWithColor(ctx context.Context, profile string, id int64, color1, color2 string) {
 	r := model.File{
-		FileID:        id,
+		ID:            id,
 		DominantColor: color1,
 		GroupColor:    color2,
 	}

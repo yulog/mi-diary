@@ -16,5 +16,5 @@ type FileRepositorier interface {
 
 	Insert(ctx context.Context, profile string, files *[]model.File) error
 
-	UpdateByPKWithColor(ctx context.Context, profile, id, c1, c2 string)
+	UpdateByPKWithColor(ctx context.Context, profile string, id int64, c1, c2 string)
 }
