@@ -1,8 +1,7 @@
 package components
 
 import (
-	"github.com/cenkalti/dominantcolor"
-	"github.com/yulog/mi-diary/color"
+	"github.com/yulog/iroiro"
 	"github.com/yulog/mi-diary/internal/shared"
 )
 
@@ -42,8 +41,8 @@ templ FileFilterBar(path string, currentColor string) {
 			<div class="field has-addons has-addons-centered">
 				<div class="buttons">
 					@PaletteClearButton("")
-					for _,color := range color.DefinedColors {
-						@PaletteButton(dominantcolor.Hex(*color), currentColor)
+					for _,color := range iroiro.DefinedColors {
+						@PaletteButton(iroiro.Hex(color), currentColor)
 					}
 				</div>
 			</div>

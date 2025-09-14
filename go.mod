@@ -1,6 +1,6 @@
 module github.com/yulog/mi-diary
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/a-h/templ v0.3.924
@@ -92,6 +92,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.15
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	github.com/yulog/iroiro v0.0.0-20250830135247-f17e407fcd4c
 	github.com/yulog/miutil v0.0.0-20250814132429-34595ad13249
 	golang.org/x/sys v0.34.0 // indirect
 )

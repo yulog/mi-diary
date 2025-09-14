@@ -159,6 +159,8 @@ github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAh
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e h1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJuqunuUZ/Dhy/avygyECGrLceyNeo4LiM=
+github.com/yulog/iroiro v0.0.0-20250830135247-f17e407fcd4c h1:9Xk3ahLCk1TqlaUi8WaL2/yJizY9ZIgTiS5mFztVqRU=
+github.com/yulog/iroiro v0.0.0-20250830135247-f17e407fcd4c/go.mod h1:PcHH8G3oV95Pu44R0xBR0BgPTmBFxznKtTl+rFCREP0=
 github.com/yulog/miutil v0.0.0-20250330095625-d8102cda8590 h1:TNxR28+XezIrXKMFX1x3pg4U5+X2dOFllk/+ds8150g=
 github.com/yulog/miutil v0.0.0-20250330095625-d8102cda8590/go.mod h1:GYmJsZDkn8Sm8YpoOA563wRRUZT+LmDM+qeAc+IywRg=
 github.com/yulog/miutil v0.0.0-20250814132429-34595ad13249 h1:VhP3vg5bVCdKNf6yvI1iBH8Aws5hfLFcfdvYfHRE0LU=
