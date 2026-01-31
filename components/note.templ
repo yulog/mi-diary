@@ -55,7 +55,17 @@ templ (n Note) WithPages(p Pages) {
 	@BaseWithNav(n.Title, n.Profile) {
 		@SearchBar(n.SearchPath, p.QueryParams.S)
 		@Pagination(p) {
-			@noteList(n.Host, n.Items)
+			if len(n.Items)==0 {
+				<ul class="columns is-multiline">
+					@CardAsListIsFull() {
+						<div class="content">
+							<div>No results found.</div>
+						</div>
+					}
+				</ul>
+			} else {
+				@noteList(n.Host, n.Items)
+			}
 		}
 	}
 }

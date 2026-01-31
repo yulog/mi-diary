@@ -161,9 +161,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 	if err != nil {
 		return nil, err
 	}
-	if len(notes) == 0 {
-		return nil, fmt.Errorf("note not found")
-	}
+
 	title := ""
 	if params.S != "" {
 		title = fmt.Sprintf("%s - %d", params.S, p.CurrentPage)
