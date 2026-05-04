@@ -12,7 +12,7 @@ func modelsToByte(db *bun.DB, models []any) []byte {
 	var data []byte
 	for _, model := range models {
 		query := db.NewCreateTable().Model(model).WithForeignKeys()
-		rawQuery, err := query.AppendQuery(db.Formatter(), nil)
+		rawQuery, err := query.AppendQuery(db.QueryGen(), nil)
 		if err != nil {
 			panic(err)
 		}
@@ -27,7 +27,7 @@ func indexesToByte(db *bun.DB, idxCreators []model.IndexQueryCreator) []byte {
 	var data []byte
 	for _, idxCreator := range idxCreators {
 		idx := idxCreator(db)
-		rawQuery, err := idx.AppendQuery(db.Formatter(), nil)
+		rawQuery, err := idx.AppendQuery(db.QueryGen(), nil)
 		if err != nil {
 			panic(err)
 		}
