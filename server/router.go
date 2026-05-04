@@ -10,7 +10,7 @@ func (srv *Server) NewRouter() *echo.Echo {
 	e.Use(middleware.RequestLogger())
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
-	e.Validator = NewValidator()
+	// e.Validator = NewValidator()
 
 	e.GET("/", srv.RootHandler)
 	e.GET("/callback/:host", srv.CallbackHandler)

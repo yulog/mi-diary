@@ -1,3 +1,5 @@
+//go:generate go tool govalid .
+
 package server
 
 import (
@@ -24,9 +26,11 @@ type Callback struct {
 }
 
 type Job struct {
-	Profile string `form:"profile" validate:"required"`
-	Type    int    `form:"job-type" validate:"required"`
-	ID      string `form:"id"`
+	//govalid:required
+	Profile string `form:"profile"`
+	//govalid:required
+	Type int    `form:"job-type"`
+	ID   string `form:"id"`
 }
 
 type Profiles struct {

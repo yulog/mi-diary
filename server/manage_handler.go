@@ -30,7 +30,7 @@ func (srv *Server) JobStartHandler(c *echo.Context) error {
 	if err := c.Bind(j); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
-	if err := c.Validate(j); err != nil {
+	if err := j.Validate(); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 	job := logic.Job{
