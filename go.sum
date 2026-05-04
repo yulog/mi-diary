@@ -86,6 +86,8 @@ github.com/lucasb-eyer/go-colorful v1.2.0 h1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69
 github.com/lucasb-eyer/go-colorful v1.2.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/magefile/mage v1.15.0 h1:BvGheCMAsG3bWUDbZ8AyXXpCNwU9u5CB6sM+HNb9HYg=
 github.com/magefile/mage v1.15.0/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=
+github.com/magefile/mage v1.17.2 h1:fyXVu1eadI8Ap1HCCNgEhJ5McIWiYhLR8uol64ZZc40=
+github.com/magefile/mage v1.17.2/go.mod h1:Yj51kqllmsgFpvvSzgrZPK9WtluG3kUhFaBUVLo4feA=
 github.com/mattn/go-ciede2000 v0.0.0-20170301095244-782e8c62fec3 h1:BXxTozrOU8zgC5dkpn3J6NTRdoP+hjok/e+ACr4Hibk=
 github.com/mattn/go-ciede2000 v0.0.0-20170301095244-782e8c62fec3/go.mod h1:x1uk6vxTiVuNt6S5R2UYgdhpj3oKojXvOXauHZ7dEnI=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=

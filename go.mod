@@ -2,6 +2,8 @@ module github.com/yulog/mi-diary
 
 go 1.25.0
 
+toolchain go1.26.2
+
 require (
 	github.com/a-h/templ v0.3.924
 	github.com/google/go-querystring v1.1.0
@@ -79,7 +81,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/k0kubun/pp/v3 v3.2.0
-	github.com/magefile/mage v1.15.0
+	github.com/magefile/mage v1.17.2
 	github.com/mattn/go-ciede2000 v0.0.0-20170301095244-782e8c62fec3
 	github.com/spf13/viper v1.20.1
 	github.com/sqldef/sqldef v0.16.15
