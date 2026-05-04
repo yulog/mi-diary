@@ -3,13 +3,13 @@ package server
 import (
 	"log"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/presenter"
 )
 
 // HomeHandler は /:profile のハンドラ
-func (srv *Server) HomeHandler(c echo.Context) error {
+func (srv *Server) HomeHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -29,7 +29,7 @@ func (srv *Server) HomeHandler(c echo.Context) error {
 }
 
 // ReactionHandler は /:profile/reactions/:name のハンドラ
-func (srv *Server) ReactionHandler(c echo.Context) error {
+func (srv *Server) ReactionHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -47,7 +47,7 @@ func (srv *Server) ReactionHandler(c echo.Context) error {
 }
 
 // HashTagsHandler は /:profile/hashtags のハンドラ
-func (srv *Server) HashTagsHandler(c echo.Context) error {
+func (srv *Server) HashTagsHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -62,7 +62,7 @@ func (srv *Server) HashTagsHandler(c echo.Context) error {
 }
 
 // HashTagHandler は /:profile/hashtags/:name のハンドラ
-func (srv *Server) HashTagHandler(c echo.Context) error {
+func (srv *Server) HashTagHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -80,7 +80,7 @@ func (srv *Server) HashTagHandler(c echo.Context) error {
 }
 
 // UsersHandler は /:profile/users のハンドラ
-func (srv *Server) UsersHandler(c echo.Context) error {
+func (srv *Server) UsersHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -95,7 +95,7 @@ func (srv *Server) UsersHandler(c echo.Context) error {
 }
 
 // UserHandler は /:profile/users/:name のハンドラ
-func (srv *Server) UserHandler(c echo.Context) error {
+func (srv *Server) UserHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -113,7 +113,7 @@ func (srv *Server) UserHandler(c echo.Context) error {
 }
 
 // FilesHandler は /:profile/files のハンドラ
-func (srv *Server) FilesHandler(c echo.Context) error {
+func (srv *Server) FilesHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -131,7 +131,7 @@ func (srv *Server) FilesHandler(c echo.Context) error {
 }
 
 // NotesHandler は /:profile/notes のハンドラ
-func (srv *Server) NotesHandler(c echo.Context) error {
+func (srv *Server) NotesHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -149,7 +149,7 @@ func (srv *Server) NotesHandler(c echo.Context) error {
 }
 
 // ArchivesHandler は /:profile/archives のハンドラ
-func (srv *Server) ArchivesHandler(c echo.Context) error {
+func (srv *Server) ArchivesHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -163,7 +163,7 @@ func (srv *Server) ArchivesHandler(c echo.Context) error {
 }
 
 // ArchiveNotesHandler は /:profile/archives/:date のハンドラ
-func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
+func (srv *Server) ArchiveNotesHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -181,7 +181,7 @@ func (srv *Server) ArchiveNotesHandler(c echo.Context) error {
 }
 
 // EmojiHandler は /:profile/emojis/:name のハンドラ
-func (srv *Server) EmojiHandler(c echo.Context) error {
+func (srv *Server) EmojiHandler(c *echo.Context) error {
 	var params Params
 	if err := c.Bind(&params); err != nil {
 		return err

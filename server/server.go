@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/yulog/mi-diary/logic"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type Server struct {
@@ -30,7 +30,7 @@ func (v *Validator) Validate(i any) error {
 	return v.validator.Struct(i)
 }
 
-func renderer(c echo.Context, cmp templ.Component) error {
+func renderer(c *echo.Context, cmp templ.Component) error {
 	// https://github.com/a-h/templ/blob/067cc686cd1e44cd0d3b6669a52e24ef115ccc5a/examples/integration-echo/main.go#L17
 	buf := templ.GetBuffer()
 	defer templ.ReleaseBuffer(buf)

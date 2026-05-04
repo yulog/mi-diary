@@ -2,12 +2,12 @@ package presenter
 
 import (
 	"github.com/a-h/templ"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/logic"
 )
 
-func IndexPresentation(c echo.Context, o *logic.IndexOutput) templ.Component {
+func IndexPresentation(c *echo.Context, o *logic.IndexOutput) templ.Component {
 	return cm.IndexParams{
 		Title:     o.Title,
 		Profile:   o.Profile,
@@ -15,10 +15,10 @@ func IndexPresentation(c echo.Context, o *logic.IndexOutput) templ.Component {
 	}.Index()
 }
 
-func HashTagPresentation(c echo.Context, o *logic.HashTagOutput) templ.Component {
+func HashTagPresentation(c *echo.Context, o *logic.HashTagOutput) templ.Component {
 	return cm.HashTags(o.Profile, o.HashTags)
 }
 
-func UserPresentation(c echo.Context, o *logic.UserOutput) templ.Component {
+func UserPresentation(c *echo.Context, o *logic.UserOutput) templ.Component {
 	return cm.Users(o.Profile, o.Users)
 }

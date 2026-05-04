@@ -49,5 +49,7 @@ func main() {
 	// TODO: context良く分からない
 	go logic.JobWorkerService.StartWorker(context.Background())
 
-	e.Logger.Fatal(e.Start(net.JoinHostPort("", app.Config.Port)))
+	if err := e.Start(net.JoinHostPort("localhost", app.Config.Port)); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
+	}
 }

@@ -1,13 +1,13 @@
 package server
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 func (srv *Server) NewRouter() *echo.Echo {
 	e := echo.New()
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 	// e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
 	e.Validator = NewValidator()

@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/yulog/mi-diary/presenter"
 )
 
@@ -34,18 +34,18 @@ type Profiles struct {
 }
 
 // RootHandler は / のハンドラ
-func (srv *Server) RootHandler(c echo.Context) error {
+func (srv *Server) RootHandler(c *echo.Context) error {
 	return renderer(c, presenter.SelectProfilePresentation(c, srv.logic.SelectProfileLogic(c.Request().Context())))
 }
 
 // NewProfilesHandler は /profiles のハンドラ
-func (srv *Server) NewProfilesHandler(c echo.Context) error {
+func (srv *Server) NewProfilesHandler(c *echo.Context) error {
 
 	return renderer(c, presenter.AddProfilePresentation(c, srv.logic.NewProfileLogic(c.Request().Context())))
 }
 
 // AddProfileHandler は /profiles のハンドラ
-func (srv *Server) AddProfileHandler(c echo.Context) error {
+func (srv *Server) AddProfileHandler(c *echo.Context) error {
 	var params Profiles
 	if err := c.Bind(&params); err != nil {
 		return err
@@ -62,7 +62,7 @@ func (srv *Server) AddProfileHandler(c echo.Context) error {
 }
 
 // CallbackHandler は /callback/:host のハンドラ
-func (srv *Server) CallbackHandler(c echo.Context) error {
+func (srv *Server) CallbackHandler(c *echo.Context) error {
 	var callback Callback
 	if err := c.Bind(&callback); err != nil {
 		return err

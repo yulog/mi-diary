@@ -2,13 +2,13 @@ package presenter
 
 import (
 	"github.com/a-h/templ"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/logic"
 )
 
-func NoteWithPagesPresentation(c echo.Context, o *logic.NoteWithPages) templ.Component {
+func NoteWithPagesPresentation(c *echo.Context, o *logic.NoteWithPages) templ.Component {
 	return cm.Note{
 		Title:      o.Note.Title,
 		Profile:    o.Note.Profile,
@@ -28,7 +28,7 @@ func NoteWithPagesPresentation(c echo.Context, o *logic.NoteWithPages) templ.Com
 		})
 }
 
-func FileWithPagesPresentation(c echo.Context, o *logic.FileWithPages) templ.Component {
+func FileWithPagesPresentation(c *echo.Context, o *logic.FileWithPages) templ.Component {
 	return cm.File{
 		Title:          o.File.Title,
 		Profile:        o.File.Profile,
