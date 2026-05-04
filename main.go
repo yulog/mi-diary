@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/charmbracelet/log"
+	"charm.land/log/v2"
 	"github.com/yulog/mi-diary/app"
 	"github.com/yulog/mi-diary/infra"
 	"github.com/yulog/mi-diary/logic"
