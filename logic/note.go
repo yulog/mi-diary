@@ -15,7 +15,7 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 		return nil, err
 	}
 
-	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -58,7 +58,7 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 		return nil, err
 	}
 
-	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -101,7 +101,7 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params shar
 		return nil, err
 	}
 
-	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -152,7 +152,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 		}
 	}
 
-	p, err := pagination.New(params.Page, 10, count, nil, nil)
+	p, err := pagination.New(params.Page, 10, count, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -179,7 +179,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 		slog.Info(err.Error())
 	}
 
-	hasLast := p.CurrentPage+1 < p.TotalPages()
+	p.LastChecker = ItemLimitHasLastPageChecker{}
 	// slog.Info("has last", slog.Bool("hasLast", hasLast), slog.Int("next", next), slog.Int("total", p.TotalPages()), slog.Int("current", p.CurrentPage))
 
 	return &NoteWithPages{
@@ -194,7 +194,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 			Current: p.CurrentPage,
 			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
 			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages(), Has: hasLast},
+			Last:    Page{Index: p.TotalPages(), Has: p.HasLastPage()},
 			// TODO: Queryがある/ないのパターンでpresenterを分けたほうが良い？
 			QueryParams: shared.QueryParams{
 				Page: params.Page,
@@ -210,7 +210,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 		return nil, err
 	}
 
-	p, err := pagination.New(params.Page, 10, 0, nil, nil)
+	p, err := pagination.New(params.Page, 10, 0, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}

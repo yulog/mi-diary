@@ -24,7 +24,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params shared.Qu
 		slog.Info("File count", slog.Int("count", count))
 	}
 
-	p, err := pagination.New(params.Page, 10, count, nil, nil)
+	p, err := pagination.New(params.Page, 10, count, nil, nil, nil)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -53,8 +53,8 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params shared.Qu
 		slog.Info(err.Error())
 	}
 
-	hasLast := p.CurrentPage+1 < p.TotalPages()
-	slog.Info("has last", slog.Bool("bool", hasLast))
+	p.LastChecker = ItemLimitHasLastPageChecker{}
+	slog.Info("has last", slog.Bool("bool", p.HasLastPage()))
 
 	return &FileWithPages{
 		File: File{
@@ -68,7 +68,7 @@ func (l *Logic) FilesLogic(ctx context.Context, profile string, params shared.Qu
 			Current: p.CurrentPage,
 			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
 			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages(), Has: hasLast},
+			Last:    Page{Index: p.TotalPages(), Has: p.HasLastPage()},
 			QueryParams: shared.QueryParams{
 				Page:  params.Page,
 				Color: params.Color,

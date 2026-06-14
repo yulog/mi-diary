@@ -193,3 +193,10 @@ type ItemLimitHasNextPageChecker struct {
 func (c ItemLimitHasNextPageChecker) HasNextPage(p *pagination.Pagination) bool {
 	return c.ItemCount >= p.Limit()
 }
+
+type ItemLimitHasLastPageChecker struct {
+}
+
+func (c ItemLimitHasLastPageChecker) HasLastPage(p *pagination.Pagination) bool {
+	return p.CurrentPage+1 < p.TotalPages()
+}

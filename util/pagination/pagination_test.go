@@ -109,7 +109,7 @@ func TestHasNextPage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, tt.checker, nil)
+			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, tt.checker, nil, nil)
 			if got := p.HasNextPage(); got != tt.want {
 				t.Errorf("HasNextPage() = %v, want %v", got, tt.want)
 			}
@@ -153,7 +153,7 @@ func TestNextPage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil)
+			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil, nil)
 			got, err := p.NextPage()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NextPage() error = %v, wantErr %v", err, tt.wantErr)
@@ -194,7 +194,7 @@ func TestPreviousPage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil)
+			p, _ := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil, nil)
 			got, err := p.PreviousPage()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PreviousPage() error = %v, wantErr %v", err, tt.wantErr)
@@ -257,7 +257,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil)
+			p, err := New(tt.currentPage, tt.perPage, tt.totalItems, nil, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
 				return

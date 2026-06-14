@@ -10,7 +10,11 @@ type NextPageChecker interface {
 }
 
 type PreviousPageChecker interface {
-	HasPreviousPage(cp *Pagination) bool
+	HasPreviousPage(p *Pagination) bool
+}
+
+type LastPageChecker interface {
+	HasLastPage(p *Pagination) bool
 }
 
 type Paging interface {
@@ -24,6 +28,7 @@ type Pagination struct {
 	TotalItems      int
 	NextChecker     NextPageChecker     // 次ページ判定ロジック
 	PreviousChecker PreviousPageChecker // 前ページ判定ロジック
+	LastChecker     LastPageChecker     // 最終ページ判定ロジック
 }
 
 type DefaultNextPageChecker struct{}
@@ -38,12 +43,21 @@ func (c DefaultPreviousPageChecker) HasPreviousPage(p *Pagination) bool {
 	return p.CurrentPage > 1
 }
 
-func New(currentPage, perPage, totalItems int, nchecker NextPageChecker, pchecker PreviousPageChecker) (*Pagination, error) {
+type DefaultLastPageChecker struct{}
+
+func (c DefaultLastPageChecker) HasLastPage(p *Pagination) bool {
+	return false
+}
+
+func New(currentPage, perPage, totalItems int, nchecker NextPageChecker, pchecker PreviousPageChecker, lchecker LastPageChecker) (*Pagination, error) {
 	if nchecker == nil {
 		nchecker = DefaultNextPageChecker{} // デフォルトロジックを使用
 	}
 	if pchecker == nil {
 		pchecker = DefaultPreviousPageChecker{}
+	}
+	if lchecker == nil {
+		lchecker = DefaultLastPageChecker{}
 	}
 	if currentPage <= 0 {
 		currentPage = 1
@@ -87,6 +101,11 @@ func (p *Pagination) HasPreviousPage() bool {
 	return p.PreviousChecker.HasPreviousPage(p)
 }
 
+func (p *Pagination) HasLastPage() bool {
+	return p.LastChecker.HasLastPage(p)
+}
+
+// TODO: 0ではなくCurrentPageを返しても良いかも？
 func (p *Pagination) NextPage() (int, error) {
 	if !p.HasNextPage() {
 		return 0, fmt.Errorf("no next page")
