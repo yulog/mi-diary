@@ -27,15 +27,6 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 
 	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 
-	next, err := p.NextPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	prev, err := p.PreviousPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
 	return &NoteWithPages{
 		Note: Note{
 			Title:   name,
@@ -44,10 +35,11 @@ func (l *Logic) ReactionNotesLogic(ctx context.Context, profile, name string, pa
 			Items:   notes,
 		},
 		Pages: Pages{
-			Current: p.CurrentPage,
-			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
-			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages()},
+			Pages: p.Pages(),
+			QueryParams: shared.QueryParams{
+				Page:  params.Page,
+				Color: params.Color,
+			},
 		},
 	}, nil
 }
@@ -70,15 +62,6 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 
 	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 
-	next, err := p.NextPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	prev, err := p.PreviousPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
 	return &NoteWithPages{
 		Note: Note{
 			Title:   name,
@@ -87,10 +70,7 @@ func (l *Logic) HashTagNotesLogic(ctx context.Context, profile, name string, par
 			Items:   notes,
 		},
 		Pages: Pages{
-			Current: p.CurrentPage,
-			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
-			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages()},
+			Pages: p.Pages(),
 		},
 	}, nil
 }
@@ -113,15 +93,6 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params shar
 
 	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 
-	next, err := p.NextPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	prev, err := p.PreviousPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
 	return &NoteWithPages{
 		Note: Note{
 			Title:   fmt.Sprintf("%s - %d", name, p.CurrentPage),
@@ -130,10 +101,7 @@ func (l *Logic) UserLogic(ctx context.Context, profile, name string, params shar
 			Items:   notes,
 		},
 		Pages: Pages{
-			Current: p.CurrentPage,
-			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
-			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages()},
+			Pages: p.Pages(),
 		},
 	}, nil
 }
@@ -170,15 +138,6 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 		title = fmt.Sprint(p.CurrentPage)
 	}
 
-	next, err := p.NextPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	prev, err := p.PreviousPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
 	p.LastChecker = ItemLimitHasLastPageChecker{}
 	// slog.Info("has last", slog.Bool("hasLast", hasLast), slog.Int("next", next), slog.Int("total", p.TotalPages()), slog.Int("current", p.CurrentPage))
 
@@ -191,10 +150,7 @@ func (l *Logic) NotesLogic(ctx context.Context, profile string, params shared.Qu
 			Items:      notes,
 		},
 		Pages: Pages{
-			Current: p.CurrentPage,
-			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
-			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages(), Has: p.HasLastPage()},
+			Pages: p.Pages(),
 			// TODO: Queryがある/ないのパターンでpresenterを分けたほうが良い？
 			QueryParams: shared.QueryParams{
 				Page: params.Page,
@@ -223,15 +179,6 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 
 	p.NextChecker = ItemLimitHasNextPageChecker{ItemCount: len(notes)}
 
-	next, err := p.NextPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	prev, err := p.PreviousPage()
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
 	return &NoteWithPages{
 		Note: Note{
 			Title:   fmt.Sprintf("%s - %d", d, p.CurrentPage),
@@ -240,10 +187,7 @@ func (l *Logic) ArchiveNotesLogic(ctx context.Context, profile, d string, params
 			Items:   notes,
 		},
 		Pages: Pages{
-			Current: p.CurrentPage,
-			Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
-			Next:    Page{Index: next, Has: p.HasNextPage()},
-			Last:    Page{Index: p.TotalPages()},
+			Pages: p.Pages(),
 		},
 	}, nil
 }

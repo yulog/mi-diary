@@ -2,8 +2,21 @@ package pagination
 
 import (
 	"fmt"
+	"log/slog"
 	"math"
 )
+
+type Pages struct {
+	Current int
+	Prev    Page
+	Next    Page
+	Last    Page
+}
+
+type Page struct {
+	Index int
+	Has   bool
+}
 
 type NextPageChecker interface {
 	HasNextPage(p *Pagination) bool
@@ -118,4 +131,21 @@ func (p *Pagination) PreviousPage() (int, error) {
 		return 0, fmt.Errorf("no previous page")
 	}
 	return p.CurrentPage - 1, nil
+}
+
+func (p *Pagination) Pages() Pages {
+	next, err := p.NextPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	prev, err := p.PreviousPage()
+	if err != nil {
+		slog.Info(err.Error())
+	}
+	return Pages{
+		Current: p.CurrentPage,
+		Prev:    Page{Index: prev, Has: p.HasPreviousPage()},
+		Next:    Page{Index: next, Has: p.HasNextPage()},
+		Last:    Page{Index: p.TotalPages(), Has: p.HasLastPage()},
+	}
 }
