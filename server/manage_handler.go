@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
+	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/domain/model"
 	"github.com/yulog/mi-diary/logic"
-	"github.com/yulog/mi-diary/presenter"
 )
 
 // type ManageHandler struct {
@@ -20,8 +20,11 @@ import (
 
 // ManageHandler は /manage のハンドラ
 func (srv *Server) ManageHandler(c *echo.Context) error {
-
-	return renderer(c, presenter.ManagePresentation(c, srv.logic.ManageLogic(c.Request().Context())))
+	out := srv.logic.ManageLogic(c.Request().Context())
+	if len(out.Profiles) > 0 {
+		return renderer(c, cm.ManageInit(out.Title, out.Profiles))
+	}
+	return renderer(c, cm.ManageStart(out.Title))
 }
 
 // JobStartHandler は /job/start のハンドラ
@@ -38,19 +41,19 @@ func (srv *Server) JobStartHandler(c *echo.Context) error {
 		Type:    model.JobType(j.Type),
 		ID:      j.ID,
 	}
-
-	return renderer(c, presenter.JobStartPresentation(c, srv.logic.JobStartLogic(c.Request().Context(), job)))
+	out := srv.logic.JobStartLogic(c.Request().Context(), job)
+	return renderer(c, cm.Start(out.Placeholder, out.Button, out.Profile, out.JobType, out.JobID))
 }
 
 // JobProgressHandler は /job/progress のハンドラ
 func (srv *Server) JobProgressHandler(c *echo.Context) error {
-	_, d, out := presenter.JobProgressPresentation(c, srv.logic.JobProgressLogic(c.Request().Context()))
+	out := srv.logic.JobProgressLogic(c.Request().Context())
 
-	if d {
+	if out.Completed {
 		c.Response().Header().Set("hx-trigger", "done")
 	}
 
-	return renderer(c, out)
+	return renderer(c, cm.Progress(out.ProgressMessage))
 }
 
 // JobHandler は /job のハンドラ
@@ -61,5 +64,5 @@ func (srv *Server) JobHandler(c *echo.Context) error {
 	}
 	out := srv.logic.JobLogic(c.Request().Context(), params.Profile)
 
-	return renderer(c, presenter.JobFinishedPresentation(c, out))
+	return renderer(c, cm.Job(out.Placeholder, out.Button, out.ProgressMessage, out.Profiles))
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/labstack/echo/v5"
+	cm "github.com/yulog/mi-diary/components"
 	"github.com/yulog/mi-diary/internal/shared"
 	"github.com/yulog/mi-diary/presenter"
 )
@@ -25,7 +26,11 @@ func (srv *Server) HomeHandler(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return renderer(c, presenter.IndexPresentation(c, out))
+	return renderer(c, cm.IndexParams{
+		Title:     out.Title,
+		Profile:   out.Profile,
+		Reactions: out.Reactions,
+	}.Index())
 }
 
 // ReactionHandler は /:profile/reactions/:name のハンドラ
@@ -58,7 +63,7 @@ func (srv *Server) HashTagsHandler(c *echo.Context) error {
 		return err
 	}
 
-	return renderer(c, presenter.HashTagPresentation(c, out))
+	return renderer(c, cm.HashTags(out.Profile, out.HashTags))
 }
 
 // HashTagHandler は /:profile/hashtags/:name のハンドラ
@@ -91,7 +96,7 @@ func (srv *Server) UsersHandler(c *echo.Context) error {
 		return err
 	}
 
-	return renderer(c, presenter.UserPresentation(c, out))
+	return renderer(c, cm.Users(out.Profile, out.Users))
 }
 
 // UserHandler は /:profile/users/:name のハンドラ
@@ -159,7 +164,11 @@ func (srv *Server) ArchivesHandler(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return renderer(c, presenter.ArchivesPresentation(c, out))
+	return renderer(c, cm.ArchiveParams{
+		Title:   out.Title,
+		Profile: out.Profile,
+		Items:   out.Items,
+	}.Archive())
 }
 
 // ArchiveNotesHandler は /:profile/archives/:date のハンドラ
