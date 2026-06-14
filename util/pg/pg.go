@@ -1,3 +1,4 @@
+// Deprecated: use pagination
 package pg
 
 import (
