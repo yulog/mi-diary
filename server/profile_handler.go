@@ -22,14 +22,19 @@ func (srv *Server) HomeHandler(c *echo.Context) error {
 	// エラーでなければ、DTOのメソッドでcomponentを作る
 
 	// return c.HTML(http.StatusOK, fmt.Sprint(reactions))
-	out, err := srv.logic.HomeLogic(c.Request().Context(), params.Profile)
+	_, err := srv.logic.ConfigRepo.GetProfile(params.Profile)
 	if err != nil {
 		return err
 	}
+	items, err := srv.logic.EmojiRepo.Get(c.Request().Context(), params.Profile)
+	if err != nil {
+		return err
+	}
+
 	return renderer(c, cm.IndexParams{
-		Title:     out.Title,
-		Profile:   out.Profile,
-		Reactions: out.Reactions,
+		Title:     params.Profile,
+		Profile:   params.Profile,
+		Reactions: items,
 	}.Index())
 }
 
@@ -58,12 +63,16 @@ func (srv *Server) HashTagsHandler(c *echo.Context) error {
 		return err
 	}
 
-	out, err := srv.logic.HashTagsLogic(c.Request().Context(), params.Profile)
+	_, err := srv.logic.ConfigRepo.GetProfile(params.Profile)
+	if err != nil {
+		return err
+	}
+	items, err := srv.logic.HashTagRepo.Get(c.Request().Context(), params.Profile)
 	if err != nil {
 		return err
 	}
 
-	return renderer(c, cm.HashTags(out.Profile, out.HashTags))
+	return renderer(c, cm.HashTags(params.Profile, items))
 }
 
 // HashTagHandler は /:profile/hashtags/:name のハンドラ
@@ -160,14 +169,14 @@ func (srv *Server) ArchivesHandler(c *echo.Context) error {
 		return err
 	}
 
-	out, err := srv.logic.ArchivesLogic(c.Request().Context(), params.Profile)
+	items, err := srv.logic.ArchiveRepo.Get(c.Request().Context(), params.Profile)
 	if err != nil {
 		return err
 	}
 	return renderer(c, cm.ArchiveParams{
-		Title:   out.Title,
-		Profile: out.Profile,
-		Items:   out.Items,
+		Title:   "Archives",
+		Profile: params.Profile,
+		Items:   items,
 	}.Archive())
 }
 

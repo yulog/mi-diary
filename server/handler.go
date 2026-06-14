@@ -39,14 +39,12 @@ type Profiles struct {
 
 // RootHandler は / のハンドラ
 func (srv *Server) RootHandler(c *echo.Context) error {
-	out := srv.logic.SelectProfileLogic(c.Request().Context())
-	return renderer(c, cm.SelectProfile(out.Title, out.Profiles))
+	return renderer(c, cm.SelectProfile("Select profile...", srv.logic.ConfigRepo.GetProfilesSortedKey()))
 }
 
 // NewProfilesHandler は /profiles のハンドラ
 func (srv *Server) NewProfilesHandler(c *echo.Context) error {
-	out := srv.logic.NewProfileLogic(c.Request().Context())
-	return renderer(c, cm.AddProfile(out.Title))
+	return renderer(c, cm.AddProfile("New Profile"))
 }
 
 // AddProfileHandler は /profiles のハンドラ

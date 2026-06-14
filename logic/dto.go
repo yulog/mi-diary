@@ -7,23 +7,6 @@ import (
 	"github.com/yulog/mi-diary/internal/shared"
 )
 
-type ArchivesOutput struct {
-	Title   string
-	Profile string
-	Items   []model.Month
-}
-
-type IndexOutput struct {
-	Title     string
-	Profile   string
-	Reactions []model.ReactionEmoji
-}
-
-type HashTagOutput struct {
-	Profile  string
-	HashTags []model.HashTag
-}
-
 type UserOutput struct {
 	Profile string
 	Users   []model.User
