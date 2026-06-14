@@ -20,14 +20,6 @@ templ SearchBar(path, s string) {
 	}
 }
 
-func getColorQuery(color string) string {
-	q := shared.QueryParams{
-		Page:  1,
-		Color: color,
-	}
-	return q.GetQuery()
-}
-
 templ FileFilterBar(path string, currentColor string) {
 	if path != "" {
 		<style type="text/css">
@@ -51,7 +43,7 @@ templ FileFilterBar(path string, currentColor string) {
 }
 
 templ PaletteClearButton(currentColor string) {
-	<a href={ getColorQuery("") } class="button">
+	<a href={ shared.NewQueryParams().SetPage(1).SetColor("").GetQuery() } class="button">
 		<span class="icon is-small">
 			<span class={ "color-palette", PaletteClearClass() }></span>
 		</span>
@@ -66,7 +58,7 @@ templ PaletteButton(color, currentColor string) {
 			</span>
 		</a>
 	} else {
-		<a href={ getColorQuery(color) } class="button">
+		<a href={ shared.NewQueryParams().SetPage(1).SetColor(color).GetQuery() } class="button">
 			<span class="icon is-small">
 				<span class={ "color-palette", PaletteClass(color) }></span>
 			</span>

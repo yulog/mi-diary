@@ -70,14 +70,6 @@ func SearchBar(path, s string) templ.Component {
 	})
 }
 
-func getColorQuery(color string) string {
-	q := shared.QueryParams{
-		Page:  1,
-		Color: color,
-	}
-	return q.GetQuery()
-}
-
 func FileFilterBar(path string, currentColor string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -149,9 +141,9 @@ func PaletteClearButton(currentColor string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(getColorQuery(""))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(shared.NewQueryParams().SetPage(1).SetColor("").GetQuery())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 54, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 46, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -241,9 +233,9 @@ func PaletteButton(color, currentColor string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 templ.SafeURL
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(getColorQuery(color))
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(shared.NewQueryParams().SetPage(1).SetColor(color).GetQuery())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 69, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/search.templ`, Line: 61, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {

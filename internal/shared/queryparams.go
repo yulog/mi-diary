@@ -10,8 +10,17 @@ type QueryParams struct {
 	Color string `url:"color,omitempty"`
 }
 
+func NewQueryParams() *QueryParams {
+	return &QueryParams{}
+}
+
 func (q *QueryParams) SetPage(p int) *QueryParams {
 	q.Page = p
+	return q
+}
+
+func (q *QueryParams) SetColor(c string) *QueryParams {
+	q.Color = c
 	return q
 }
 
